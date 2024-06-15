@@ -1,5 +1,4 @@
 "use server";
-import Cookies from "js-cookie";
 import prisma from "../prismaClient";
 import { getUserFromAuth } from "./authMiddleware";
 

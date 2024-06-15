@@ -1,9 +1,9 @@
 import "~/styles/globals.css";
-import { ReduxProvider } from "./reduxProvider";
+import { ReduxProvider } from "../redux/reduxProvider";
 import TopNavbar from "./_components/layout/topNavbar";
 import Footer from "./_components/layout/footer";
 import { GeistSans } from "geist/font/sans";
-import WhoIsWatching from "./_components/profile/whoiswatching";
+import WhoIsWatching from "./_components/profile/whoIsWatching";
 
 export const metadata = {
   title: "UltimaTio",

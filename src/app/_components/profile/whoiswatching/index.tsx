@@ -1,5 +1,4 @@
 "use client";
-
 import {
   selectFailure,
   selectStart,
@@ -9,13 +8,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import Cookies from "js-cookie";
-import CardProfile from "../profilecard";
-import CreateProfile from "../createprofile";
+import CardProfile from "../profileCard";
+import CreateProfile from "../createProfile";
 import { PencilSquareIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
-import ManageProfile from "../manageprofile";
+import ManageProfile from "../manageProfile";
 import {
   getUserProfiles,
-  getProfile,
   getAllProfilePictures,
 } from "~/server/queries/profile.queries";
 
@@ -71,18 +69,20 @@ const WhoIsWatching = () => {
   });
 
   useEffect(() => {
-    try {
-      const handleFetchProfiles = async () => {
-        const fetchedProfilePictures = await getAllProfilePictures();
-        const fetchedProfiles = await getUserProfiles();
-        setProfilePictures(fetchedProfilePictures);
-        setProfiles(fetchedProfiles);
+    if (currentUser) {
+      const fetchProfiles = async () => {
+        try {
+          const fetchedProfilePictures = await getAllProfilePictures();
+          const fetchedProfiles = await getUserProfiles();
+          setProfilePictures(fetchedProfilePictures);
+          setProfiles(fetchedProfiles);
+        } catch (error) {
+          console.error("Error fetching profiles:", error);
+        }
       };
-      handleFetchProfiles();
-    } catch (error) {
-      //
+      fetchProfiles();
     }
-  }, []);
+  }, [currentUser, isCreatingProfile, isManagingProfile]);
 
   // SELECT PROFILE
   const handleSelectProfile = (profile: any) => {
