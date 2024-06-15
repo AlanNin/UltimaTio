@@ -3,11 +3,11 @@
 ## TODO
 
 - [x] Make it deploy (Vercel)
-- [ ] Set up database (w/ Vercel Postgres)
-- [ ] Scaffoold UI from the other project UI
-- [ ] Attach database to UI
-- [ ] Auth (w/ Redux)
-- [ ] Routing (Maybe implement parallel route)
+- [x] Set up database (w/ Vercel Postgres)
+- [~] Scaffold UI from the other project UI
+- [~] Attach database to UI
+- [x] Auth (w/ Redux)
+- [~] Routing
 - [ ] Server actions for delete, update, create
 - [ ] Error management (w/ Sentry)
 - [ ] Analytics (w/ Upstash)

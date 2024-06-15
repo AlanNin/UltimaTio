@@ -1,4 +1,4 @@
-import useMediaQuery from "@/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import CardProfile from "./item";
 import { ArrowLeftCircleIcon } from "@heroicons/react/24/outline";
 import Carousel from "react-multi-carousel";

@@ -2,7 +2,7 @@ import useMediaQuery from "~/hooks/useMediaQuery";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import PFPsModule from "../changePFP/PFPsModule";
-import { updateProfile, deleteProfile } from "@/api/profile";
+import { updateProfile, deleteProfile } from "~/server/queries/profile.queries";
 
 type Profile = {
   id: string;
@@ -48,7 +48,7 @@ const ManageProfile: React.FC<Props> = ({
       selectedImage !== profileToManage.imgUrl
     ) {
       try {
-        await updateProfile(inputs.name!, selectedImage);
+        await updateProfile(profileToManage.id, inputs.name!, selectedImage);
         setEnterManageProfile(false);
       } catch (error) {
         //

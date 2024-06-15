@@ -3,6 +3,7 @@ import { ReduxProvider } from "./reduxProvider";
 import TopNavbar from "./_components/layout/topNavbar";
 import Footer from "./_components/layout/footer";
 import { GeistSans } from "geist/font/sans";
+import WhoIsWatching from "./_components/profile/whoiswatching";
 
 export const metadata = {
   title: "UltimaTio",
@@ -19,7 +20,8 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className="app">
         <ReduxProvider>
-          <TopNavbar isTopOfPage={true} />
+          <WhoIsWatching />
+          <TopNavbar />
           {children}
           <Footer />
         </ReduxProvider>

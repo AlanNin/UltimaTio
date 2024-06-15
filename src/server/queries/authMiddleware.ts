@@ -1,17 +1,17 @@
-import Cookies from "js-cookie";
+"use server";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 type User = {
   id: string;
 };
 
-export const authMiddleware = async (): Promise<{
-  success: boolean;
-  response: User | string | null;
-}> => {
-  const token = Cookies.get("access_token");
+export const authMiddleware = async (): Promise<User> => {
+  const cookieStore = cookies();
+  const token = cookieStore.get("access_token")?.value;
+
   if (!token) {
-    return { success: false, response: "No token found" };
+    throw new Error("No token found");
   }
 
   try {
@@ -22,9 +22,15 @@ export const authMiddleware = async (): Promise<{
     const user: User = {
       id: decodedToken.id as string,
     };
-    return { success: true, response: user };
+
+    return user;
   } catch (error) {
     console.error("JWT verification error:", error);
-    return { success: false, response: "Invalid token" };
+    throw new Error("Invalid token");
   }
+};
+
+export const getUserFromAuth = async (): Promise<string> => {
+  const user = await authMiddleware();
+  return user.id;
 };

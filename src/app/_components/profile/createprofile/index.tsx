@@ -1,8 +1,7 @@
-import useMediaQuery from "@/hooks/useMediaQuery";
-import { useTranslation } from "react-i18next";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import { ArrowLeftCircleIcon, PencilIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { createProfile } from "@/api/profile";
+import { createProfile } from "~/server/queries/profile.queries";
 import PFPsModule from "../changePFP/PFPsModule";
 
 type Props = {
@@ -15,7 +14,6 @@ const CreateProfile: React.FC<Props> = ({
   profilePictures,
 }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
-  const { t } = useTranslation();
 
   // CONST
   const [isChangingPFP, setIsChangingPFP] = useState<boolean>(false);

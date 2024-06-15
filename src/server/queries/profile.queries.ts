@@ -1,3 +1,208 @@
+"use server";
+import Cookies from "js-cookie";
+import prisma from "../prismaClient";
+import { getUserFromAuth } from "./authMiddleware";
+
+// GET PROFILE SERVICE
+export async function getProfile(profile_id: any): Promise<any | null> {
+  try {
+    const user_id = await getUserFromAuth();
+
+    // FIND PROFILE
+    const profile = await prisma.profile.findUnique({
+      where: {
+        id: profile_id,
+      },
+      include: {
+        profileSettings: true,
+      },
+    });
+
+    // VALIDATE PROFILE AND USER
+    if (!profile) {
+      return "Profile not found";
+    }
+    if (profile.user_id !== user_id) {
+      return "Unauthorized: Profile does not belong to the user";
+    }
+
+    return profile;
+  } catch (error) {
+    return error;
+  }
+}
+
+// GET ALL PROFILE SERVICE
+export async function getUserProfiles(): Promise<any | null> {
+  try {
+    const user_id = await getUserFromAuth();
+
+    // FIND ALL PROFILES BELONGING TO THE USER
+    const profiles = await prisma.profile.findMany({
+      where: {
+        user_id,
+      },
+      orderBy: {
+        created_at: "asc",
+      },
+      include: {
+        profileSettings: true,
+      },
+    });
+
+    // CHECK IF PROFILES EXIST
+    if (profiles.length === 0) {
+      return "No profiles found for the user";
+    }
+
+    return profiles;
+  } catch (error) {
+    return error;
+  }
+}
+
+// CREATE PROFILE SERVICE
+export async function createProfile(
+  name: any,
+  imgUrl: any
+): Promise<any | null> {
+  try {
+    const user_id = await getUserFromAuth();
+
+    // VALIDATE IF USER EXISTS
+    const user = await prisma.user.findUnique({
+      where: { id: user_id },
+    });
+    if (!user) {
+      return "User not found";
+    }
+
+    // CREATE PROFILE
+    const profile = await prisma.profile.create({
+      data: {
+        name,
+        imgUrl,
+        user_id,
+      },
+    });
+
+    return profile;
+  } catch (error) {
+    return error;
+  }
+}
+
+// DELETE PROFILE SERVICE
+export async function deleteProfile(profile_id: any): Promise<any | null> {
+  try {
+    const user_id = await getUserFromAuth();
+
+    // FIND PROFILE
+    const profile = await prisma.profile.findUnique({
+      where: {
+        id: profile_id,
+      },
+      select: {
+        user_id: true,
+      },
+    });
+
+    // VALIDATE PROFILE AND USER
+    if (!profile) {
+      return "Profile not found";
+    }
+    if (profile.user_id !== user_id) {
+      return "Unauthorized: Profile does not belong to this user";
+    }
+
+    // DELETE PROFILE PREFERENCES ASSOCIATED WITH THE PROFILE
+    await prisma.profileSettings.deleteMany({
+      where: { profile_id },
+    });
+
+    // DELETE PROFILE
+    await prisma.profile.delete({
+      where: {
+        id: profile_id,
+      },
+    });
+
+    return "Profile deleted successfully";
+  } catch (error) {
+    return error;
+  }
+}
+
+// UPDATE PROFILE SERVICE
+export async function updateProfile(
+  profile_id: any,
+  name?: any,
+  imgUrl?: any,
+  appLanguage?: any,
+  contentLanguage?: any,
+  subtitlesLanguage?: any,
+  autoPlay?: any,
+  contentQuality?: any
+): Promise<any | null> {
+  try {
+    const user_id = await getUserFromAuth();
+
+    // FIND PROFILE
+    const profile = await prisma.profile.findUnique({
+      where: {
+        id: profile_id,
+      },
+      select: {
+        user_id: true,
+      },
+    });
+
+    // VALIDATE PROFILE AND USER
+    if (!profile) {
+      return "Profile not found";
+    }
+    if (profile.user_id !== user_id) {
+      return "Unauthorized: Profile does not belong to this user";
+    }
+
+    // UPDATE PROFILE
+    const updatedProfile = await prisma.profile.update({
+      where: {
+        id: profile_id,
+      },
+      data: {
+        name,
+        imgUrl,
+        profileSettings: {
+          upsert: {
+            create: {
+              app_language: appLanguage,
+              content_language: contentLanguage,
+              subtitles_language: subtitlesLanguage,
+              auto_play: autoPlay,
+              content_quality: contentQuality,
+            },
+            update: {
+              app_language: appLanguage,
+              content_language: contentLanguage,
+              subtitles_language: subtitlesLanguage,
+              auto_play: autoPlay,
+              content_quality: contentQuality,
+            },
+          },
+        },
+      },
+      include: {
+        profileSettings: true,
+      },
+    });
+
+    return updatedProfile;
+  } catch (error) {
+    return error;
+  }
+}
+
 const MoviesProfileImages = [
   "https://i.pinimg.com/564x/e5/4c/1c/e54c1cabc44ba4765a6c546592bcfb3d.jpg",
   "https://i.pinimg.com/564x/2e/07/91/2e07912e865b810dbef7a21d23412200.jpg",

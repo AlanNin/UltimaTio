@@ -16,20 +16,28 @@ import useMediaQuery from "~/hooks/useMediaQuery";
 import MobileMenu from "./_menu/mobilemenu";
 import DesktopMenu from "./_menu/desktopmenu";
 
-type Props = {
-  isTopOfPage: boolean;
-};
-
-const TopNavbar = ({ isTopOfPage }: Props) => {
+const TopNavbar = () => {
   const flexBetween = "flex items-center justify-between";
-  const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
-  const hideNavbar = isTopOfPage ? "" : ""; // HIDE NAVBAR
+  const isAboveMediumScreens = useMediaQuery("(min-width: 900px)"); // HIDE NAVBAR
   const desktopMenuRef = useRef<HTMLDivElement>(null);
   const desktopMenuButtonRef = useRef<any>(null);
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const { currentProfile } = useSelector((state: any) => state.profile);
   const location = usePathname();
+  const [isTopOfPage, setIsTopOfPage] = useState<boolean>(true);
+
+  // MANAGE SCROLLING
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY === 0) {
+        setIsTopOfPage(true);
+      }
+      if (window.scrollY !== 0) setIsTopOfPage(false);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: any) => {
@@ -62,7 +70,7 @@ const TopNavbar = ({ isTopOfPage }: Props) => {
   return (
     <nav>
       <div
-        className={`${hideNavbar} ${flexBetween} ${
+        className={`${flexBetween} ${
           isAboveMediumScreens ? "px-12 " : "px-4"
         } fixed top-0 z-30 w-full gap-10 py-2.5 left-0 right-0 mx-auto bg-[#0F0F0F]
         ${!isTopOfPage && "shadow-md border-b border-white border-opacity-5"}`}

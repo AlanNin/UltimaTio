@@ -45,7 +45,7 @@ export async function SignUpAccount(
   const hash = bcrypt.hashSync(password, salt);
 
   // GET DEFAULT PROFILE PICTURE
-  const profilePicture = getRandomProfilePicture() || "";
+  const profilePicture = (await getRandomProfilePicture()) || "";
 
   // CREATE NEW USER
   await prisma.user.create({
@@ -98,7 +98,7 @@ export async function SignInAccount(
     }
 
     // TOKEN
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || "");
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!);
 
     // EXCLUDE USER PASSWORD FROM ANSWER
     const { password: _, ...userData } = user;
