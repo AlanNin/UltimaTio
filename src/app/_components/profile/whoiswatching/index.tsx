@@ -8,10 +8,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import Cookies from "js-cookie";
-import CardProfile from "../profileCard";
-import CreateProfile from "../createProfile";
+import CardProfile from "../profilecard";
+import CreateProfile from "../createprofile";
 import { PencilSquareIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
-import ManageProfile from "../manageProfile";
+import ManageProfile from "../manageprofile";
 import {
   getUserProfiles,
   getAllProfilePictures,
