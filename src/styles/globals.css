@@ -1,3 +1,81 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Jersey+15&family=Lilita+One&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Saira+Stencil+One&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Viga&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  background-color: #0f0f0f;
+}
+
+.app {
+  height: auto;
+  width: auto;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  margin: 0;
+  box-sizing: border-box;
+  background-color: #0f0f0f;
+  color: #ffffff;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    scroll-padding-block-start: 5px;
+  }
+}
+
+@keyframes rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (min-width: 900px) {
+  ::-webkit-scrollbar {
+    width: 7px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #424242;
+    border-radius: 6px;
+    width: 7px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: #1b1a1d;
+    border-radius: 0px;
+    width: 7px;
+    height: 4px;
+  }
+}
+
+[data-media-player] {
+  height: 100%;
+  display: block !important;
+  aspect-ratio: auto;
+}
+
+[data-media-provider] {
+  height: 100%;
+}
+
+[data-media-provider] video {
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+[data-media-provider] img {
+  height: 100%;
+  object-fit: contain;
+}

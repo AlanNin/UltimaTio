@@ -2,9 +2,9 @@
 
 ## TODO
 
-- [] Make it deploy (Vercel)
-- [] Scaffoold UI with the other project UI
-- [] Set up database (w/ Vercel Postgres)
+- [x] Make it deploy (Vercel)
+- [ ] Scaffoold UI from the other project UI
+- [ ] Set up database (w/ Vercel Postgres)
 - [ ] Attach database to UI
 - [ ] Auth (w/ Redux)
 - [ ] Routing (Maybe implement parallel route)
