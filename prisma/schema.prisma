@@ -7,14 +7,162 @@ generator client {
 
 datasource db {
     provider = "postgresql"
-    url      = env("DATABASE_URL")
+    url      = env("POSTGRES_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+// USER MODEL
+model User {
+    id          String  @id @default(uuid())
+    email      String   @unique
+    password   String
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
 
-    @@index([name])
+    // REFERENCE WITH USER PREFERENCES
+    userSettings UserSettings?
+
+    // REFERENCE WITH PROFILE
+    profiles Profile[]
+
+    @@map("users")
 }
+
+// USER SETTINGS MODEL
+model UserSettings {
+  id          String  @id @default(uuid())
+  is_premium  Boolean @default(false)
+  receive_emails Boolean @default(false)
+
+  // REFERENCE WITH USER
+  user_id String  @unique
+  user User @relation(fields: [user_id], references: [id])
+
+  // CREATED AT & UPDATED AT
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+// PROFILE MODEL
+model Profile {
+  id     String @id @default(uuid())
+  name   String
+  imgUrl String
+
+  // CREATED AT & UPDATED AT
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // REFERENCE WITH USER MODEL, FK
+  user_id String
+  user   User   @relation(fields: [user_id], references: [id])
+
+  // REFERENCE WITH PROFILE PREFERENCES
+  profileSettings ProfileSettings?
+
+  // REFERENCE WITH PLAYLIST
+  library Library[]
+
+  // REFERENCE WITH PROFILE CONTENT
+  profile_content ProfileContent[]
+
+  @@map("profiles")
+}
+
+// PROFILE SETTINGS MODEL
+model ProfileSettings {
+  id          String  @id @default(uuid())
+  app_language String?
+  content_language String?
+  subtitles_language String?
+  auto_play Boolean?
+  content_quality String?
+
+  // REFERENCE WITH USER
+  profile_id String  @unique
+  profile Profile @relation(fields: [profile_id], references: [id])
+
+  // CREATED AT & UPDATED AT
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("profile_settings")
+}
+
+
+// LIBRARY MODEL
+model Library {
+  id              String @id @default(uuid())
+  name           String
+
+  // CREATED AT & UPDATED AT
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // REFERENCE WITH LIBRARY
+  library_content LibraryContent[]
+
+  // REFERENCE WITH USER PROFILE, FK
+  profile_id String
+  profile   Profile @relation(fields: [profile_id], references: [id])
+
+  @@map("library")
+}
+
+// BRIDGE TABLE CONTENT_LIBRARY
+model ProfileContent {
+  id         String @id @default(uuid())
+  tmdb_id  Int
+  profile_id String
+  season Int
+  espisode Int
+  watchProgress Decimal
+  likeStatus Int
+
+  // RELATIONSHIP WITH CONTENT AND GENRE
+  content  Content  @relation(fields: [tmdb_id ], references: [tmdb_id])
+  profile Profile @relation(fields: [profile_id], references: [id])
+  
+
+  // CREATED AT & UPDATED AT
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("profile_content")
+}
+
+// BRIDGE TABLE CONTENT_LIBRARY
+model LibraryContent {
+  id         String @id @default(uuid())
+  tmdb_id  Int
+  library_id String
+
+  // RELATIONSHIP WITH CONTENT AND GENRE
+  content  Content  @relation(fields: [tmdb_id ], references: [tmdb_id])
+  library Library @relation(fields: [library_id], references: [id])
+
+  // CREATED AT & UPDATED AT
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("library_content")
+}
+
+// LIBRARY MODEL
+model Content {
+  tmdb_id              Int @id
+
+  // CREATED AT & UPDATED AT
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // REFERENCE WITH LIBRARY
+  library_content LibraryContent[]
+
+    // REFERENCE WITH PROFILE CONTENT
+  profile_content ProfileContent[]
+
+  @@map("contents")
+}
+
