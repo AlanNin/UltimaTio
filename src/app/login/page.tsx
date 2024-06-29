@@ -1,7 +1,7 @@
 "use client";
 import LogoL from "~/assets/UltimatioLogo_Lighter.png";
 import GoogleIcon from "~/assets/GoogleIcon2.png";
-import useMediaQuery from "~/hooks/UseMediaQuery";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import Link from "next/link";
 import { ChevronRightIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
