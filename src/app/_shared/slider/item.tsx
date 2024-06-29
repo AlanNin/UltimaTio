@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import TMDBIcon from "~/assets/TMDB.png";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import useMediaQuery from "~/hooks/useMediaQuery";
 
 type Props = {
   content: any;
@@ -8,6 +10,8 @@ type Props = {
 
 const SliderCard: React.FC<Props> = ({ content }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
+  const isAboveSmallTablet = useMediaQuery("(min-width: 650px)");
 
   /*
   const handleNavigate = () => {
@@ -21,13 +25,16 @@ const SliderCard: React.FC<Props> = ({ content }) => {
   };
 */
 
-  const handleNavigate = () => {};
+  const handleNavigate = () => {
+    // HANDLE IF MOVIE OR TV (SERIES OR ANIME)
+    router.push(`/movie/${content.tmdbid}`);
+  };
 
   return (
     <div
       className="flex w-full h-full pr-4"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => (isAboveSmallTablet ? setIsHovered(true) : null)}
+      onMouseLeave={() => (isAboveSmallTablet ? setIsHovered(false) : null)}
     >
       <div
         className="h-full w-max overflow-hidden relative rounded-sm cursor-pointer"

@@ -12,6 +12,9 @@ const config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  images: {
+    domains: ["media.themoviedb.org"],
+  },
 };
 
 export default config;

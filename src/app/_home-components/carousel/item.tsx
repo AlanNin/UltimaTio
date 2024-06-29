@@ -18,15 +18,8 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
   const router = useRouter();
 
   const handleNavigate = () => {
-    if (content!.ContentCategory[0].category.name === "series") {
-      router.push(`/tv/` + content!.id);
-    } else if (content!.ContentCategory[0].category.name === "movie") {
-      router.push(`/movies/${content!.id}`);
-    } else {
-      router.push(
-        `/${content!.ContentCategory[0].category.name}/${content!.id}`
-      );
-    }
+    // HANDLE IF MOVIE OR TV (SERIES OR ANIME)
+    router.push(`/movie/${content.tmdbid}`);
   };
   return (
     <div className="flex h-full w-full justify-center items-center overflow-hidden max-h-[675px]">

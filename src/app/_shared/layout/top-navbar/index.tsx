@@ -94,7 +94,6 @@ const TopNavbar = () => {
                   <Item name="Movies" route="movie" />
                   <Item name="TV Shows" route="tv" />
                   <Item name="Anime" route="anime" />
-                  <Item name="K-Shows" route="kshow" />
                 </div>
                 {/* INNER RIGHT SIDE */}
                 <div className={`${flexBetween} gap-8 relative`}>
