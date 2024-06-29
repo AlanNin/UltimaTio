@@ -15,6 +15,7 @@ type Feed = {
 const Home = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
+  const [isLoading, setIsLoading] = useState(true);
   const [feed, setFeed] = useState<Feed>({
     trendingMovies: [],
     popularMovies: [],
@@ -22,11 +23,13 @@ const Home = () => {
     upcomingMovies: [],
   });
   useEffect(() => {
+    setIsLoading(true);
     const fetchFeed = async () => {
       const response = await getHomeFeed();
       setFeed(response);
     };
     fetchFeed();
+    setIsLoading(false);
   }, []);
 
   return (
@@ -36,14 +39,18 @@ const Home = () => {
         isAboveMediumScreens ? "pt-14 pb-10" : "pt-11 pb-[172px]"
       }`}
     >
-      <>
-        <HomeCarousel content={feed.trendingMovies} />
-        <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
-          <HomeSection text="Popular" content={feed.popularMovies} />
-          <HomeSection text="Top Rated" content={feed.topRatedMovies} />
-          <HomeSection text="Upcoming" content={feed.upcomingMovies} />
-        </div>
-      </>
+      {isLoading ? (
+        <></>
+      ) : (
+        <>
+          <HomeCarousel content={feed.trendingMovies} />
+          <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
+            <HomeSection text="Popular" content={feed.popularMovies} />
+            <HomeSection text="Top Rated" content={feed.topRatedMovies} />
+            <HomeSection text="Upcoming" content={feed.upcomingMovies} />
+          </div>
+        </>
+      )}
     </section>
   );
 };

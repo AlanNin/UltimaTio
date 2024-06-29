@@ -20,14 +20,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className={`${GeistSans.className} app`}>
-        <ReactQueryProvider>
-          <ReduxProvider>
-            <WhoIsWatching />
-            <TopNavbar />
-            {children}
-            <Footer />
-          </ReduxProvider>
-        </ReactQueryProvider>
+        <ReduxProvider>
+          <WhoIsWatching />
+          <TopNavbar />
+          {children}
+          <Footer />
+        </ReduxProvider>
       </body>
     </html>
   );
