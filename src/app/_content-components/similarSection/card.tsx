@@ -29,8 +29,16 @@ const SimilarCard: React.FC<Props> = ({ similarContent }) => {
     return null;
   }
 
+  const handleNavigate = () => {
+    // HANDLE IF MOVIE OR TV (SERIES OR ANIME)
+    router.push(`/movie/${tmdbid}`);
+  };
+
   return (
-    <div className="relative cursor-pointer h-max w-max">
+    <div
+      className="relative cursor-pointer h-max w-max"
+      onClick={handleNavigate}
+    >
       <Image
         alt="Poster"
         src={posterUrl}
