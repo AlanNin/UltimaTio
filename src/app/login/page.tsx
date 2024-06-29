@@ -1,12 +1,16 @@
 "use client";
 import LogoL from "~/assets/UltimatioLogo_Lighter.png";
 import GoogleIcon from "~/assets/GoogleIcon2.png";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/UseMediaQuery";
 import Link from "next/link";
 import { ChevronRightIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { loginStart, loginFailure, loginSuccess } from "~/redux/userSlice";
+import {
+  loginStart,
+  loginFailure,
+  loginSuccess,
+} from "~/utils/redux/user-slice";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { SignInAccount } from "~/server/queries/auth.queries";
@@ -48,6 +52,7 @@ const LogIn = () => {
           inputs.email.trim(),
           inputs.password
         );
+
         if (response.success === true) {
           dispatch(loginSuccess(response.response));
           Cookies.set("access_token", response.token!, { expires: 365 });
@@ -107,7 +112,7 @@ const LogIn = () => {
           name="email"
           required
           className="bg-[#292929]
-            px-4 p-2 rounded text-white w-full tx-sm placeholder:text-sm placeholder:text-[#8a8a8a]"
+            px-4 p-2 rounded text-white w-full text-sm placeholder:text-sm placeholder:text-[#8a8a8a]"
         />
 
         <input

@@ -1,9 +1,10 @@
 import "~/styles/globals.css";
-import { ReduxProvider } from "../redux/reduxProvider";
-import TopNavbar from "./_components/layout/topNavbar";
-import Footer from "./_components/layout/footer";
+import ReduxProvider from "../utils/redux/redux-provider";
+import ReactQueryProvider from "~/utils/react-query/react-query";
 import { GeistSans } from "geist/font/sans";
-import WhoIsWatching from "./_components/profile/whoiswatching";
+import TopNavbar from "./_shared/layout/top-navbar";
+import Footer from "./_shared/layout/footer";
+import WhoIsWatching from "./_shared/profile/whos-watching";
 
 export const metadata = {
   title: "UltimaTio",
@@ -18,13 +19,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body className="app">
-        <ReduxProvider>
-          <WhoIsWatching />
-          <TopNavbar />
-          {children}
-          <Footer />
-        </ReduxProvider>
+      <body className={`${GeistSans.className} app`}>
+        <ReactQueryProvider>
+          <ReduxProvider>
+            <WhoIsWatching />
+            <TopNavbar />
+            {children}
+            <Footer />
+          </ReduxProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

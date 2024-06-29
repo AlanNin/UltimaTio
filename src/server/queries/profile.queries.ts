@@ -1,8 +1,8 @@
 "use server";
-import prisma from "../prismaClient";
+import prisma from "../prisma-client";
 import { getUserFromAuth } from "./authMiddleware";
 
-// GET PROFILE SERVICE
+// GET PROFILE
 export async function getProfile(profile_id: any): Promise<any | null> {
   try {
     const user_id = await getUserFromAuth();
@@ -31,7 +31,7 @@ export async function getProfile(profile_id: any): Promise<any | null> {
   }
 }
 
-// GET ALL PROFILE SERVICE
+// GET ALL PROFILE
 export async function getUserProfiles(): Promise<any | null> {
   try {
     const user_id = await getUserFromAuth();
@@ -60,7 +60,7 @@ export async function getUserProfiles(): Promise<any | null> {
   }
 }
 
-// CREATE PROFILE SERVICE
+// CREATE PROFILE
 export async function createProfile(
   name: any,
   imgUrl: any
@@ -91,7 +91,7 @@ export async function createProfile(
   }
 }
 
-// DELETE PROFILE SERVICE
+// DELETE PROFILE
 export async function deleteProfile(profile_id: any): Promise<any | null> {
   try {
     const user_id = await getUserFromAuth();
@@ -132,7 +132,7 @@ export async function deleteProfile(profile_id: any): Promise<any | null> {
   }
 }
 
-// UPDATE PROFILE SERVICE
+// UPDATE PROFILE
 export async function updateProfile(
   profile_id: any,
   name?: any,

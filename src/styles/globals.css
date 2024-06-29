@@ -79,3 +79,27 @@ body {
   height: 100%;
   object-fit: contain;
 }
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #292929 inset;
+  box-shadow: 0 0 0px 1000px #292929 inset;
+  -webkit-text-fill-color: white;
+  border-radius: 0;
+  font-size: 14px !important;
+  color: white !important;
+  background-color: #292929 !important;
+  font-family: inherit !important;
+  font-weight: inherit !important;
+}
+
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #292929 inset;
+  box-shadow: 0 0 0px 1000px #292929 inset;
+  -webkit-text-fill-color: white;
+  border-radius: 0;
+  font-size: 14px !important;
+  color: white !important;
+  background-color: #292929 !important;
+  font-family: inherit !important;
+  font-weight: inherit !important;
+}

@@ -1,5 +1,5 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/UseMediaQuery";
 import {
   MinusIcon,
   ChevronRightIcon,
@@ -7,7 +7,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import GoogleIcon from "~/assets/GoogleIcon2.png";
-import { Reveal } from "~/utils/reveal";
+import { Reveal } from "~/utils/framer-motion/reveal";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import LogoL from "~/assets/UltimatioLogo_Lighter.png";

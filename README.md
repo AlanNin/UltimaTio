@@ -8,7 +8,7 @@
 - [~] Attach database to UI
 - [x] Auth (w/ Redux)
 - [~] Routing
-- [ ] Server actions for delete, update, create
+- [x] Server actions for delete, update, create
 - [ ] Error management (w/ Sentry)
 - [ ] Analytics (w/ Upstash)
 - [ ] Ratelimiting (w/ Upstash)

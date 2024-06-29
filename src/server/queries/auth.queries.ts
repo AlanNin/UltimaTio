@@ -1,5 +1,5 @@
 "use server";
-import prisma from "../prismaClient";
+import prisma from "../prisma-client";
 import bcrypt from "bcrypt";
 import { getRandomProfilePicture } from "./profile.queries";
 import jwt from "jsonwebtoken";
@@ -105,7 +105,8 @@ export async function SignInAccount(
 
     return { token, response: userData, success: true };
   } catch (error) {
-    throw error;
+    console.error("Error in SignInAccount:", error);
+    throw new Error("An error occurred during sign-in");
   }
 }
 
