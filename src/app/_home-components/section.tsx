@@ -1,4 +1,4 @@
-import useMediaQuery from "~/hooks/UseMediaQuery";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import Slider from "../_shared/slider";
 
 type Props = {

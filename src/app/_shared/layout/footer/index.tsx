@@ -1,7 +1,7 @@
 "use client";
 
 import Item from "./item";
-import useMediaQuery from "~/hooks/UseMediaQuery";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
 
 const Footer = () => {

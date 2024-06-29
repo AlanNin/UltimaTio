@@ -12,7 +12,7 @@ import Link from "next/link";
 import Logo from "~/assets/UltimatioLogo_Lighter.png";
 import Item from "./item";
 import Image from "next/image";
-import useMediaQuery from "~/hooks/UseMediaQuery";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import MobileMenu from "./menu/mobilemenu";
 import DesktopMenu from "./menu/desktopmenu";
 

@@ -1,5 +1,5 @@
 "use client";
-import useMediaQuery from "~/hooks/UseMediaQuery";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import {
   MinusIcon,
   ChevronRightIcon,

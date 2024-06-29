@@ -1,5 +1,5 @@
 "use client";
-import useMediaQuery from "~/hooks/UseMediaQuery";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import HomeCarousel from "./_home-components/carousel";
 import HomeSection from "./_home-components/section";
 import { getHomeFeed } from "~/server/queries/tmdb.queries";

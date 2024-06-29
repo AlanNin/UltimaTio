@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import useMediaQuery from "~/hooks/UseMediaQuery";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import {
   XMarkIcon,
   UserIcon,

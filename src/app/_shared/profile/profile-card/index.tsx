@@ -1,5 +1,5 @@
 import React from "react";
-import useMediaQuery from "~/hooks/UseMediaQuery";
+import useMediaQuery from "~/hooks/useMediaQuery";
 import { PlusIcon, PencilIcon } from "@heroicons/react/24/outline";
 
 type Profile = {
