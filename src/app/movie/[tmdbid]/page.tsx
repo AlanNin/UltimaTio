@@ -36,7 +36,7 @@ const Content = () => {
       <section
         id="content"
         className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto overflow-x-clip ${
-          isAboveMediumScreens ? "pt-14 pb-10" : "pt-11 pb-16"
+          isAboveMediumScreens ? "pt-14 pb-10" : "pt-11 pb-24"
         }`}
       >
         {isLoading ? (
