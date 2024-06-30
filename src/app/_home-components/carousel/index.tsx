@@ -57,11 +57,10 @@ const HomeCarousel: React.FC<Props> = ({ content }) => {
       <Carousel
         responsive={responsive}
         draggable={false}
-        autoPlay
-        autoPlaySpeed={8000}
+        autoPlay={true}
+        autoPlaySpeed={3000}
         arrows={false}
         infinite
-        ssr={true}
         showDots={isAboveMediumScreens}
         customDot={<CustomDot onClick={() => {}} active={true} />}
         beforeChange={(nextSlide) => {
