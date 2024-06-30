@@ -8,15 +8,13 @@ import { useEffect } from "react";
 const Footer = () => {
   const flexBetween = "flex items-center justify-between";
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
-  const location = usePathname();
+  let location = usePathname();
 
   useEffect(() => {
     if (!location) {
-      //
-    } else {
-      console.log("location", location);
+      location = window.location.pathname;
     }
-  }, [location]);
+  }, []);
 
   if (
     location.toLowerCase() === "/settings" ||

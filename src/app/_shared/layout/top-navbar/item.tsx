@@ -8,16 +8,14 @@ type Props = {
 };
 
 function Item({ name, route }: Props) {
+  let location = usePathname();
   const router = useRouter();
-  const location = usePathname();
 
   useEffect(() => {
     if (!location) {
-      //
-    } else {
-      console.log("location", location);
+      location = window.location.pathname;
     }
-  }, [location]);
+  }, []);
 
   const lowerCasePage = route.toLowerCase().replace(/ /g, "");
 

@@ -27,15 +27,12 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
     const isAMovie = content.category === "movie";
 
     if (isAMovie) {
-      router.push("/watch/" + content.id);
+      router.push(
+        `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}`
+      );
     } else {
       router.push(
-        "/watch/" +
-          content.id +
-          "/" +
-          content.seasons[0].seasonNumber +
-          "/" +
-          content.seasons[0].episodes[0].episodeNumber
+        `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}&season=${content.seasons[0].seasonNumber}&episode=${content.seasons[0].episodes[0].episodeNumber}`
       );
     }
   };

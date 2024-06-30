@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import SearchCard from "./_components/card";
 import { FaceFrownIcon } from "@heroicons/react/24/outline";
 
-const Home = () => {
+const Search = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
   const [isLoading, setIsLoading] = useState(true);
@@ -18,19 +18,19 @@ const Home = () => {
 
   useEffect(() => {
     if (query) {
-      const fetchFeed = async () => {
+      const fetchSearch = async () => {
         setIsLoading(true);
         try {
           const response = await handleSearch(query!);
           console.log(response);
           setContent(response);
         } catch (error) {
-          console.error("Error fetching home feed:", error);
+          console.error("Error fetching search:", error);
         } finally {
           setIsLoading(false);
         }
       };
-      fetchFeed();
+      fetchSearch();
     } else {
       router.push("/");
     }
@@ -97,4 +97,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Search;
