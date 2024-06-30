@@ -168,7 +168,7 @@ const WhoIsWatching = () => {
                 profiles.length > 0 ? "bg-[rgba(0,0,0,0.7)]" : "bg-[#0F0F0F]"
               } `}
             >
-              <Loading type="spin" color="fff" />
+              <Loading type="spin" color="#ffffff" />
             </div>
           )}
           <>
