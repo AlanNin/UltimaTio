@@ -51,7 +51,8 @@ const Slider: React.FC<Props> = ({ content }) => {
       <Carousel
         responsive={responsive}
         draggable={true}
-        swipeable={false}
+        swipeable={true}
+        minimumTouchDrag={10}
         arrows={true}
         partialVisbile
         ssr={true}
