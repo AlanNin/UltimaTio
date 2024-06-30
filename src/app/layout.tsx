@@ -1,6 +1,6 @@
 import "~/styles/globals.css";
 import ReduxProvider from "../utils/redux/redux-provider";
-import ReactQueryProvider from "~/utils/react-query/react-query";
+// import ReactQueryProvider from "~/utils/react-query/react-query";
 import { GeistSans } from "geist/font/sans";
 import TopNavbar from "./_shared/layout/top-navbar";
 import Footer from "./_shared/layout/footer";

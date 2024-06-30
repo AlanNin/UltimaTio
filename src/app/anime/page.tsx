@@ -1,8 +1,9 @@
 "use client";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import Section from "../_shared/section/section";
-import { geFeedAnime } from "~/server/queries/anime/tmdb.queries";
+import { getFeedAnime } from "~/server/queries/anime/tmdb.queries";
 import { useEffect, useState } from "react";
+import { Loading } from "~/utils/loading/loading";
 
 type Feed = {
   airingTodayTV: any[];
@@ -21,15 +22,20 @@ const Home = () => {
     popularTV: [],
     topRatedTV: [],
   });
+
   useEffect(() => {
-    setIsLoading(true);
     const fetchFeed = async () => {
-      const response = await geFeedAnime();
-      console.log(response);
-      setFeed(response);
+      setIsLoading(true);
+      try {
+        const response = await getFeedAnime();
+        setFeed(response);
+      } catch (error) {
+        console.error("Error fetching home feed:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchFeed();
-    setIsLoading(false);
   }, []);
 
   return (
@@ -40,7 +46,13 @@ const Home = () => {
       }`}
     >
       {isLoading ? (
-        <></>
+        <div
+          className={`flex w-full h-screen items-center justify-center ${
+            isAboveMediumScreens ? "my-[-56px]" : "my-[-44px]"
+          } `}
+        >
+          <Loading type="bars" />
+        </div>
       ) : (
         <>
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>

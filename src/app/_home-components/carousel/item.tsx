@@ -105,7 +105,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
 
                       <div className="mt-3 mb-10">
                         <p className="text-lg font-normal text-[#c2c2c2] max-w-[650px]">
-                          {truncateText(content.description, 380)}
+                          {content.description.length > 0
+                            ? truncateText(content.description, 380)
+                            : "No description available"}
                         </p>
                       </div>
 
@@ -193,7 +195,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
 
                         <div className="mt-3 mb-10">
                           <p className="text-md font-normal text-[#c2c2c2] max-w-[550px]">
-                            {truncateText(content.description, 380)}
+                            {content.description.length > 0
+                              ? truncateText(content.description, 380)
+                              : "No description available"}
                           </p>
                         </div>
 

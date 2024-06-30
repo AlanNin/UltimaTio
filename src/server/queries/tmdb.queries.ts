@@ -150,6 +150,19 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
               }
             );
 
+            const hasNewsGenre = fullDataResponse.data.genres.some(
+              (genre: any) =>
+                genre.name.toLowerCase() === "news" ||
+                genre.name.toLowerCase() === "talk" ||
+                genre.name.toLowerCase() === "documentary" ||
+                genre.name.toLowerCase() === "soap" ||
+                genre.name.toLowerCase() === "reality"
+            );
+
+            if (hasNewsGenre) {
+              return null; // Exclude if it contains "news" genre
+            }
+
             const studios = fullDataResponse.data.production_companies.map(
               (studio: any) => ({
                 id: studio.id,

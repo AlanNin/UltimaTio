@@ -1,12 +1,18 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+
 type Props = {
   name: string;
   route: string;
 };
 
 function Item({ name, route }: Props) {
-  const location = usePathname();
+  let location = usePathname();
+
+  if (!location) {
+    location = typeof window !== "undefined" ? window.location.pathname : "/";
+  }
+
   const lowerCasePage = route.toLowerCase().replace(/ /g, "");
 
   return (

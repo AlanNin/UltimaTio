@@ -13,6 +13,7 @@ type User = {
   updated_at: Date | null;
 };
 
+// SIGN UP ACCOUNT
 export async function SignUpAccount(
   email: string,
   password: string,
@@ -73,6 +74,7 @@ export async function SignUpAccount(
   };
 }
 
+// SIGN IN ACCOUNT
 export async function SignInAccount(
   email: string,
   password: string
@@ -110,6 +112,7 @@ export async function SignInAccount(
   }
 }
 
+// VALIDATE EMAIL
 export async function validateEmail(
   email: string
 ): Promise<{

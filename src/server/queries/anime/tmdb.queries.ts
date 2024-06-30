@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // GET FEED (ANIME)
-export async function geFeedAnime(): Promise<any | { error: string }> {
+export async function getFeedAnime(): Promise<any | { error: string }> {
   try {
     const airingTodayTV = await searchTMDBFeedAnime(
       "tv/airing_today?language=en-US"
