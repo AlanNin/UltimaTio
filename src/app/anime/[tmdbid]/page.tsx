@@ -8,6 +8,7 @@ import SimilarSection from "../../_content-components/similarSection";
 import SeasonAndEpisodeSection from "../../_content-components/season&EpisodeSection";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loading } from "~/utils/loading/loading";
 
 const Content = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
@@ -19,15 +20,19 @@ const Content = () => {
 
   useEffect(() => {
     if (!tmdbid || isNaN(Number(tmdbid))) {
-      router.push("/tv");
+      router.push("/anime");
       return;
     }
-
     const fetchContent = async () => {
       setIsLoading(true);
-      const response = await getContentAnime(parseInt(tmdbid as string, 10));
-      setContent(response);
-      setIsLoading(false);
+      try {
+        const response = await getContentAnime(parseInt(tmdbid as string, 10));
+        setContent(response);
+      } catch (error) {
+        console.error("Error getting content -->:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchContent();
@@ -42,7 +47,13 @@ const Content = () => {
         }`}
       >
         {isLoading ? (
-          <></>
+          <div
+            className={`flex w-full h-screen items-center justify-center ${
+              isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
+            } `}
+          >
+            <Loading type="bars" />
+          </div>
         ) : (
           <>
             <TopSection content={content} isLoading={isLoading} />

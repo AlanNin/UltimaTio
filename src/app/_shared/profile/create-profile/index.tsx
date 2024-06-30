@@ -7,12 +7,16 @@ type Props = {
   handleCreateProfile: (inputs: any, selectedImage: string) => void;
   setIsCreatingProfile: (boolean: boolean) => void;
   profilePictures: any;
+  setUpdate: (boolean: boolean) => void;
+  update: boolean;
 };
 
 const CreateProfile: React.FC<Props> = ({
   handleCreateProfile,
   setIsCreatingProfile,
   profilePictures,
+  setUpdate,
+  update,
 }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
@@ -34,9 +38,10 @@ const CreateProfile: React.FC<Props> = ({
     });
   };
 
-  const createProfile = async () => {
+  const createProfile = () => {
     if (inputs.name !== undefined && inputs.name.length > 0) {
       handleCreateProfile(inputs.name, selectedImage);
+      setUpdate(!update);
     } else {
       setEmptyInput(true);
     }

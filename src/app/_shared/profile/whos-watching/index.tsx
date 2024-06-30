@@ -19,6 +19,7 @@ import {
   updateProfile,
   deleteProfile,
 } from "~/server/queries/profile.queries";
+import { Loading } from "~/utils/loading/loading";
 
 const WhoIsWatching = () => {
   type ProfilePictures = {
@@ -47,6 +48,12 @@ const WhoIsWatching = () => {
   const [enterManageProfile, setEnterManageProfile] = useState<boolean>(false);
   const [profileToManage, setProfileToManage] = useState<any>();
 
+  // LOADING
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // UPDATE
+  const [update, setUpdate] = useState<boolean>(false);
+
   //STOP SCROLL
   useEffect(() => {
     if (currentUser && !currentProfile) {
@@ -73,6 +80,7 @@ const WhoIsWatching = () => {
   // FETCH PROFILES
   useEffect(() => {
     if (currentUser) {
+      setIsLoading(true);
       const fetchProfiles = async () => {
         try {
           const fetchedProfilePictures = await getAllProfilePictures();
@@ -81,11 +89,13 @@ const WhoIsWatching = () => {
           setProfiles(fetchedProfiles);
         } catch (error) {
           console.error("Error fetching profiles:", error);
+        } finally {
+          setIsLoading(false);
         }
       };
       fetchProfiles();
     }
-  }, [currentUser, isCreatingProfile, isManagingProfile]);
+  }, [currentUser, update]);
 
   // SELECT PROFILE
   const handleSelectProfile = (profile: any) => {
@@ -106,9 +116,10 @@ const WhoIsWatching = () => {
   };
 
   const handleCreateProfile = async (name: any, selectedImage: string) => {
+    setIsLoading(true);
     try {
-      await createProfile(name, selectedImage);
       setIsCreatingProfile(false);
+      await createProfile(name, selectedImage);
     } catch (error) {
       //
     }
@@ -125,9 +136,11 @@ const WhoIsWatching = () => {
     name: any,
     selectedImage: string
   ) => {
+    setIsLoading(true);
     try {
-      await updateProfile(profileId, name, selectedImage);
+      setIsManagingProfile(false);
       setEnterManageProfile(false);
+      await updateProfile(profileId, name, selectedImage);
     } catch (error) {
       //
     }
@@ -135,9 +148,11 @@ const WhoIsWatching = () => {
 
   // MANAGE --> DELETE
   const handleDeleteProfile = async (profileId: string) => {
+    setIsLoading(true);
     try {
-      await deleteProfile(profileId);
+      setIsManagingProfile(false);
       setEnterManageProfile(false);
+      await deleteProfile(profileId);
     } catch (error) {
       //
     }
@@ -147,79 +162,96 @@ const WhoIsWatching = () => {
     <>
       {!currentUser || (currentUser && currentProfile) ? null : (
         <div className={`fixed inset-0 h-full w-full bg-[#0F0F0F] z-40`}>
-          {isCreatingProfile && (
-            <CreateProfile
-              handleCreateProfile={handleCreateProfile}
-              setIsCreatingProfile={setIsCreatingProfile}
-              profilePictures={profilePictures}
-            />
+          {isLoading && (
+            <div
+              className={`fixed flex w-full h-screen items-center justify-center z-20 ${
+                profiles.length > 0 ? "bg-[rgba(0,0,0,0.7)]" : "bg-[#0F0F0F]"
+              } `}
+            >
+              <Loading type="spin" color="fff" />
+            </div>
           )}
+          <>
+            {isCreatingProfile && (
+              <CreateProfile
+                handleCreateProfile={handleCreateProfile}
+                setIsCreatingProfile={setIsCreatingProfile}
+                profilePictures={profilePictures}
+                setUpdate={setUpdate}
+                update={update}
+              />
+            )}
 
-          {enterManageProfile && (
-            <ManageProfile
-              handleUpdateProfile={handleUpdateProfile}
-              handleDeleteProfile={handleDeleteProfile}
-              setEnterManageProfile={setEnterManageProfile}
-              profileToManage={profileToManage}
-              profilePictures={profilePictures}
-            />
-          )}
+            {enterManageProfile && (
+              <ManageProfile
+                handleUpdateProfile={handleUpdateProfile}
+                handleDeleteProfile={handleDeleteProfile}
+                setEnterManageProfile={setEnterManageProfile}
+                profileToManage={profileToManage}
+                profilePictures={profilePictures}
+                setUpdate={setUpdate}
+                update={update}
+              />
+            )}
 
-          <div
-            className={`h-full w-full items-center justify-between flex flex-col overflow-y-auto py-10 ${
-              isAboveMediumScreens ? "gap-16" : "gap-8"
-            }`}
-          >
-            <h1
-              className={`font-light text-3xl text-white mt-auto ${
-                !isAboveMediumScreens && "text-[24px]"
+            <div
+              className={`h-full w-full items-center justify-between flex flex-col overflow-y-auto py-10 ${
+                isAboveMediumScreens ? "gap-16" : "gap-8"
               }`}
             >
-              Hello, who are you?
-            </h1>
+              <h1
+                className={`font-light text-3xl text-white mt-auto ${
+                  !isAboveMediumScreens && "text-[24px]"
+                }`}
+              >
+                Hello, who are you?
+              </h1>
 
-            <div className={`px-10 ${!isAboveSmallTablet && ""}`}>
-              <div className="flex flex-wrap items-center justify-center gap-8 gap-x-10">
-                {Array.isArray(profiles) &&
-                  profiles.map((profile: any) => (
+              <div className={`px-10 ${!isAboveSmallTablet && ""}`}>
+                <div className="flex flex-wrap items-center justify-center gap-8 gap-x-10">
+                  {Array.isArray(profiles) &&
+                    profiles.map((profile: any) => (
+                      <CardProfile
+                        key={profile.id}
+                        profile={profile}
+                        handleSelectProfile={handleSelectProfile}
+                        toggleCreatingProfile={toggleCreatingProfile}
+                        isManagingProfile={isManagingProfile}
+                        setEnterManageProfile={setEnterManageProfile}
+                        setProfileToManage={setProfileToManage}
+                      />
+                    ))}
+                  {Array.isArray(profiles) && profiles.length < 6 && (
                     <CardProfile
-                      key={profile.id}
-                      profile={profile}
-                      handleSelectProfile={handleSelectProfile}
                       toggleCreatingProfile={toggleCreatingProfile}
-                      isManagingProfile={isManagingProfile}
-                      setEnterManageProfile={setEnterManageProfile}
-                      setProfileToManage={setProfileToManage}
+                      isCreating={true}
                     />
-                  ))}
-                {Array.isArray(profiles) && profiles.length < 6 && (
-                  <CardProfile
-                    toggleCreatingProfile={toggleCreatingProfile}
-                    isCreating={true}
-                  />
+                  )}
+                </div>
+              </div>
+
+              <div
+                className="flex mb-auto justify-center items-center text-white gap-2 px-4 py-2 rounded-lg cursor-pointer bg-[rgba(117,117,117,0.1)] hover:bg-[rgba(117,117,117,0.3)] transition-colors duration-300"
+                onClick={toggleManagingProfile}
+              >
+                {isManagingProfile ? (
+                  <>
+                    <CheckCircleIcon className="h-4 text-[#d1d1d1]" />
+                    <h1 className={`font-light text-sm text-[#d1d1d1]`}>
+                      Done
+                    </h1>
+                  </>
+                ) : (
+                  <>
+                    <PencilSquareIcon className="h-4 text-[#d1d1d1]" />
+                    <h1 className={`font-light text-sm text-[#d1d1d1]`}>
+                      Manage Profiles
+                    </h1>
+                  </>
                 )}
               </div>
             </div>
-
-            <div
-              className="flex mb-auto justify-center items-center text-white gap-2 px-4 py-2 rounded-lg cursor-pointer bg-[rgba(117,117,117,0.1)] hover:bg-[rgba(117,117,117,0.3)] transition-colors duration-300"
-              onClick={toggleManagingProfile}
-            >
-              {isManagingProfile ? (
-                <>
-                  <CheckCircleIcon className="h-4 text-[#d1d1d1]" />
-                  <h1 className={`font-light text-sm text-[#d1d1d1]`}>Done</h1>
-                </>
-              ) : (
-                <>
-                  <PencilSquareIcon className="h-4 text-[#d1d1d1]" />
-                  <h1 className={`font-light text-sm text-[#d1d1d1]`}>
-                    Manage Profiles
-                  </h1>
-                </>
-              )}
-            </div>
-          </div>
+          </>
         </div>
       )}
     </>

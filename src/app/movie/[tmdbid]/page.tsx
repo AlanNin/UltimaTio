@@ -6,6 +6,7 @@ import TopSection from "../../_content-components/topSection";
 import CastSection from "../../_content-components/castSection";
 import SimilarSection from "../../_content-components/similarSection";
 import { useEffect, useState } from "react";
+import { Loading } from "~/utils/loading/loading";
 
 const Content = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
@@ -22,9 +23,14 @@ const Content = () => {
     }
     const fetchContent = async () => {
       setIsLoading(true);
-      const response = await getContentMovie(parseInt(tmdbid as string, 10));
-      setContent(response);
-      setIsLoading(false);
+      try {
+        const response = await getContentMovie(parseInt(tmdbid as string, 10));
+        setContent(response);
+      } catch (error) {
+        console.error("Error getting content -->:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchContent();
@@ -39,7 +45,13 @@ const Content = () => {
         }`}
       >
         {isLoading ? (
-          <></>
+          <div
+            className={`flex w-full h-screen items-center justify-center ${
+              isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
+            } `}
+          >
+            <Loading type="bars" />
+          </div>
         ) : (
           <>
             <TopSection content={content} isLoading={isLoading} />

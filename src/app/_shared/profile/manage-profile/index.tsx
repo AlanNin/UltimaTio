@@ -19,6 +19,8 @@ type Props = {
   setEnterManageProfile: (boolean: any) => void;
   profileToManage: Profile;
   profilePictures: any;
+  setUpdate: (boolean: boolean) => void;
+  update: boolean;
 };
 
 const ManageProfile: React.FC<Props> = ({
@@ -27,6 +29,8 @@ const ManageProfile: React.FC<Props> = ({
   setEnterManageProfile,
   profileToManage,
   profilePictures,
+  setUpdate,
+  update,
 }) => {
   // DEFINITOINS
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
@@ -49,21 +53,23 @@ const ManageProfile: React.FC<Props> = ({
   };
 
   // UPDATE
-  const updateProfile = async () => {
+  const updateProfile = () => {
     if (
       (inputs.name !== undefined && inputs.name.length > 0) ||
       selectedImage !== profileToManage.imgUrl
     ) {
       handleUpdateProfile(profileToManage.id, inputs.name!, selectedImage);
+      setUpdate(!update);
     } else {
       setEnterManageProfile(false);
     }
   };
 
   // DELETE
-  const deleteProfile = async () => {
+  const deleteProfile = () => {
     try {
       handleDeleteProfile(profileToManage.id);
+      setUpdate(!update);
     } catch (error) {
       //
     }

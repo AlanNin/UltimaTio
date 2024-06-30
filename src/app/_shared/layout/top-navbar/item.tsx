@@ -1,5 +1,6 @@
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 type Props = {
   name: string;
@@ -8,16 +9,25 @@ type Props = {
 
 function Item({ name, route }: Props) {
   let location = usePathname();
+  const router = useRouter();
 
-  if (!location) {
-    location = typeof window !== "undefined" ? window.location.pathname : "/";
-  }
+  useEffect(() => {
+    if (!location) {
+      location = window.location.pathname;
+      console.log("location", location);
+    }
+  }, []);
 
   const lowerCasePage = route.toLowerCase().replace(/ /g, "");
 
   return (
-    <Link
-      href={lowerCasePage}
+    <p
+      onClick={() => {
+        if (location === `/${lowerCasePage}`) {
+          return;
+        }
+        router.push(`/${lowerCasePage}`);
+      }}
       className={`${
         (location === "/" && name === "Home") ||
         location === `/${lowerCasePage}`
@@ -26,7 +36,7 @@ function Item({ name, route }: Props) {
       } text-base`}
     >
       {name}
-    </Link>
+    </p>
   );
 }
 

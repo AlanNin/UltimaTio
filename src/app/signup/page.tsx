@@ -270,12 +270,12 @@ const SignUp = () => {
               <ChevronRightIcon
                 strokeWidth={0.8}
                 className={`text-white
-                h-[60px] p-2 border-[2.5px] border-[#383838] rounded-3xl stroke-current cursor-pointer
+                h-[60px] p-2 pr-1.5 pl-2.5 border-[2.5px] border-[#383838] rounded-3xl stroke-current cursor-pointer
                 ${
                   currentStep === 0
                     ? `${
                         inputs.email !== undefined && isEmailValid
-                          ? "bg-[rgba(158,16,90)]"
+                          ? "bg-[rgba(158,16,90)] border-transparent"
                           : "transparent"
                       }`
                     : "transparent"
@@ -422,15 +422,15 @@ const SignUp = () => {
             <div className="mt-5">
               <ChevronRightIcon
                 strokeWidth={0.8}
-                className={`text-white h-[60px] p-2 border-[2.5px] border-[#383838] rounded-3xl stroke-current cursor-pointer
+                className={`text-white h-[60px] p-2 pr-1.5 pl-2.5 border-[2.5px] border-[#383838] rounded-3xl stroke-current cursor-pointer
                 ${
                   currentStep === 0
                     ? inputs.email !== undefined && isEmailValid
-                      ? "bg-[rgba(158,16,90)]"
+                      ? "bg-[rgba(158,16,90)] border-transparent"
                       : ""
                     : currentStep === 1
                     ? inputs.password !== undefined && isPasswordValid
-                      ? "bg-[rgba(158,16,90)]"
+                      ? "bg-[rgba(158,16,90)] border-transparent"
                       : ""
                     : "transparent"
                 }`}
