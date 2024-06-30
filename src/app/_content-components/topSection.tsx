@@ -56,6 +56,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
           })`,
           backgroundPosition: "center",
           backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
         }}
       >
         <div className="absolute inset-0 bg-[rgba(0,0,0,0.75)] backdrop-blur-lg" />

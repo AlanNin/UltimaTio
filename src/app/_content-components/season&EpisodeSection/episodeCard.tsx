@@ -49,7 +49,7 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
         />
         <div className="flex flex-col justify-center gap-1">
           <h1 className="text-xs font-base mb-1 max-w-[135px]">
-            {episode.episodeNumber}. {episode.title}
+            {episode.episodeNumber}. {truncateText(episode.title, 50)}
           </h1>
           <h1 className="text-xs font-base text-[#c2c2c2]">
             Rated: {episode.rating.toFixed(1)}
