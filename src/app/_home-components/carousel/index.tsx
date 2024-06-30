@@ -58,7 +58,7 @@ const HomeCarousel: React.FC<Props> = ({ content }) => {
         responsive={responsive}
         draggable={false}
         autoPlay={true}
-        autoPlaySpeed={3000}
+        autoPlaySpeed={4500}
         arrows={false}
         infinite
         showDots={isAboveMediumScreens}
