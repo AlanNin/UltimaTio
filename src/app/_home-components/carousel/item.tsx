@@ -39,7 +39,11 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
           alt="Content Image"
           loading="lazy"
           className={`object-cover w-full h-full`}
-          style={{ backgroundPosition: "center" }}
+          style={{
+            backgroundPosition: "center",
+            userSelect: "none",
+            pointerEvents: "none",
+          }}
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent via-50% to-transparent pointer-events-none" />

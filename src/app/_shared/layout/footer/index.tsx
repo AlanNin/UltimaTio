@@ -3,11 +3,20 @@
 import Item from "./item";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 const Footer = () => {
   const flexBetween = "flex items-center justify-between";
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
   const location = usePathname();
+
+  useEffect(() => {
+    if (!location) {
+      //
+    } else {
+      console.log("location", location);
+    }
+  }, [location]);
 
   if (
     location.toLowerCase() === "/settings" ||

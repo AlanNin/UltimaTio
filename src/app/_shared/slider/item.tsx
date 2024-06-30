@@ -46,6 +46,10 @@ const SliderCard: React.FC<Props> = ({ content }) => {
               ? "scale-125 brightness-[0.25]"
               : "scale-100 brightness-100"
           }`}
+          style={{
+            userSelect: "none",
+            pointerEvents: "none",
+          }}
         />
         <div
           className={`absolute inset-0 flex flex-col text-center items-center justify-center transition-opacity duration-500 ${
