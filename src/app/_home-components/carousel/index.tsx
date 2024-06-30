@@ -56,8 +56,10 @@ const HomeCarousel: React.FC<Props> = ({ content }) => {
     <section id="carousel" className="w-full h-full flex flex-col z-0">
       <Carousel
         responsive={responsive}
-        draggable={false}
+        draggable={true}
+        swipeable={true}
         autoPlay={true}
+        shouldResetAutoplay={true}
         autoPlaySpeed={4500}
         arrows={false}
         infinite

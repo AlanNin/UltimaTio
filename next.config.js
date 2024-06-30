@@ -14,6 +14,7 @@ const config = {
   },
   images: {
     domains: ["media.themoviedb.org"],
+    unoptimized: true,
   },
 };
 

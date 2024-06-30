@@ -180,7 +180,7 @@ async function searchTMDBFeedAnime(url: string): Promise<any[] | null> {
   const excludedGenreId = 16;
   const excludedCountry = "JP";
 
-  let totalPages = 5;
+  let totalPages = 8;
 
   try {
     const responses = await Promise.all(

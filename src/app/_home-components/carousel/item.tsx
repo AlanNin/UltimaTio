@@ -127,7 +127,7 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                           onClick={handleNavigate}
                         >
                           <h1 className="text-lg text-[#ebebeb] font-medium">
-                            More Info{" >"}
+                            More Info
                           </h1>
                         </div>
                       </div>
@@ -217,7 +217,7 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             onClick={handleNavigate}
                           >
                             <h1 className="text-sm text-[#ebebeb] font-medium">
-                              More Info{" >"}
+                              More Info
                             </h1>
                           </div>
                         </div>
@@ -299,7 +299,7 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                               onClick={handleNavigate}
                             >
                               <h1 className="text-xs text-[#ebebeb] font-medium">
-                                More Info{" >"}
+                                More Info
                               </h1>
                             </div>
                           </div>

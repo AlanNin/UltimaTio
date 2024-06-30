@@ -150,6 +150,10 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
               }
             );
 
+            if (fullDataResponse.data.genres.length === 0) {
+              return null;
+            }
+
             const hasNewsGenre = fullDataResponse.data.genres.some(
               (genre: any) =>
                 genre.name.toLowerCase() === "news" ||
@@ -160,7 +164,7 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
             );
 
             if (hasNewsGenre) {
-              return null; // Exclude if it contains "news" genre
+              return null;
             }
 
             const studios = fullDataResponse.data.production_companies.map(
