@@ -42,6 +42,10 @@ type Props = {
 const Slider: React.FC<Props> = ({ content }) => {
   const isAboveTabletScreens = useMediaQuery("(min-width: 680px)");
 
+  const filteredContent = content.filter(
+    (item: any) => !item.posterUrl.includes("w780null")
+  );
+
   return (
     <section id="carousel" className="w-full h-full flex flex-col z-0">
       <Carousel
@@ -80,7 +84,7 @@ const Slider: React.FC<Props> = ({ content }) => {
           </div>
         }
       >
-        {content.map((content: any, index: number) => (
+        {filteredContent.map((content: any, index: number) => (
           <SliderCard key={index} content={content} />
         ))}
       </Carousel>

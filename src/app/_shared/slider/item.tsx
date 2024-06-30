@@ -26,8 +26,17 @@ const SliderCard: React.FC<Props> = ({ content }) => {
 */
 
   const handleNavigate = () => {
-    // HANDLE IF MOVIE OR TV (SERIES OR ANIME)
-    router.push(`/movie/${content.tmdbid}`);
+    if (content.category === "movie") {
+      // HANDLE IF MOVIE
+      router.push(`/movie/${content.tmdbid}`);
+    }
+    if (content.category === "tv") {
+      // HANDLE IF TV
+      router.push(`/tv/${content.tmdbid}`);
+    }
+    if (content.category === "anime") {
+      router.push(`/anime/${content.tmdbid}`);
+    }
   };
 
   return (

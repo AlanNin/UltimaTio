@@ -10,18 +10,12 @@ type Props = {
 const SimilarCard: React.FC<Props> = ({ similarContent }) => {
   const isAboveSmallScreens = useMediaQuery("(min-width: 480px)");
 
-  const landscapeUrl =
-    "https://media.themoviedb.org/t/p/original" + similarContent.backdrop_path;
-
   const posterUrl =
     !similarContent.poster_path ||
     similarContent.poster_path.includes("2Fw780null") ||
     similarContent.poster_path.includes("bestv2null")
       ? "null"
       : "https://media.themoviedb.org/t/p/w780" + similarContent.poster_path;
-
-  const title = similarContent.original_title;
-  const tmdbid = similarContent.id;
 
   const router = useRouter();
 
@@ -30,8 +24,17 @@ const SimilarCard: React.FC<Props> = ({ similarContent }) => {
   }
 
   const handleNavigate = () => {
-    // HANDLE IF MOVIE OR TV (SERIES OR ANIME)
-    router.push(`/movie/${tmdbid}`);
+    if (similarContent.category === "movie") {
+      // HANDLE IF MOVIE
+      router.push(`/movie/${similarContent.id}`);
+    }
+    if (similarContent.category === "tv") {
+      // HANDLE IF TV
+      router.push(`/tv/${similarContent.id}`);
+    }
+    if (similarContent.category === "anime") {
+      router.push(`/anime/${similarContent.id}`);
+    }
   };
 
   return (

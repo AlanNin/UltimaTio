@@ -12,7 +12,6 @@ type Props = {
 
 const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
   const router = useRouter();
-  console.log(episode);
   const handleNavigateToWatch = () => {
     const seasonNumber = selectedSeason.seasonNumber - 1;
     const episodeNumber = episode.episodeNumber - 1;

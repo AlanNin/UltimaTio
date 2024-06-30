@@ -1,12 +1,12 @@
 import useMediaQuery from "~/hooks/useMediaQuery";
-import Slider from "../_shared/slider";
+import Slider from "../slider";
 
 type Props = {
   text: string;
   content: any;
 };
 
-const HomeSection: React.FC<Props> = ({ text, content }) => {
+const Section: React.FC<Props> = ({ text, content }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
   return (
@@ -29,4 +29,4 @@ const HomeSection: React.FC<Props> = ({ text, content }) => {
   );
 };
 
-export default HomeSection;
+export default Section;

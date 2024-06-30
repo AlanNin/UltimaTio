@@ -11,7 +11,6 @@ import {
   SquaresPlusIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
-import { usePathname } from "next/navigation";
 
 type Props = {
   content: any;
@@ -22,14 +21,10 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
   const isAboveDesktopScreens = useMediaQuery("(min-width: 1100px)");
   const isAboveMobileScreens = useMediaQuery("(min-width: 770px)");
   const [showMore, setShowMore] = useState(false);
-  const pathName = usePathname();
-  const path = pathName.split("/")[1];
   const router = useRouter();
 
   const handleNavigateToWatch = () => {
-    const isAMovie = content.ContentCategory.some(
-      (item: any) => item.category.name === "movie"
-    );
+    const isAMovie = content.category === "movie";
 
     if (isAMovie) {
       router.push("/watch/" + content.id);
@@ -54,7 +49,11 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
       <div
         className="flex w-full h-full items-center justify-center bg-cover relative"
         style={{
-          backgroundImage: `url(${content!.landscapeUrl})`,
+          backgroundImage: `url(${
+            content!.landscapeUrl.includes("originalnull")
+              ? content!.posterUrl
+              : content!.landscapeUrl
+          })`,
           backgroundPosition: "center",
         }}
       >
@@ -90,9 +89,9 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                     <h1 className="text-sm font-light text-white">•</h1>
                     <h1
                       className="text-sm font-light capitalize cursor-pointer text-white hover:text-[#b084db] transition-property:text duration-500"
-                      onClick={() => router.push("/" + path)}
+                      onClick={() => router.push("/" + content.category)}
                     >
-                      {path === "tv" ? "TV" : path}
+                      {content.category === "tv" ? "TV" : content.category}
                     </h1>
                     <h1 className="text-sm font-light text-white">•</h1>
                     <h1 className="text-sm font-light text-[#acabab] capitalize">
@@ -117,32 +116,47 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               <p className="text-sm font-normal text-[#c2c2c2] max-w-[500px] mt-4">
                 {isAboveMobileScreens || showMore ? (
                   <>
-                    {isAboveMobileScreens
-                      ? content && content.description?.slice(0, 520) + "..."
-                      : content.description}
-                    {!isAboveMobileScreens && content.description.length > 150 && (
-                      <span
-                        className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0.5 px-2 font-light text-xs cursor-pointer ml-2 my-1"
-                        style={{ whiteSpace: "nowrap" }}
-                        onClick={() => setShowMore(!showMore)}
-                      >
-                        Show Less
-                      </span>
+                    {content &&
+                    content.description &&
+                    content.description.length > 0 ? (
+                      <>
+                        {isAboveMobileScreens
+                          ? content.description.slice(0, 520) + "..."
+                          : content.description}
+                        {!isAboveMobileScreens &&
+                          content.description.length > 150 && (
+                            <span
+                              className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0.5 px-2 font-light text-xs cursor-pointer ml-2 my-1"
+                              style={{ whiteSpace: "nowrap" }}
+                              onClick={() => setShowMore(!showMore)}
+                            >
+                              Show Less
+                            </span>
+                          )}
+                      </>
+                    ) : (
+                      <span>No description found</span>
                     )}
                   </>
                 ) : (
                   <>
-                    {content?.description && content.description.length > 150
-                      ? content && content.description?.slice(0, 150) + "..."
-                      : content.description}
-                    {content.description.length > 150 && (
-                      <span
-                        className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0.5 px-2 font-light text-xs cursor-pointer ml-2 my-1"
-                        style={{ whiteSpace: "nowrap" }}
-                        onClick={() => setShowMore(!showMore)}
-                      >
-                        Show More
-                      </span>
+                    {content?.description && content.description.length > 0 ? (
+                      <>
+                        {content.description.length > 150
+                          ? content.description.slice(0, 150) + "..."
+                          : content.description}
+                        {content.description.length > 150 && (
+                          <span
+                            className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0.5 px-2 font-light text-xs cursor-pointer ml-2 my-1"
+                            style={{ whiteSpace: "nowrap" }}
+                            onClick={() => setShowMore(!showMore)}
+                          >
+                            Show More
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span>No description found</span>
                     )}
                   </>
                 )}
@@ -192,10 +206,10 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
           )}
           {/* DETAILS */}
           <div className="bg-[rgba(191,191,191,0.075)] rounded-md p-4 flex flex-col gap-4 w-auto">
-            {content.duration && (
+            {content.duration && content.duration > 0 && (
               <h1 className="font-light text-xs flex">
                 <p className="font-bold"> Duration: &nbsp;</p>
-                {formatDuration(content.duration)}
+                {formatDuration(content.duration || content.episodeDuration)}
               </h1>
             )}
             <h1 className="font-light text-xs flex">

@@ -47,7 +47,7 @@ const SeasonAndEpisodeSection: React.FC<Props> = ({ content, isLoading }) => {
           ))}
         </div>
         <div
-          className={`flex gap-6 pb-4 ${
+          className={`flex gap-6 pb-4 items-center justify-center ${
             isAboveMediumScreens ? "flex-wrap" : "overflow-x-auto"
           }`}
         >

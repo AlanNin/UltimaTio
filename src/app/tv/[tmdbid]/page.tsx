@@ -1,12 +1,13 @@
 "use client";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import { useParams } from "next/navigation";
-import { getContentTV } from "~/server/queries/tmdb.queries";
+import { getContentTV } from "~/server/queries/tv/tmdb.queries";
 import TopSection from "../../_content-components/topSection";
 import CastSection from "../../_content-components/castSection";
 import SimilarSection from "../../_content-components/similarSection";
 import SeasonAndEpisodeSection from "../../_content-components/season&EpisodeSection";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Content = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
@@ -14,17 +15,18 @@ const Content = () => {
   const { tmdbid } = useParams();
   const [content, setContent] = useState<any>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const router = useRouter();
 
   useEffect(() => {
-    if (!tmdbid) return;
+    if (!tmdbid || isNaN(Number(tmdbid))) {
+      router.push("/tv");
+      return;
+    }
 
     const fetchContent = async () => {
       setIsLoading(true);
-      const id = parseInt(tmdbid as string, 10);
-      if (!isNaN(id)) {
-        const response = await getContentTV(id);
-        setContent(response);
-      }
+      const response = await getContentTV(parseInt(tmdbid as string, 10));
+      setContent(response);
       setIsLoading(false);
     };
 

@@ -1,11 +1,13 @@
 "use client";
 import useMediaQuery from "~/hooks/useMediaQuery";
-import { useParams, useRouter } from "next/navigation";
-import { getContentMovie } from "~/server/queries/movie/tmdb.queries";
+import { useParams } from "next/navigation";
+import { getContentAnime } from "~/server/queries/anime/tmdb.queries";
 import TopSection from "../../_content-components/topSection";
 import CastSection from "../../_content-components/castSection";
 import SimilarSection from "../../_content-components/similarSection";
+import SeasonAndEpisodeSection from "../../_content-components/season&EpisodeSection";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Content = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
@@ -17,12 +19,13 @@ const Content = () => {
 
   useEffect(() => {
     if (!tmdbid || isNaN(Number(tmdbid))) {
-      router.push("/movie");
+      router.push("/tv");
       return;
     }
+
     const fetchContent = async () => {
       setIsLoading(true);
-      const response = await getContentMovie(parseInt(tmdbid as string, 10));
+      const response = await getContentAnime(parseInt(tmdbid as string, 10));
       setContent(response);
       setIsLoading(false);
     };
@@ -45,6 +48,12 @@ const Content = () => {
             <TopSection content={content} isLoading={isLoading} />
             <div className={`${isAboveMobileScreens ? "px-8" : "px-4"}`}>
               <CastSection cast={content.ContentActor} />
+              {content?.seasons && content?.seasons?.length > 0 && (
+                <SeasonAndEpisodeSection
+                  content={content}
+                  isLoading={isLoading}
+                />
+              )}
               <SimilarSection content={content.similarContent} />
             </div>
           </>

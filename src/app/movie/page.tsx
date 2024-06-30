@@ -1,15 +1,14 @@
 "use client";
 import useMediaQuery from "~/hooks/useMediaQuery";
-import HomeCarousel from "./_home-components/carousel";
-import Section from "./_shared/section/section";
-import { getHomeFeed } from "~/server/queries/tmdb.queries";
+import Section from "../_shared/section/section";
+import { getFeedMovie } from "~/server/queries/movie/tmdb.queries";
 import { useEffect, useState } from "react";
 
 type Feed = {
-  trending: any[];
-  popular: any[];
-  topRated: any[];
-  upcoming: any[];
+  trendingMovies: any[];
+  popularMovies: any[];
+  topRatedMovies: any[];
+  upcomingMovies: any[];
 };
 
 const Home = () => {
@@ -17,15 +16,15 @@ const Home = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [feed, setFeed] = useState<Feed>({
-    trending: [],
-    popular: [],
-    topRated: [],
-    upcoming: [],
+    trendingMovies: [],
+    popularMovies: [],
+    topRatedMovies: [],
+    upcomingMovies: [],
   });
   useEffect(() => {
     setIsLoading(true);
     const fetchFeed = async () => {
-      const response = await getHomeFeed();
+      const response = await getFeedMovie();
       setFeed(response);
     };
     fetchFeed();
@@ -43,11 +42,11 @@ const Home = () => {
         <></>
       ) : (
         <>
-          <HomeCarousel content={feed.trending} />
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
-            <Section text="Popular" content={feed.popular} />
-            <Section text="Top Rated" content={feed.topRated} />
-            <Section text="Upcoming" content={feed.upcoming} />
+            <Section text="Trending" content={feed.trendingMovies} />
+            <Section text="Popular" content={feed.popularMovies} />
+            <Section text="Top Rated" content={feed.topRatedMovies} />
+            <Section text="Upcoming" content={feed.upcomingMovies} />
           </div>
         </>
       )}
