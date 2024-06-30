@@ -31,9 +31,9 @@ function Item({ name, route }: Props) {
       className={`${
         (location === "/" && name === "Home") ||
         location === `/${lowerCasePage}`
-          ? "cursor-pointer text-[#a35fe8]"
-          : "transition-property:text duration-500 cursor-pointer hover:text-[#858383]"
-      } text-base`}
+          ? "text-[#a35fe8]"
+          : "duration-300 hover:text-[#858383]"
+      } text-base whitespace-nowrap cursor-pointer transition-property:text `}
     >
       {name}
     </p>

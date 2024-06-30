@@ -252,3 +252,85 @@ function shuffleArray(array: any[]): any[] {
   }
   return shuffledArray;
 }
+
+// HANDLE SEARCH
+export async function handleSearch(query: string): Promise<any> {
+  const AnimeGenreId = 16;
+  const AnimeCountry = "JP";
+  const baseUrl = "https://api.themoviedb.org/3/";
+  const apiKey = process.env.TMDB_APIKEY;
+  const language = "en-US";
+
+  try {
+    // Search for multi content (movies, TV shows, etc.)
+    const searchResults: any[] = [];
+
+    // Function to fetch search results from TMDb
+    const fetchSearchResults = async (page: number) => {
+      const response = await axios.get(`${baseUrl}search/multi`, {
+        params: {
+          api_key: apiKey,
+          query,
+          language,
+          page, // Specify the page number
+        },
+      });
+
+      return response.data.results;
+    };
+
+    // Fetch results from page 1
+    const resultsPage1 = await fetchSearchResults(1);
+    searchResults.push(...resultsPage1);
+
+    // Fetch results from page 2
+    const resultsPage2 = await fetchSearchResults(2);
+    searchResults.push(...resultsPage2);
+
+    // Process search results
+    const responseData = await Promise.all(
+      searchResults.map(async (content: any) => {
+        try {
+          let category = content.media_type; // Default category based on media type
+
+          if (content.media_type === "movie" || content.media_type === "tv") {
+            // Determine if it's anime based on conditions
+            const isAnime =
+              content.origin_country &&
+              content.origin_country.includes(AnimeCountry) &&
+              content.genre_ids &&
+              content.genre_ids.includes(AnimeGenreId);
+
+            category = isAnime ? "anime" : content.media_type;
+          }
+
+          return {
+            landscapeUrl: content.backdrop_path
+              ? "https://media.themoviedb.org/t/p/original" +
+                content.backdrop_path
+              : null,
+            posterUrl: content.poster_path
+              ? "https://media.themoviedb.org/t/p/w780" + content.poster_path
+              : null,
+            title: content.title || content.name,
+            tmdbid: content.id,
+            rating: Math.round(content.vote_average * 10) / 10,
+            description: content.overview,
+            category,
+          };
+        } catch (error) {
+          console.error("Error fetching full TMDB data:", content.id, error);
+          return null;
+        }
+      })
+    );
+
+    // Filter out null entries
+    const filteredData = responseData.filter((data) => data !== null);
+
+    return filteredData;
+  } catch (error) {
+    console.error("Error fetching TMDb search data:", error);
+    return [];
+  }
+}

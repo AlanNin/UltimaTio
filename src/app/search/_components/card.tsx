@@ -8,7 +8,7 @@ type Props = {
   content: any;
 };
 
-const SliderCard: React.FC<Props> = ({ content }) => {
+const SearchCard: React.FC<Props> = ({ content }) => {
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
   const isAboveSmallTablet = useMediaQuery("(min-width: 650px)");
@@ -27,9 +27,20 @@ const SliderCard: React.FC<Props> = ({ content }) => {
     }
   };
 
+  const posterUrl =
+    !content.posterUrl ||
+    content.posterUrl.includes("2Fw780null") ||
+    content.posterUrl.includes("bestv2null")
+      ? "null"
+      : "https://media.themoviedb.org/t/p/w780" + content.posterUrl;
+
+  if (posterUrl === "null") {
+    return null;
+  }
+
   return (
     <div
-      className="flex w-full h-full pr-4"
+      className="flex w-max h-max"
       onMouseEnter={() => (isAboveSmallTablet ? setIsHovered(true) : null)}
       onMouseLeave={() => (isAboveSmallTablet ? setIsHovered(false) : null)}
     >
@@ -38,14 +49,16 @@ const SliderCard: React.FC<Props> = ({ content }) => {
         onClick={handleNavigate}
       >
         <img
-          src={content?.posterUrl}
+          src={posterUrl}
           alt="Content Image"
           loading="lazy"
-          className={`object-cover w-full h-full cursor-pointer rounded-sm transition-all duration-500 ${
-            isHovered
-              ? "scale-125 brightness-[0.25]"
-              : "scale-100 brightness-100"
-          }`}
+          className={`object-cover cursor-pointer rounded-sm transition-all duration-500
+            ${isAboveSmallTablet ? "w-[200px] h-[295px]" : "w-[95px] h-[147px]"}
+             ${
+               isHovered
+                 ? "scale-125 brightness-[0.25]"
+                 : "scale-100 brightness-100"
+             }`}
         />
         <div
           className={`absolute inset-0 flex flex-col text-center items-center justify-center transition-opacity duration-500 ${
@@ -65,4 +78,4 @@ const SliderCard: React.FC<Props> = ({ content }) => {
   );
 };
 
-export default SliderCard;
+export default SearchCard;
