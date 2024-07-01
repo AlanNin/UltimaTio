@@ -31,6 +31,20 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
     }
   };
 
+  const handleWatch = () => {
+    if (content.category === "movie") {
+      // HANDLE IF MOVIE
+      router.push(
+        `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}`
+      );
+    } else {
+      // HANDLE IF TV
+      router.push(
+        `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}&season=1&episode=1`
+      );
+    }
+  };
+
   return (
     <div className="flex h-full w-full justify-center items-center overflow-hidden max-h-[675px]">
       <div className="relative w-full h-full">
@@ -116,7 +130,10 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                       </div>
 
                       <div className="flex gap-6">
-                        <div className="flex gap-3 items-center w-max rounded-2xl cursor-pointer transition-colors duration-500">
+                        <div
+                          className="flex gap-3 items-center w-max rounded-2xl cursor-pointer transition-colors duration-500"
+                          onClick={handleWatch}
+                        >
                           <PlayIcon
                             className="w-[40px] h-[40px] text-white fill-white bg-[#a35fe8] py-2.5 pl-2.5 pr-2 rounded-full"
                             strokeWidth={0.8}
@@ -206,7 +223,10 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                         </div>
 
                         <div className="flex gap-6">
-                          <div className="flex gap-3 items-center w-max rounded-2xl cursor-pointer transition-colors duration-500">
+                          <div
+                            className="flex gap-3 items-center w-max rounded-2xl cursor-pointer transition-colors duration-500"
+                            onClick={handleWatch}
+                          >
                             <PlayIcon
                               className="w-[35px] h-[35px] text-white fill-white bg-[#a35fe8] py-2 pl-2 pr-1.5 rounded-full"
                               strokeWidth={0.8}
@@ -289,7 +309,10 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             </div>
                           </div>
                           <div className="flex gap-4 items-center mt-4">
-                            <div className="flex gap-2.5 items-center w-max h-max rounded-2xl cursor-pointer">
+                            <div
+                              className="flex gap-2.5 items-center w-max h-max rounded-2xl cursor-pointer"
+                              onClick={handleWatch}
+                            >
                               <PlayIcon
                                 className="w-[24px] h-[24px] text-white fill-white bg-[#a35fe8] py-1.5 pl-1.5 pr-1 rounded-full"
                                 strokeWidth={0.8}

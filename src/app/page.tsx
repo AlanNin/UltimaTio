@@ -49,7 +49,7 @@ const Home = () => {
       {isLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
-            isAboveMediumScreens ? "my-[-56px]" : "my-[-44px]"
+            isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
           } `}
         >
           <Loading type="bars" />

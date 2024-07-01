@@ -11,19 +11,16 @@ type Props = {
 };
 
 const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
+  console.log(episode);
   const router = useRouter();
   const handleNavigateToWatch = () => {
-    const seasonNumber = selectedSeason.seasonNumber - 1;
+    const seasonNumber = selectedSeason.season_number - 1;
     const episodeNumber = episode.episodeNumber - 1;
     router.push(
-      "/watch/" +
-        content.id +
-        "/" +
-        content.seasons[seasonNumber].seasonNumber +
-        "/" +
-        content.seasons[seasonNumber].episodes[episodeNumber].episodeNumber
+      `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}&season=${seasonNumber}&episode=${episodeNumber}`
     );
   };
+
   const imageUrl =
     !episode.episodePoster ||
     episode.episodePoster.includes("questionmark") ||
