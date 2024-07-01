@@ -14,8 +14,8 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
   console.log(episode);
   const router = useRouter();
   const handleNavigateToWatch = () => {
-    const seasonNumber = selectedSeason.season_number - 1;
-    const episodeNumber = episode.episodeNumber - 1;
+    const seasonNumber = selectedSeason.season_number;
+    const episodeNumber = episode.episodeNumber;
     router.push(
       `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}&season=${seasonNumber}&episode=${episodeNumber}`
     );

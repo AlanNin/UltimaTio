@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const Watch = () => {
@@ -8,24 +8,20 @@ const Watch = () => {
   const category = searchParams.get("category");
   const season = searchParams.get("season");
   const episode = searchParams.get("episode");
-  const playerRef = useRef<HTMLIFrameElement>(null);
+  const playerRef = useRef<any>(null);
   const router = useRouter();
 
   let src;
 
   if (category === "movie") {
-    // src = `https://vidsrc.to/embed/movie/${tmdbid}`;
     src = `https://player.smashy.stream/movie/${tmdbid}`;
   } else {
-    // src = `https://vidsrc.to/embed/tv/${tmdbid}/${season}/${episode}`;
     src = `https://player.smashy.stream/tv/${tmdbid}?s=${season}&e=${episode}`;
   }
 
   const handlePlay = () => {
-    if (playerRef.current) {
-      if (playerRef.current && playerRef.current.contentWindow) {
-        playerRef.current.contentWindow.postMessage({ event: "play" }, "*");
-      }
+    if (playerRef.current && playerRef.current.contentWindow) {
+      playerRef.current.contentWindow.postMessage({ event: "play" }, "*");
     }
   };
 
@@ -40,7 +36,8 @@ const Watch = () => {
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
         onCanPlay={handlePlay}
-      ></iframe>
+        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts"
+      />
     </div>
   );
 };
