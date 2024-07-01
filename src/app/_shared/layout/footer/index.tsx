@@ -20,10 +20,11 @@ const Footer = () => {
     location.toLowerCase() === "/settings" ||
     location.toLowerCase() === "/login" ||
     location.toLowerCase() === "/signup" ||
-    /^\/watch\/.*/.test(location.toLowerCase())
+    location.toLowerCase() === "/watch"
   ) {
     return null;
   }
+
   return (
     <footer>
       {/* MOBILE MENU FOOTER MODAL */}
