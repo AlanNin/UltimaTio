@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const Watch = () => {
@@ -14,14 +14,18 @@ const Watch = () => {
   let src;
 
   if (category === "movie") {
+    // src = `https://vidsrc.to/embed/movie/${tmdbid}`;
     src = `https://player.smashy.stream/movie/${tmdbid}`;
   } else {
+    // src = `https://vidsrc.to/embed/tv/${tmdbid}/${season}/${episode}`;
     src = `https://player.smashy.stream/tv/${tmdbid}?s=${season}&e=${episode}`;
   }
 
   const handlePlay = () => {
-    if (playerRef.current && playerRef.current.contentWindow) {
-      playerRef.current.contentWindow.postMessage({ event: "play" }, "*");
+    if (playerRef.current) {
+      if (playerRef.current && playerRef.current.contentWindow) {
+        playerRef.current.contentWindow.postMessage({ event: "play" }, "*");
+      }
     }
   };
 
@@ -36,7 +40,7 @@ const Watch = () => {
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen
         onCanPlay={handlePlay}
-        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts"
+        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
       />
     </div>
   );
