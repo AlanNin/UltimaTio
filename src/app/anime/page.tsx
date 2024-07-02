@@ -6,10 +6,10 @@ import { useEffect, useState } from "react";
 import { Loading } from "~/utils/loading/loading";
 
 type Feed = {
-  airingTodayTV: any[];
-  onTheAirTV: any[];
-  popularTV: any[];
-  topRatedTV: any[];
+  airingTodayAnime: any[];
+  onTheAirAnime: any[];
+  popularAnime: any[];
+  topRatedAnime: any[];
 };
 
 const Home = () => {
@@ -17,10 +17,10 @@ const Home = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [feed, setFeed] = useState<Feed>({
-    airingTodayTV: [],
-    onTheAirTV: [],
-    popularTV: [],
-    topRatedTV: [],
+    airingTodayAnime: [],
+    onTheAirAnime: [],
+    popularAnime: [],
+    topRatedAnime: [],
   });
 
   useEffect(() => {
@@ -56,10 +56,18 @@ const Home = () => {
       ) : (
         <>
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
-            <Section text="Airing Today" content={feed.airingTodayTV} />
-            <Section text="On The Air" content={feed.onTheAirTV} />
-            <Section text="Popular" content={feed.popularTV} />
-            <Section text="Top Rated" content={feed.topRatedTV} />
+            {feed.airingTodayAnime.length > 0 && (
+              <Section text="Airing Today" content={feed.airingTodayAnime} />
+            )}
+            {feed.onTheAirAnime.length > 0 && (
+              <Section text="On The Air" content={feed.onTheAirAnime} />
+            )}
+            {feed.popularAnime.length > 0 && (
+              <Section text="Popular" content={feed.popularAnime} />
+            )}
+            {feed.topRatedAnime.length > 0 && (
+              <Section text="Top Rated" content={feed.topRatedAnime} />
+            )}
           </div>
         </>
       )}

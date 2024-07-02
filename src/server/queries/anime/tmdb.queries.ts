@@ -4,19 +4,21 @@ import axios from "axios";
 // GET FEED (ANIME)
 export async function getFeedAnime(): Promise<any | { error: string }> {
   try {
-    const airingTodayTV = await searchTMDBFeedAnime(
+    const airingTodayAnime = await searchTMDBFeedAnime(
       "tv/airing_today?language=en-US"
     );
 
-    const onTheAirTV = await searchTMDBFeedAnime(
+    const onTheAirAnime = await searchTMDBFeedAnime(
       "tv/on_the_air?language=en-US"
     );
 
-    const popularTV = await searchTMDBFeedAnime("tv/popular?language=en-US");
+    const popularAnime = await searchTMDBFeedAnime("tv/popular?language=en-US");
 
-    const topRatedTV = await searchTMDBFeedAnime("tv/top_rated?language=en-US");
+    const topRatedAnime = await searchTMDBFeedAnime(
+      "tv/top_rated?language=en-US"
+    );
 
-    return { airingTodayTV, onTheAirTV, popularTV, topRatedTV };
+    return { airingTodayAnime, onTheAirAnime, popularAnime, topRatedAnime };
   } catch (error) {
     console.error("Error fetching home feed:", error);
     return { error: "Error al obtener el feed de inicio" };

@@ -37,9 +37,10 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
         <Image
           src={imageUrl}
           alt="Episode Image"
-          className="w-[160px] h-[90px] object-cover rounded-md"
+          className="w-[160px] h-[90px] object-cover rounded-md bg-[rgba(181,181,181,0.1)]"
           width={160}
           height={90}
+          priority
           style={{
             backgroundPosition: "center",
           }}

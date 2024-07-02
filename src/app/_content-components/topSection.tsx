@@ -73,7 +73,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             <img
               src={content!.posterUrl}
               alt="Content Image"
-              className="w-[158px] h-auto bg-cover drop-shadow-lg rounded-sm"
+              className="w-[158px] h-[240px] bg-cover drop-shadow-lg rounded-sm"
             />
             <div className="flex flex-col gap-1 h-full px-4">
               {isAboveMobileScreens && (
@@ -100,7 +100,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
 
                   {/* TITLE */}
                   <h1
-                    className="text-4xl"
+                    className="text-4xl max-w-[750px]"
                     style={{
                       textShadow: "0px 10px 20px black",
                       wordWrap: "break-word",
@@ -112,26 +112,24 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               )}
 
               {/* DESCRIPTION */}
-              <p className="text-sm font-normal text-[#c2c2c2] max-w-[500px] mt-4">
-                {isAboveMobileScreens || showMore ? (
+              <p className="text-sm font-normal text-[#c2c2c2] max-w-[750px] mt-4">
+                {showMore ? (
                   <>
                     {content &&
                     content.description &&
                     content.description.length > 0 ? (
                       <>
-                        {isAboveMobileScreens
-                          ? content.description.slice(0, 520) + "..."
-                          : content.description}
-                        {!isAboveMobileScreens &&
-                          content.description.length > 150 && (
-                            <span
-                              className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0.5 px-2 font-light text-xs cursor-pointer ml-2 my-1"
-                              style={{ whiteSpace: "nowrap" }}
-                              onClick={() => setShowMore(!showMore)}
-                            >
-                              Show Less
-                            </span>
-                          )}
+                        {content.description}
+                        {content.description.length >
+                          (isAboveMobileScreens ? 520 : 150) && (
+                          <span
+                            className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0.5 px-2 font-light text-xs cursor-pointer ml-2 my-1"
+                            style={{ whiteSpace: "nowrap" }}
+                            onClick={() => setShowMore(!showMore)}
+                          >
+                            Show Less
+                          </span>
+                        )}
                       </>
                     ) : (
                       <span>No description found</span>
@@ -141,10 +139,15 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   <>
                     {content?.description && content.description.length > 0 ? (
                       <>
-                        {content.description.length > 150
-                          ? content.description.slice(0, 150) + "..."
+                        {content.description.length >
+                        (isAboveMobileScreens ? 520 : 150)
+                          ? content.description.slice(
+                              0,
+                              isAboveMobileScreens ? 520 : 150
+                            ) + "..."
                           : content.description}
-                        {content.description.length > 150 && (
+                        {content.description.length >
+                          (isAboveMobileScreens ? 520 : 150) && (
                           <span
                             className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0.5 px-2 font-light text-xs cursor-pointer ml-2 my-1"
                             style={{ whiteSpace: "nowrap" }}

@@ -56,10 +56,18 @@ const Home = () => {
       ) : (
         <>
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
-            <Section text="Trending" content={feed.trendingMovies} />
-            <Section text="Popular" content={feed.popularMovies} />
-            <Section text="Top Rated" content={feed.topRatedMovies} />
-            <Section text="Upcoming" content={feed.upcomingMovies} />
+            {feed.trendingMovies.length > 0 && (
+              <Section text="Trending" content={feed.trendingMovies} />
+            )}
+            {feed.popularMovies.length > 0 && (
+              <Section text="Popular" content={feed.popularMovies} />
+            )}
+            {feed.topRatedMovies.length > 0 && (
+              <Section text="Top Rated" content={feed.topRatedMovies} />
+            )}
+            {feed.upcomingMovies.length > 0 && (
+              <Section text="Upcoming" content={feed.upcomingMovies} />
+            )}
           </div>
         </>
       )}
