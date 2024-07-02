@@ -91,7 +91,7 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                           )}
                         </p>
                         <div className="flex items-center gap-5">
-                          <p className="text-6xl text-white">
+                          <p className="text-6xl text-white max-w-[750px]">
                             {content?.title}
                           </p>
                         </div>
@@ -122,9 +122,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                       </div>
 
                       <div className="mt-3 mb-10">
-                        <p className="text-lg font-normal text-[#c2c2c2] max-w-[650px]">
+                        <p className="text-lg font-normal text-[#c2c2c2] max-w-[750px]">
                           {content.description.length > 0
-                            ? truncateText(content.description, 380)
+                            ? truncateText(content.description, 480)
                             : "No description available"}
                         </p>
                       </div>

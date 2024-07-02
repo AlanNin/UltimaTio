@@ -14,21 +14,15 @@ export async function getHomeFeed(): Promise<any | { error: string }> {
     const upcomingMovies = await searchTMDBFeed(
       "movie/upcoming?language=en-US"
     );
+    const trendingTV = await searchTMDBFeed("trending/tv/week?language=en-US");
 
-    const airingTodayTV = await searchTMDBFeed(
-      "tv/airing_today?language=en-US"
-    );
-    const onTheAirTV = await searchTMDBFeed("tv/on_the_air?language=en-US");
     const popularTV = await searchTMDBFeed("tv/popular?language=en-US");
     const topRatedTV = await searchTMDBFeed("tv/top_rated?language=en-US");
 
-    // Combina todos los resultados en una sola estructura
     const homeFeed = {
       trending: shuffleArray([
         ...trendingMovies.slice(0, 8),
-        ...airingTodayTV
-          .filter((item: any) => item.category === "tv")
-          .slice(0, 8),
+        ...trendingTV.filter((item: any) => item.category === "tv").slice(0, 8),
       ]),
       popular: shuffleArray([
         ...popularMovies.slice(0, 8),
@@ -39,14 +33,6 @@ export async function getHomeFeed(): Promise<any | { error: string }> {
         ...topRatedTV.filter((item: any) => item.category === "tv").slice(0, 8),
       ]),
       upcoming: shuffleArray([...upcomingMovies]),
-      airingToday: shuffleArray([
-        ...airingTodayTV
-          .filter((item: any) => item.category === "tv")
-          .slice(0, 8),
-      ]),
-      onTheAir: shuffleArray([
-        ...onTheAirTV.filter((item: any) => item.category === "tv").slice(0, 8),
-      ]),
     };
 
     return homeFeed;
@@ -82,6 +68,10 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
                 },
               }
             );
+
+            if (content.overview.length === 0) {
+              return null;
+            }
 
             const studios = fullDataResponse.data.production_companies.map(
               (studio: any) => ({
