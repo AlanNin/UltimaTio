@@ -1,48 +1,114 @@
 "use client";
-import { useRef, useState } from "react";
+import useMediaQuery from "~/hooks/useMediaQuery";
+import { useState, useRef, useEffect } from "react";
+import { Loading } from "~/utils/loading/loading";
+import Player from "./_components/player";
+import ProviderButton from "./_components/providers/provider-button";
+import TopNav from "./_components/top-nav";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getContentMovie } from "~/server/queries/movie/tmdb.queries";
+import { getContentTV } from "~/server/queries/tv/tmdb.queries";
+import { getContentAnime } from "~/server/queries/anime/tmdb.queries";
+import EpisodeBox from "./_components/episodes/episode-box";
+import SeasonBox from "./_components/seasons/season-box";
+import Providers from "./_components/providers/providers";
+import Episodes from "./_components/episodes/episodes";
+import Seasons from "./_components/seasons/seasons";
+import Info from "./_components/info";
 
 const Watch = () => {
-  const searchParams = useSearchParams();
-  const tmdbid = searchParams.get("tmdbid");
-  const category = searchParams.get("category");
-  const season = searchParams.get("season");
-  const episode = searchParams.get("episode");
-  const playerRef = useRef<any>(null);
+  const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const providers = ["Smashy", "2Embed", "VidSrc", "VidSrcXYZ"];
+  const [currentProvider, setCurrentProvider] = useState<string>(providers[0]!);
+  const playerRef = useRef<HTMLIFrameElement>(null);
+  const searchParams = useSearchParams();
+  const category = searchParams.get("category");
+  const tmdbidParam = searchParams.get("tmdbid");
+  const seasonParam = searchParams.get("season");
+  const episodeParam = searchParams.get("episode");
+  const tmdbid = tmdbidParam ? parseInt(tmdbidParam) : null;
+  const currentSeason = seasonParam ? parseInt(seasonParam) : null;
+  const currentEpisode = episodeParam ? parseInt(episodeParam) : null;
+  const [content, setContent] = useState<any>({});
 
-  let src;
-
-  if (category === "movie") {
-    // src = `https://vidsrc.to/embed/movie/${tmdbid}`;
-    src = `https://player.smashy.stream/movie/${tmdbid}`;
-  } else {
-    // src = `https://vidsrc.to/embed/tv/${tmdbid}/${season}/${episode}`;
-    src = `https://player.smashy.stream/tv/${tmdbid}?s=${season}&e=${episode}`;
-  }
-
-  const handlePlay = () => {
-    if (playerRef.current) {
-      if (playerRef.current && playerRef.current.contentWindow) {
-        playerRef.current.contentWindow.postMessage({ event: "play" }, "*");
-      }
+  useEffect(() => {
+    if (!tmdbidParam) {
+      router.push("/");
+      return;
     }
-  };
+
+    const fetchContent = async () => {
+      setIsLoading(true);
+      try {
+        let response;
+        if (category === "movie") {
+          response = await getContentMovie(tmdbid!);
+        } else if (category === "tv") {
+          response = await getContentTV(tmdbid!);
+        } else if (category === "anime") {
+          response = await getContentAnime(tmdbid!);
+        }
+        setContent(response);
+      } catch (error) {
+        console.error("Error getting content -->:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, [tmdbidParam]);
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center">
-      <iframe
-        ref={playerRef}
-        src={src}
-        width="100%"
-        height="100%"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        onCanPlay={handlePlay}
-        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation"
-      />
-    </div>
+    <section
+      id="home"
+      className={`w-full h-full min-h-screen relative max-w-[854px] m-auto ${
+        isAboveMediumScreens ? "pb-10" : "pb-16"
+      }`}
+    >
+      {isLoading ? (
+        <div className={`flex w-full h-screen items-center justify-center`}>
+          <Loading type="bars" />
+        </div>
+      ) : (
+        <div className="h-full w-full flex flex-col items-center">
+          <TopNav />
+          <Player
+            tmdbid={tmdbid}
+            category={category}
+            playerRef={playerRef}
+            season={currentSeason}
+            episode={currentEpisode}
+            provider={currentProvider}
+          />
+          <Providers
+            providers={providers}
+            currentProvider={currentProvider}
+            setCurrentProvider={setCurrentProvider}
+          />
+          {(category === "tv" || category === "anime") && (
+            <div className="w-full flex flex-col gap-4">
+              <Episodes
+                content={content}
+                tmdbid={tmdbid!}
+                category={category}
+                currentSeason={currentSeason!}
+                currentEpisode={currentEpisode!}
+              />
+              <Seasons
+                content={content}
+                tmdbid={tmdbid!}
+                category={category}
+                currentSeason={currentSeason!}
+              />
+            </div>
+          )}
+          <Info content={content!} />
+        </div>
+      )}
+    </section>
   );
 };
 

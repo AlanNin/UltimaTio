@@ -50,7 +50,6 @@ const SearchCard: React.FC<Props> = ({ content }) => {
       >
         <img
           src={posterUrl}
-          alt="Content Image"
           loading="lazy"
           className={`object-cover cursor-pointer rounded-sm transition-all duration-500
             ${isAboveSmallTablet ? "w-[200px] h-[295px]" : "w-[95px] h-[147px]"}
@@ -59,6 +58,10 @@ const SearchCard: React.FC<Props> = ({ content }) => {
                  ? "scale-125 brightness-[0.25]"
                  : "scale-100 brightness-100"
              }`}
+          style={{
+            background:
+              "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
+          }}
         />
         <div
           className={`absolute inset-0 flex flex-col text-center items-center justify-center transition-opacity duration-500 ${

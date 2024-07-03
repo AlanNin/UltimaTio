@@ -50,6 +50,10 @@ const SimilarCard: React.FC<Props> = ({ similarContent }) => {
         } h-auto bg-cover`}
         width={isAboveSmallScreens ? 208.5 : 90}
         height={isAboveSmallScreens ? 208.5 : 90}
+        style={{
+          background:
+            "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
+        }}
       />
     </div>
   );

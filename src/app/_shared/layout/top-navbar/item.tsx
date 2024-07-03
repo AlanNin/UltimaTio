@@ -11,7 +11,6 @@ function Item({ name, route }: Props) {
   let location = usePathname();
   const router = useRouter();
 
-  console.log(location);
   useEffect(() => {
     if (!location) {
       location = window.location.pathname;

@@ -143,7 +143,7 @@ const TopNavbar = () => {
       <div
         className={`${flexBetween} ${
           isAboveMediumScreens ? "px-12 " : "px-6"
-        } fixed top-0 z-30 w-full gap-10 py-2.5 left-0 right-0 mx-auto bg-[#0F0F0F]
+        } max-w-[1920px] fixed top-0 z-30 w-full gap-10 py-2.5 left-0 right-0 mx-auto bg-[#0F0F0F]
         ${!isTopOfPage && "shadow-md border-b border-white border-opacity-5"}`}
       >
         <>

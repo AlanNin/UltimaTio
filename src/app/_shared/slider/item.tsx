@@ -49,6 +49,8 @@ const SliderCard: React.FC<Props> = ({ content }) => {
           style={{
             userSelect: "none",
             pointerEvents: "none",
+            background:
+              "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
           }}
         />
         <div

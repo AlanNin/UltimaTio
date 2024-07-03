@@ -28,11 +28,11 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
 
     if (isAMovie) {
       router.push(
-        `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}`
+        `/watch?tmdbid=${content.tmdbid}&category=${content.category}`
       );
     } else {
       router.push(
-        `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}&season=${content.seasons[0].seasonNumber}&episode=${content.seasons[0].episodes[0].episodeNumber}`
+        `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=1&episode=1`
       );
     }
   };
@@ -74,6 +74,10 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               src={content!.posterUrl}
               alt="Content Image"
               className="w-[158px] h-[240px] bg-cover drop-shadow-lg rounded-sm"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
+              }}
             />
             <div className="flex flex-col gap-1 h-full px-4">
               {isAboveMobileScreens && (

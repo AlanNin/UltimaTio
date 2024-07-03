@@ -17,7 +17,7 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
     const seasonNumber = selectedSeason.season_number;
     const episodeNumber = episode.episodeNumber;
     router.push(
-      `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}&season=${seasonNumber}&episode=${episodeNumber}`
+      `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=${seasonNumber}&episode=${episodeNumber}`
     );
   };
 
@@ -37,11 +37,14 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
         <Image
           src={imageUrl}
           alt="Episode Image"
-          className="w-[160px] h-[90px] object-cover rounded-md bg-[rgba(181,181,181,0.1)]"
+          className="w-[160px] h-[90px] object-cover rounded-md"
           width={160}
           height={90}
           priority
+          unoptimized
           style={{
+            background:
+              "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
             backgroundPosition: "center",
           }}
         />

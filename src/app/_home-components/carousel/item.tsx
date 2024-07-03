@@ -35,12 +35,12 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
     if (content.category === "movie") {
       // HANDLE IF MOVIE
       router.push(
-        `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}`
+        `/watch?tmdbid=${content.tmdbid}&category=${content.category}`
       );
     } else {
       // HANDLE IF TV
       router.push(
-        `/watch?title=${content.title}&tmdbid=${content.tmdbid}&category=${content.category}&season=1&episode=1`
+        `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=1&episode=1`
       );
     }
   };

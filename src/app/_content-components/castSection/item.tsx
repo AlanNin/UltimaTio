@@ -23,6 +23,10 @@ const CastItem: React.FC<Props> = ({ cast }) => {
         width={92}
         height={92}
         className={`rounded-full min-w-[92px] min-h-[92px] w-[92px] h-[92px] object-cover hover:p-[3px] transition-all duration-200 `}
+        style={{
+          background:
+            "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
+        }}
       />
       <h1 className="text-xs font-light text-[#dddddd]">{cast.name}</h1>
     </div>
