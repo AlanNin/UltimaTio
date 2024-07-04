@@ -30,7 +30,7 @@ const Providers: React.FC<Props> = ({
         {isAboveMediumScreens ? (
           <>
             You are watching this media through the {currentProvider} provider
-            (If current server doesn't work please try other servers beside)
+            (If current server doesn't work please try another server)
           </>
         ) : (
           <>
