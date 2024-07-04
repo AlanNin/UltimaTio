@@ -1,10 +1,10 @@
 "use client";
 import {
   HomeIcon,
+  QueueListIcon,
   BookmarkIcon,
   PaperAirplaneIcon,
   MagnifyingGlassIcon,
-  Cog6ToothIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
@@ -34,7 +34,7 @@ const TopNav: React.FC<Props> = ({}) => {
           router.push("/");
         }}
       />
-      <BookmarkIcon
+      <QueueListIcon
         width={36}
         height={36}
         strokeWidth={1}

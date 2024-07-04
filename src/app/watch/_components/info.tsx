@@ -65,10 +65,10 @@ const Info: React.FC<Props> = ({ content }) => {
           <p className="font-light text-xs text-white capitalize bg-[rgba(71,12,130)] py-0.5 px-2">
             {category === "tv" ? "TV" : category}
           </p>
-          {category === "tv" && category === "anime" && seasonsQuantity > 0 && (
+          {(category === "tv" || category === "anime") && (
             <div className="flex gap-1 items-center bg-[rgba(173,173,173,0.2)] py-0.5 px-2">
-              <p className="font-light text-xs text-white capitalize ">
-                {seasonsQuantity} Seasons
+              <p className="font-light text-xs text-white capitalize">
+                {seasonsQuantity} {seasonsQuantity === 1 ? "Season" : "Seasons"}
               </p>
             </div>
           )}
