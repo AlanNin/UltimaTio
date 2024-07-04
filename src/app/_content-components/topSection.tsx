@@ -104,7 +104,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
 
                   {/* TITLE */}
                   <h1
-                    className="text-4xl max-w-[750px]"
+                    className="text-4xl max-w-[550px]"
                     style={{
                       textShadow: "0px 10px 20px black",
                       wordWrap: "break-word",
@@ -116,7 +116,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               )}
 
               {/* DESCRIPTION */}
-              <p className="text-sm font-normal text-[#c2c2c2] max-w-[750px] mt-4">
+              <p className="text-sm font-normal text-[#c2c2c2] max-w-[550px] mt-4">
                 {showMore ? (
                   <>
                     {content &&
