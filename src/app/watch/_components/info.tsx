@@ -5,10 +5,13 @@ import useMediaQuery from "~/hooks/useMediaQuery";
 
 type Props = {
   content: any;
+  season?: any;
+  episode?: any;
 };
 
-const Info: React.FC<Props> = ({ content }) => {
+const Info: React.FC<Props> = ({ content, season, episode }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
+  const poster = content.posterUrl;
   const title = content.title;
   const category = content.category;
   let validSeasons;
@@ -23,9 +26,16 @@ const Info: React.FC<Props> = ({ content }) => {
     validSeasons = null;
     seasonsQuantity = null;
   }
+  const description =
+    content.category === "movie"
+      ? content.description
+      : content.seasons[season - 1].season.episodes[episode - 1].overview;
+  console.log(content.seasons[season - 1].season.episodes[episode - 1]);
 
-  const description = content.description;
-  const rating = content.rating;
+  const rating =
+    content.category === "movie"
+      ? content.rating
+      : content.seasons[season - 1].season.episodes[episode - 1].rating;
 
   const router = useRouter();
 
@@ -33,7 +43,6 @@ const Info: React.FC<Props> = ({ content }) => {
     router.push(`${content.category}/${content.tmdbid}`);
   };
 
-  console.log(content);
   return (
     <div
       className={`w-full flex gap-6 mt-2 flex-wrap justify-center ${
@@ -41,7 +50,7 @@ const Info: React.FC<Props> = ({ content }) => {
       }`}
     >
       <img
-        src={content.posterUrl}
+        src={poster}
         alt="Poster"
         className="w-[180px] h-auto object-cover cursor-pointer"
         onClick={handleNavigateToContent}
@@ -55,7 +64,11 @@ const Info: React.FC<Props> = ({ content }) => {
           className="font-normal text-lg cursor-pointer"
           onClick={handleNavigateToContent}
         >
-          {title}
+          {title}{" "}
+          {category !== "movie" &&
+            season &&
+            episode &&
+            `S${season}:E${episode}`}
         </h1>
         <div
           className={`flex gap-2 items-center mb-2 ${

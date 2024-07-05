@@ -105,7 +105,11 @@ const Watch = () => {
               />
             </div>
           )}
-          <Info content={content!} />
+          <Info
+            content={content!}
+            season={currentSeason}
+            episode={currentEpisode}
+          />
         </div>
       )}
     </section>
