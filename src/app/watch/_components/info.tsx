@@ -91,7 +91,9 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
             isAboveMediumScreens && "max-h-[100px] overflow-y-auto"
           }`}
         >
-          {description}
+          {description && description.length > 0
+            ? description
+            : "Description is not available"}
         </p>
         <div
           className={`flex gap-2 items-center mt-4 ${
