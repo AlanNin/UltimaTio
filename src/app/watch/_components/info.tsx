@@ -96,7 +96,11 @@ const Info: React.FC<Props> = ({ content }) => {
           }`}
         >
           <span className="font-light text-xs text-[#adadad]"> Genres: </span>
-          <div className="flex gap-2 flex-wrap items-center justify-center">
+          <div
+            className={`flex gap-2 flex-wrap items-center ${
+              !isAboveMediumScreens && "justify-center "
+            }`}
+          >
             {content?.ContentGenre?.map((genre: any, _index: number) => (
               <span
                 key={genre.id}
@@ -115,7 +119,11 @@ const Info: React.FC<Props> = ({ content }) => {
           }`}
         >
           <span className="font-light text-xs text-[#adadad]"> Studios: </span>
-          <div className="flex gap-2 flex-wrap items-center justify-center">
+          <div
+            className={`flex gap-2 flex-wrap items-center ${
+              !isAboveMediumScreens && "justify-center "
+            }`}
+          >
             {content?.ContentStudio?.map((studio: any, _index: number) => (
               <span
                 key={studio.id}

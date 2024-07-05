@@ -11,7 +11,6 @@ type Props = {
 };
 
 const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
-  console.log(episode);
   const router = useRouter();
   const handleNavigateToWatch = () => {
     const seasonNumber = selectedSeason.season_number;
@@ -20,6 +19,12 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
       `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=${seasonNumber}&episode=${episodeNumber}`
     );
   };
+
+  if (new Date(episode.airDate) > new Date()) {
+    return null;
+  }
+
+  console.log(episode);
 
   const imageUrl =
     !episode.episodePoster ||
@@ -60,10 +65,8 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
           </h1>
         </div>
       </div>
-      <h1 className="text-sm font-light text-[#c2c2c2] h-full flex items-center">
-        {episode.overview
-          ? truncateText(episode.overview, 70)
-          : "No overview found for this episode"}
+      <h1 className="text-sm font-light text-[#c2c2c2] h-full flex max-h-[100px] overflow-y-auto ">
+        {episode.overview}
       </h1>
     </div>
   );
