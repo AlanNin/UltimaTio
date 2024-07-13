@@ -18,7 +18,7 @@ const Episodes: React.FC<Props> = ({
   currentSeason,
   currentEpisode,
 }) => {
-  const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
+  const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
 
   return (
     <div

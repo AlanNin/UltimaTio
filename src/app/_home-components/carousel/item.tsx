@@ -19,11 +19,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
 
   const handleNavigate = () => {
     if (content.category === "movie") {
-      // HANDLE IF MOVIE
       router.push(`/movie/${content.tmdbid}`);
     }
     if (content.category === "tv") {
-      // HANDLE IF TV
       router.push(`/tv/${content.tmdbid}`);
     }
     if (content.category === "anime") {
@@ -33,12 +31,10 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
 
   const handleWatch = () => {
     if (content.category === "movie") {
-      // HANDLE IF MOVIE
       router.push(
         `/watch?tmdbid=${content.tmdbid}&category=${content.category}`
       );
     } else {
-      // HANDLE IF TV
       router.push(
         `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=1&episode=1`
       );
@@ -91,7 +87,7 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                           )}
                         </p>
                         <div className="flex items-center gap-5">
-                          <p className="text-6xl text-white max-w-[750px]">
+                          <p className="text-6xl text-white max-w-[1150px]">
                             {content?.title}
                           </p>
                         </div>
@@ -124,7 +120,7 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                       <div className="mt-3 mb-10">
                         <p className="text-lg font-normal text-[#c2c2c2] max-w-[750px]">
                           {content.description.length > 0
-                            ? truncateText(content.description, 480)
+                            ? truncateText(content.description, 440)
                             : "No description available"}
                         </p>
                       </div>
@@ -217,7 +213,7 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                         <div className="mt-3 mb-10">
                           <p className="text-md font-normal text-[#c2c2c2] max-w-[550px]">
                             {content.description.length > 0
-                              ? truncateText(content.description, 380)
+                              ? truncateText(content.description, 210)
                               : "No description available"}
                           </p>
                         </div>
@@ -354,7 +350,7 @@ function truncateText(text: string, maxLength: number) {
 function formatDuration(seconds: number) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-  return `${hours}h ${minutes}m`;
+  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
 
 export default CarouselCard;

@@ -10,27 +10,15 @@ type Props = {
 };
 
 const Info: React.FC<Props> = ({ content, season, episode }) => {
-  const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
+  const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   const poster = content.posterUrl;
   const title = content.title;
   const category = content.category;
-  let validSeasons;
-  let seasonsQuantity;
-  if (category === "tv" || category === "anime") {
-    validSeasons = content.seasons.filter(
-      (season: any) =>
-        season.season.air_date !== null && season.season.name !== "Specials"
-    );
-    seasonsQuantity = validSeasons.length;
-  } else {
-    validSeasons = null;
-    seasonsQuantity = null;
-  }
+
   const description =
     content.category === "movie"
       ? content.description
       : content.seasons[season - 1].season.episodes[episode - 1].overview;
-  console.log(content.seasons[season - 1].season.episodes[episode - 1]);
 
   const rating =
     content.category === "movie"
@@ -38,15 +26,14 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
       : content.seasons[season - 1].season.episodes[episode - 1].rating;
 
   const router = useRouter();
-
   const handleNavigateToContent = () => {
     router.push(`${content.category}/${content.tmdbid}`);
   };
 
   return (
     <div
-      className={`w-full flex gap-6 mt-2 flex-wrap justify-center ${
-        !isAboveMediumScreens && "px-4"
+      className={`w-full flex gap-6 mt-2 flex-wrap ${
+        !isAboveMediumScreens && "px-4 justify-center"
       }`}
     >
       <img
@@ -64,11 +51,7 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
           className="font-normal text-lg cursor-pointer"
           onClick={handleNavigateToContent}
         >
-          {title}{" "}
-          {category !== "movie" &&
-            season &&
-            episode &&
-            `S${season}:E${episode}`}
+          {title}
         </h1>
         <div
           className={`flex gap-2 items-center mb-2 ${
@@ -79,11 +62,18 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
             {category === "tv" ? "TV" : category}
           </p>
           {(category === "tv" || category === "anime") && (
-            <div className="flex gap-1 items-center bg-[rgba(173,173,173,0.2)] py-0.5 px-2">
-              <p className="font-light text-xs text-white capitalize">
-                {seasonsQuantity} {seasonsQuantity === 1 ? "Season" : "Seasons"}
-              </p>
-            </div>
+            <>
+              <div className="flex gap-1 items-center bg-[rgba(173,173,173,0.2)] py-0.5 px-2">
+                <p className="font-light text-xs text-white capitalize">
+                  Season {season}
+                </p>
+              </div>
+              <div className="flex gap-1 items-center bg-[rgba(173,173,173,0.2)] py-0.5 px-2">
+                <p className="font-light text-xs text-white capitalize">
+                  Episode {episode}
+                </p>
+              </div>
+            </>
           )}
         </div>
         <p

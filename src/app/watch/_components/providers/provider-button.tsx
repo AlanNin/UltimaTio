@@ -13,7 +13,7 @@ const ProviderButton: React.FC<Props> = ({
   currentProvider,
   setProvider,
 }) => {
-  const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
+  const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   return (
     <div
       className={`relative cursor-pointer h-max w-max py-1.5 px-2.5 rounded-sm transition-colors duration-200 ${

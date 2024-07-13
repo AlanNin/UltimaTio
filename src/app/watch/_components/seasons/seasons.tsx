@@ -16,7 +16,7 @@ const Seasons: React.FC<Props> = ({
   category,
   currentSeason,
 }) => {
-  const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
+  const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   return (
     <div
       className={`w-full flex flex-col gap-3 mb-8 ${

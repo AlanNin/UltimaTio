@@ -14,7 +14,7 @@ const Providers: React.FC<Props> = ({
   currentProvider,
   setCurrentProvider,
 }) => {
-  const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
+  const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
 
   return (
     <div

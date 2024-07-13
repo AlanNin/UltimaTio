@@ -3,14 +3,11 @@ import useMediaQuery from "~/hooks/useMediaQuery";
 import { useState, useRef, useEffect } from "react";
 import { Loading } from "~/utils/loading/loading";
 import Player from "./_components/player";
-import ProviderButton from "./_components/providers/provider-button";
 import TopNav from "./_components/top-nav";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getContentMovie } from "~/server/queries/movie/tmdb.queries";
 import { getContentTV } from "~/server/queries/tv/tmdb.queries";
 import { getContentAnime } from "~/server/queries/anime/tmdb.queries";
-import EpisodeBox from "./_components/episodes/episode-box";
-import SeasonBox from "./_components/seasons/season-box";
 import Providers from "./_components/providers/providers";
 import Episodes from "./_components/episodes/episodes";
 import Seasons from "./_components/seasons/seasons";
@@ -20,9 +17,9 @@ const Watch = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const providers = ["Smashy", "2Embed", "VidSrc", "VidSrcXYZ"];
+  const providers = ["Smashy", "VidSrcPro"];
+  // const providers = ["Smashy", "VidSrcPro", "2Embed", "VidSrc"];
   const [currentProvider, setCurrentProvider] = useState<string>(providers[0]!);
-  const playerRef = useRef<HTMLIFrameElement>(null);
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
   const tmdbidParam = searchParams.get("tmdbid");
@@ -78,7 +75,6 @@ const Watch = () => {
           <Player
             tmdbid={tmdbid}
             category={category}
-            playerRef={playerRef}
             season={currentSeason}
             episode={currentEpisode}
             provider={currentProvider}

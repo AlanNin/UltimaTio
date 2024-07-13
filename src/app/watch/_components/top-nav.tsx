@@ -15,7 +15,7 @@ import useMediaQuery from "~/hooks/useMediaQuery";
 type Props = {};
 
 const TopNav: React.FC<Props> = ({}) => {
-  const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
+  const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   const { currentProfile } = useSelector((state: any) => state.profile);
   const router = useRouter();
   return (

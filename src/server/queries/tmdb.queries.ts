@@ -15,22 +15,21 @@ export async function getHomeFeed(): Promise<any | { error: string }> {
       "movie/upcoming?language=en-US"
     );
     const trendingTV = await searchTMDBFeed("trending/tv/week?language=en-US");
-
     const popularTV = await searchTMDBFeed("tv/popular?language=en-US");
     const topRatedTV = await searchTMDBFeed("tv/top_rated?language=en-US");
 
     const homeFeed = {
       trending: shuffleArray([
         ...trendingMovies.slice(0, 8),
-        ...trendingTV.filter((item: any) => item.category === "tv").slice(0, 8),
+        ...trendingTV.slice(0, 8),
       ]),
       popular: shuffleArray([
         ...popularMovies.slice(0, 8),
-        ...popularTV.filter((item: any) => item.category === "tv").slice(0, 8),
+        ...popularTV.slice(0, 8),
       ]),
       topRated: shuffleArray([
         ...topRatedMovies.slice(0, 8),
-        ...topRatedTV.filter((item: any) => item.category === "tv").slice(0, 8),
+        ...topRatedTV.slice(0, 8),
       ]),
       upcoming: shuffleArray([...upcomingMovies]),
     };
@@ -129,7 +128,15 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
               category: contentType,
             };
           } else if (url.includes("tv")) {
-            contentType = "tv";
+            const AnimeGenreId = 16;
+            const AnimeCountry = "JP";
+            const isAnime =
+              content.origin_country &&
+              content.origin_country.includes(AnimeCountry) &&
+              content.genre_ids &&
+              content.genre_ids.includes(AnimeGenreId);
+
+            contentType = isAnime ? "anime" : "tv";
             const fullDataResponse = await axios.get(
               `${baseUrl}tv/${content.id}`,
               {
@@ -205,9 +212,8 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
               tmdbid: content.id,
               date: new Date(fullDataResponse.data.first_air_date),
               duration:
-                fullDataResponse.data.episode_run_time.length > 0
-                  ? fullDataResponse.data.episode_run_time[0] * 60
-                  : null,
+                fullDataResponse.data.episode_run_time * 60 ||
+                fullDataResponse.data.last_episode_to_air.runtime * 60,
               rating: Math.round(content.vote_average * 10) / 10,
               description: content.overview,
               ContentStudio,
@@ -234,13 +240,19 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
 
 // SHUFFLE ARRAY
 function shuffleArray(array: any[]): any[] {
-  const shuffledArray = [...array]; // Copia el array original para no modificarlo directamente
-  for (let i = shuffledArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1)); // Genera un índice aleatorio entre 0 e i (inclusive)
-    // Intercambia los elementos en las posiciones i y j
-    [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+  const interleavedArray: any[] = [];
+  const halfLength = Math.ceil(array.length / 2);
+
+  for (let i = 0; i < halfLength; i++) {
+    if (i < array.length) {
+      interleavedArray.push(array[i]);
+    }
+    if (i + halfLength < array.length) {
+      interleavedArray.push(array[i + halfLength]);
+    }
   }
-  return shuffledArray;
+
+  return interleavedArray;
 }
 
 // HANDLE SEARCH
@@ -262,7 +274,7 @@ export async function handleSearch(query: string): Promise<any> {
           api_key: apiKey,
           query,
           language,
-          page, // Specify the page number
+          page,
         },
       });
 
@@ -281,18 +293,13 @@ export async function handleSearch(query: string): Promise<any> {
     const responseData = await Promise.all(
       searchResults.map(async (content: any) => {
         try {
-          let category = content.media_type; // Default category based on media type
+          const isAnime =
+            content.origin_country &&
+            content.origin_country.includes(AnimeCountry) &&
+            content.genre_ids &&
+            content.genre_ids.includes(AnimeGenreId);
 
-          if (content.media_type === "movie" || content.media_type === "tv") {
-            // Determine if it's anime based on conditions
-            const isAnime =
-              content.origin_country &&
-              content.origin_country.includes(AnimeCountry) &&
-              content.genre_ids &&
-              content.genre_ids.includes(AnimeGenreId);
-
-            category = isAnime ? "anime" : content.media_type;
-          }
+          const category = isAnime ? "anime" : content.media_type;
 
           return {
             landscapeUrl: content.backdrop_path
