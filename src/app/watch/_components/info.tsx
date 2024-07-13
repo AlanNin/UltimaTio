@@ -7,9 +7,15 @@ type Props = {
   content: any;
   season?: any;
   episode?: any;
+  saveProfileProgress: any;
 };
 
-const Info: React.FC<Props> = ({ content, season, episode }) => {
+const Info: React.FC<Props> = ({
+  content,
+  season,
+  episode,
+  saveProfileProgress,
+}) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   const poster = content.posterUrl;
   const title = content.title;
@@ -27,7 +33,9 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
 
   const router = useRouter();
   const handleNavigateToContent = () => {
-    router.push(`${content.category}/${content.tmdbid}`);
+    saveProfileProgress(() => {
+      router.push(`${content.category}/${content.tmdbid}`);
+    });
   };
 
   return (
@@ -48,7 +56,9 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
         }`}
       >
         <h1
-          className="font-normal text-lg cursor-pointer"
+          className={`font-normal text-lg cursor-pointer w-fit ${
+            !isAboveMediumScreens && "self-center"
+          }`}
           onClick={handleNavigateToContent}
         >
           {title}

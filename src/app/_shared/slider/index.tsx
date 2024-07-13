@@ -37,9 +37,10 @@ const responsive = {
 
 type Props = {
   content: any;
+  history?: boolean;
 };
 
-const Slider: React.FC<Props> = ({ content }) => {
+const Slider: React.FC<Props> = ({ content, history }) => {
   const isAboveTabletScreens = useMediaQuery("(min-width: 680px)");
 
   const filteredContent = content.filter(
@@ -86,7 +87,7 @@ const Slider: React.FC<Props> = ({ content }) => {
         }
       >
         {filteredContent.map((content: any, index: number) => (
-          <SliderCard key={index} content={content} />
+          <SliderCard key={index} content={content} history={history} />
         ))}
       </Carousel>
     </section>

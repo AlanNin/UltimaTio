@@ -5,8 +5,11 @@ import Section from "./_shared/section/section";
 import { getHomeFeed } from "~/server/queries/tmdb.queries";
 import { useEffect, useState } from "react";
 import { Loading } from "~/utils/loading/loading";
+import { getProfileHistory } from "~/server/queries/contentProfile.queries";
+import { useSelector } from "react-redux";
 
 type Feed = {
+  history?: any[];
   trending: any[];
   popular: any[];
   topRated: any[];
@@ -15,9 +18,10 @@ type Feed = {
 
 const Home = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
-
+  const { currentProfile } = useSelector((state: any) => state.profile);
   const [isLoading, setIsLoading] = useState(true);
   const [feed, setFeed] = useState<Feed>({
+    history: [],
     trending: [],
     popular: [],
     topRated: [],
@@ -29,7 +33,21 @@ const Home = () => {
       setIsLoading(true);
       try {
         const response = await getHomeFeed();
-        setFeed(response);
+        setFeed({
+          trending: response.trending,
+          popular: response.popular,
+          topRated: response.topRated,
+          upcoming: response.upcoming,
+          history: [],
+        });
+
+        if (currentProfile) {
+          const history = await getProfileHistory();
+          setFeed((prevFeed) => ({
+            ...prevFeed,
+            history: history || [],
+          }));
+        }
       } catch (error) {
         console.error("Error fetching home feed:", error);
       } finally {
@@ -37,7 +55,7 @@ const Home = () => {
       }
     };
     fetchFeed();
-  }, []);
+  }, [currentProfile]);
 
   return (
     <section
@@ -58,6 +76,13 @@ const Home = () => {
         <>
           <HomeCarousel content={feed.trending} />
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
+            {feed.history && feed.history.length > 0 && (
+              <Section
+                text="Continue Watching"
+                content={feed.history}
+                history={true}
+              />
+            )}
             <Section text="Popular" content={feed.popular} />
             <Section text="Top Rated" content={feed.topRated} />
             <Section text="Upcoming" content={feed.upcoming} />

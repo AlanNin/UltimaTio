@@ -6,12 +6,14 @@ type Props = {
   providerName: string;
   currentProvider: string;
   setProvider: (provider: string) => void;
+  saveProfileProgress: any;
 };
 
 const ProviderButton: React.FC<Props> = ({
   providerName,
   currentProvider,
   setProvider,
+  saveProfileProgress,
 }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   return (
@@ -25,7 +27,9 @@ const ProviderButton: React.FC<Props> = ({
       }`}
       onClick={() => {
         if (providerName !== currentProvider) {
-          setProvider(providerName);
+          saveProfileProgress(() => {
+            setProvider(providerName);
+          });
         }
       }}
     >

@@ -41,8 +41,8 @@ const SearchCard: React.FC<Props> = ({ content }) => {
   return (
     <div
       className="flex w-max h-max"
-      onMouseEnter={() => (isAboveSmallTablet ? setIsHovered(true) : null)}
-      onMouseLeave={() => (isAboveSmallTablet ? setIsHovered(false) : null)}
+      // onMouseEnter={() => (isAboveSmallTablet ? setIsHovered(true) : null)}
+      // onMouseLeave={() => (isAboveSmallTablet ? setIsHovered(false) : null)}
     >
       <div
         className="h-full w-max overflow-hidden relative rounded-sm cursor-pointer"

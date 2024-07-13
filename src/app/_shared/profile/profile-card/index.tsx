@@ -70,10 +70,13 @@ const CardProfile: React.FC<Props> = ({
           )}
           <img
             src={profile?.imgUrl}
-            alt="Profile Picture"
             className={`rounded-md w-[120px] h-[120px] object-cover ${
               !isAboveMediumScreens && "w-[90px] h-[90px]"
             }`}
+            style={{
+              background:
+                "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
+            }}
           />
           <h1 className="font-medium text-sm text-[#c9c9c9] max-w-28 overflow-hidden whitespace-nowrap overflow-ellipsis">
             {profile?.name}

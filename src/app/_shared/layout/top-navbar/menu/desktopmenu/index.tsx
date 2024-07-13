@@ -48,7 +48,7 @@ const DesktopMenu: React.FC<Props> = ({
   return (
     <div
       ref={desktopMenuRef}
-      className={`fixed flex flex-col gap-1 py-2.5 z-30 ${
+      className={`absolute flex flex-col gap-1 py-2.5 z-30  ${
         currentProfile ? "right-[40px] top-[45px]" : "right-[145px] top-[40px]"
       } rounded-lg shadow-[0_5px_60px_-12px_rgba(0,0,0,0.3)] bg-[#1c1c1c] text-white`}
     >

@@ -113,15 +113,16 @@ model Library {
 // BRIDGE TABLE CONTENT_LIBRARY
 model ProfileContent {
   id         String @id @default(uuid())
-  tmdb_id  Int
+  content_id  String
   profile_id String
-  season Int
-  espisode Int
+  season Int?
+  episode Int?
   watchProgress Decimal
+  duration Decimal
   likeStatus Int
 
   // RELATIONSHIP WITH CONTENT AND GENRE
-  content  Content  @relation(fields: [tmdb_id ], references: [tmdb_id])
+  content  Content  @relation(fields: [content_id ], references: [id])
   profile Profile @relation(fields: [profile_id], references: [id])
   
 
@@ -135,11 +136,11 @@ model ProfileContent {
 // BRIDGE TABLE CONTENT_LIBRARY
 model LibraryContent {
   id         String @id @default(uuid())
-  tmdb_id  Int
+  content_id  String
   library_id String
 
   // RELATIONSHIP WITH CONTENT AND GENRE
-  content  Content  @relation(fields: [tmdb_id ], references: [tmdb_id])
+  content  Content  @relation(fields: [content_id ], references: [id])
   library Library @relation(fields: [library_id], references: [id])
 
   // CREATED AT & UPDATED AT
@@ -151,7 +152,9 @@ model LibraryContent {
 
 // LIBRARY MODEL
 model Content {
-  tmdb_id              Int @id
+  id                   String @id @default(uuid())
+  tmdb_id              Int
+  category             String
 
   // CREATED AT & UPDATED AT
   created_at DateTime @default(now())

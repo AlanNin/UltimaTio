@@ -7,12 +7,14 @@ type Props = {
   providers: any;
   currentProvider: any;
   setCurrentProvider: any;
+  saveProfileProgress: any;
 };
 
 const Providers: React.FC<Props> = ({
   providers,
   currentProvider,
   setCurrentProvider,
+  saveProfileProgress,
 }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
 
@@ -51,6 +53,7 @@ const Providers: React.FC<Props> = ({
             providerName={provider}
             currentProvider={currentProvider}
             setProvider={setCurrentProvider}
+            saveProfileProgress={saveProfileProgress}
           />
         ))}
       </div>

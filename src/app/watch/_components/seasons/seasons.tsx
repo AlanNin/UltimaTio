@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import SeasonBox from "./season-box";
 
@@ -8,6 +8,7 @@ type Props = {
   tmdbid: any;
   category: any;
   currentSeason: any;
+  saveProfileProgress: any;
 };
 
 const Seasons: React.FC<Props> = ({
@@ -15,6 +16,7 @@ const Seasons: React.FC<Props> = ({
   tmdbid,
   category,
   currentSeason,
+  saveProfileProgress,
 }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   return (
@@ -36,6 +38,7 @@ const Seasons: React.FC<Props> = ({
             category={category}
             currentSeason={currentSeason!}
             season={season.season}
+            saveProfileProgress={saveProfileProgress}
           />
         ))}
       </div>

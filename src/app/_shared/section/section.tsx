@@ -4,9 +4,10 @@ import Slider from "../slider";
 type Props = {
   text: string;
   content: any;
+  history?: boolean;
 };
 
-const Section: React.FC<Props> = ({ text, content }) => {
+const Section: React.FC<Props> = ({ text, content, history }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
   return (
@@ -23,7 +24,7 @@ const Section: React.FC<Props> = ({ text, content }) => {
         {text}
       </h1>
       <div className="w-full">
-        <Slider content={content} />
+        <Slider content={content} history={history} />
       </div>
     </div>
   );

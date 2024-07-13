@@ -6,13 +6,20 @@ import useMediaQuery from "~/hooks/useMediaQuery";
 
 type Props = {
   content: any;
+  history?: boolean;
 };
 
-const SliderCard: React.FC<Props> = ({ content }) => {
+const SliderCard: React.FC<Props> = ({ content, history }) => {
   const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
   const isAboveSmallTablet = useMediaQuery("(min-width: 650px)");
+  const watchPercentage = history
+    ? Math.floor((content.watchProgress / content.duration) * 100)
+    : null;
 
+  if (history) {
+    console.log(watchPercentage);
+  }
   const handleNavigate = () => {
     if (content.category === "movie") {
       // HANDLE IF MOVIE
@@ -27,6 +34,18 @@ const SliderCard: React.FC<Props> = ({ content }) => {
     }
   };
 
+  const handleNavigateHistory = () => {
+    if (content.category === "movie") {
+      router.push(
+        `/watch?tmdbid=${content.tmdbid}&category=${content.category}`
+      );
+    } else {
+      router.push(
+        `/watch?tmdbid=${content.content.tmdb_id}&category=${content.category}&season=${content.season}&episode=${content.episode}`
+      );
+    }
+  };
+
   return (
     <div
       className="flex w-full h-full pr-4"
@@ -35,7 +54,7 @@ const SliderCard: React.FC<Props> = ({ content }) => {
     >
       <div
         className="h-full w-max overflow-hidden relative rounded-sm cursor-pointer"
-        onClick={handleNavigate}
+        onClick={history ? handleNavigateHistory : handleNavigate}
       >
         <img
           src={content?.posterUrl}
@@ -66,6 +85,16 @@ const SliderCard: React.FC<Props> = ({ content }) => {
             </p>
           </div>
         </div>
+        {history && (
+          <div className={`absolute bottom-2 left-0 right-0 h-1.5 w-full px-2`}>
+            <div className="h-full w-full rounded-md bg-[rgba(255,255,255,0.35)]">
+              <div
+                className={`rounded-md bg-[#7c26d4] h-full`}
+                style={{ width: watchPercentage + "%" }}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

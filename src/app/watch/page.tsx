@@ -12,10 +12,13 @@ import Providers from "./_components/providers/providers";
 import Episodes from "./_components/episodes/episodes";
 import Seasons from "./_components/seasons/seasons";
 import Info from "./_components/info";
+import { useSelector } from "react-redux";
+import { saveProfileContentProgress } from "~/server/queries/contentProfile.queries";
 
 const Watch = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
   const router = useRouter();
+  const { currentProfile } = useSelector((state: any) => state.profile);
   const [isLoading, setIsLoading] = useState(true);
   const providers = ["Smashy", "VidSrcPro"];
   // const providers = ["Smashy", "VidSrcPro", "2Embed", "VidSrc"];
@@ -29,6 +32,9 @@ const Watch = () => {
   const currentSeason = seasonParam ? parseInt(seasonParam) : null;
   const currentEpisode = episodeParam ? parseInt(episodeParam) : null;
   const [content, setContent] = useState<any>({});
+  const playerCurrentTimeRef = useRef(null);
+  const [watchProgress, setWatchProgress] = useState<number>(0);
+  const playerCurrentDurationRef = useRef(null);
 
   useEffect(() => {
     if (!tmdbidParam) {
@@ -58,6 +64,25 @@ const Watch = () => {
     fetchContent();
   }, [tmdbidParam]);
 
+  const saveProfileProgress = (callback: () => void) => {
+    try {
+      if (currentProfile) {
+        saveProfileContentProgress(
+          tmdbid!,
+          category!,
+          playerCurrentTimeRef.current!,
+          playerCurrentDurationRef.current!,
+          currentSeason!,
+          currentEpisode!
+        );
+      }
+    } catch (error) {
+      console.error("Error saving profile content progress:", error);
+    } finally {
+      callback();
+    }
+  };
+
   return (
     <section
       id="home"
@@ -71,18 +96,23 @@ const Watch = () => {
         </div>
       ) : (
         <div className="h-full w-full flex flex-col items-center">
-          <TopNav />
+          <TopNav saveProfileProgress={saveProfileProgress} />
           <Player
             tmdbid={tmdbid}
             category={category}
             season={currentSeason}
             episode={currentEpisode}
             provider={currentProvider}
+            playerCurrentTimeRef={playerCurrentTimeRef}
+            watchProgress={watchProgress}
+            setWatchProgress={setWatchProgress}
+            playerCurrentDurationRef={playerCurrentDurationRef}
           />
           <Providers
             providers={providers}
             currentProvider={currentProvider}
             setCurrentProvider={setCurrentProvider}
+            saveProfileProgress={saveProfileProgress}
           />
           {(category === "tv" || category === "anime") && (
             <div className="w-full flex flex-col gap-4">
@@ -92,12 +122,14 @@ const Watch = () => {
                 category={category}
                 currentSeason={currentSeason!}
                 currentEpisode={currentEpisode!}
+                saveProfileProgress={saveProfileProgress}
               />
               <Seasons
                 content={content}
                 tmdbid={tmdbid!}
                 category={category}
                 currentSeason={currentSeason!}
+                saveProfileProgress={saveProfileProgress}
               />
             </div>
           )}
@@ -105,6 +137,7 @@ const Watch = () => {
             content={content!}
             season={currentSeason}
             episode={currentEpisode}
+            saveProfileProgress={saveProfileProgress}
           />
         </div>
       )}

@@ -6,7 +6,21 @@ type User = {
   id: string;
 };
 
-export const authMiddleware = async (): Promise<User> => {
+type Profile = {
+  id: string;
+};
+
+export const getUserFromAuth = async (): Promise<string> => {
+  const user = await authMiddleware();
+  return user.id;
+};
+
+export const getCurrentProfile = async (): Promise<string> => {
+  const profile = await profileMiddleware();
+  return profile.id;
+};
+
+const authMiddleware = async (): Promise<User> => {
   const cookieStore = cookies();
   const token = cookieStore.get("access_token")?.value;
 
@@ -30,7 +44,21 @@ export const authMiddleware = async (): Promise<User> => {
   }
 };
 
-export const getUserFromAuth = async (): Promise<string> => {
-  const user = await authMiddleware();
-  return user.id;
+const profileMiddleware = async (): Promise<Profile> => {
+  const cookieStore = cookies();
+  const profile_id = cookieStore.get("currentProfile")?.value;
+
+  if (!profile_id) {
+    throw new Error("No token found");
+  }
+
+  try {
+    const profile: Profile = {
+      id: profile_id as string,
+    };
+
+    return profile;
+  } catch (error) {
+    throw new Error("Invalid token");
+  }
 };

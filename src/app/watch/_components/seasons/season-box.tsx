@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 type Props = {
@@ -7,6 +7,7 @@ type Props = {
   category: string;
   currentSeason: number;
   season: any;
+  saveProfileProgress: any;
 };
 
 const SeasonBox: React.FC<Props> = ({
@@ -14,7 +15,9 @@ const SeasonBox: React.FC<Props> = ({
   category,
   currentSeason,
   season,
+  saveProfileProgress,
 }) => {
+  const router = useRouter();
   const posterUrl =
     "https://media.themoviedb.org/t/p/w780" + season.poster_path;
   const [isHover, setIsHover] = useState(false);
@@ -26,9 +29,15 @@ const SeasonBox: React.FC<Props> = ({
   }
 
   return (
-    <Link
+    <div
       className="relative overflow-clip cursor-pointer min-w-32 w-32 h-16 p-0 flex justify-center items-center text-center font-light text-[14px] border border-[rgba(255,255,255,0.1)]"
-      href={`/watch?tmdbid=${tmdbid}&category=${category}&season=${season.season_number}&episode=${firstEpisodeSeason}`}
+      onClick={() => {
+        saveProfileProgress(() => {
+          router.push(
+            `/watch?tmdbid=${tmdbid}&category=${category}&season=${season.season_number}&episode=${firstEpisodeSeason}`
+          );
+        });
+      }}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
     >
@@ -46,7 +55,7 @@ const SeasonBox: React.FC<Props> = ({
       >
         {season.name}
       </h1>
-    </Link>
+    </div>
   );
 };
 

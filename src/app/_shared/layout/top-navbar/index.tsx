@@ -139,136 +139,131 @@ const TopNavbar = () => {
   }
 
   return (
-    <nav>
-      <div
-        className={`${flexBetween} ${
-          isAboveMediumScreens ? "px-12 " : "px-6"
-        } max-w-[1920px] fixed top-0 z-30 w-full gap-10 py-2.5 left-0 right-0 mx-auto bg-[#0F0F0F]
-        ${!isTopOfPage && "shadow-md border-b border-white border-opacity-5"}`}
-      >
-        <>
-          {/* LEFT SIDE */}
-          <Link href="/">
-            <Image
-              alt="logo"
-              src={Logo}
-              className="h-[25px] w-auto cursor-pointer"
-            />
-          </Link>
-          {isAboveMediumScreens ? (
-            <>
-              {/* RIGHT SIDE DESKTOP */}
-              <div className={`${flexBetween} w-full items-center`}>
-                {/* INNER LEFT SIDE */}
-                <div className={`${flexBetween} gap-8 text-sm mt-1`}>
-                  <Item name="Home" route="/" />
-                  <Item name="Movies" route="movie" />
-                  <Item name="TV Shows" route="tv" />
-                  <Item name="Anime" route="anime" />
-                </div>
-                {/* INNER RIGHT SIDE */}
-                <div className={`${flexBetween} gap-6 relative`}>
-                  <div
-                    className={`flex border-[2px] rounded transition-width duration-300 overflow-hidden gap-0 ${
-                      isSearching
-                        ? "w-[275px] border-[#757575] py-1"
-                        : "w-8 border-transparent"
-                    }`}
-                    ref={searchRef}
-                  >
-                    <MagnifyingGlassIcon
-                      className={`text-white h-6 w-6 stroke-current cursor-pointer ${
-                        isSearching && "mx-2"
-                      }`}
-                      strokeWidth={1.5}
-                      onClick={toggleSearch}
-                    />
-                    {isSearching && (
-                      <>
-                        <input
-                          className="text-white w-full whitespace-nowrap bg-transparent text-sm text-white placeholder:text-[#858383] outline-none"
-                          name="search"
-                          value={inputs.search}
-                          placeholder="Titles, actors or genres..."
-                          autoFocus
-                          autoComplete="off"
-                          ref={searchInputRef}
-                          onChange={(e) => {
-                            handleChange(e);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && handleSearch) {
-                              handleSearch();
-                            }
-                          }}
-                        />
-                        <button
-                          className={`text-[#a3a3a3] focus:outline-none px-2 ${
-                            inputs.search.length > 0
-                              ? "opacity-100"
-                              : "opacity-0"
-                          }`}
-                          onClick={() => clearSearch("desktop")}
-                        >
-                          x
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  {!currentProfile && (
-                    <AdjustmentsHorizontalIcon
-                      className="h-7 w-7 stroke-current cursor-pointer rounded-2xl p-1 transition duration-150 text-white hover:bg-[rgba(255,255,255,0.1)]"
-                      strokeWidth={1.5}
-                      ref={desktopMenuButtonRef}
-                      onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
-                    />
-                  )}
-                  {currentProfile ? (
-                    <img
-                      src={currentProfile.imgUrl}
-                      className="h-9 w-9 rounded-full object-cover cursor-pointer"
-                      ref={desktopMenuButtonRef}
-                      onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
-                    />
-                  ) : (
-                    <Link
-                      href="/login"
-                      className="text-white px-3.5 py-1.5 rounded w-max mx-auto transition duration-500 p-2 bg-[#6C0386] hover:bg-[#510266]"
-                    >
-                      <button>Sign in</button>
-                    </Link>
-                  )}
-                </div>
+    <nav
+      className={`max-w-[1920px] fixed top-0 z-30 w-full gap-10 py-2.5 left-0 right-0 mx-auto bg-[#0F0F0F] 
+        ${flexBetween} ${isAboveMediumScreens ? "px-12 " : "px-6"} 
+      ${!isTopOfPage && "shadow-md border-b border-white border-opacity-5"}`}
+    >
+      <>
+        {/* LEFT SIDE */}
+        <Link href="/">
+          <Image
+            alt="logo"
+            src={Logo}
+            className="h-[25px] w-auto cursor-pointer"
+          />
+        </Link>
+        {isAboveMediumScreens ? (
+          <>
+            {/* RIGHT SIDE DESKTOP */}
+            <div className={`${flexBetween} w-full items-center`}>
+              {/* INNER LEFT SIDE */}
+              <div className={`${flexBetween} gap-8 text-sm mt-1`}>
+                <Item name="Home" route="/" />
+                <Item name="Movies" route="movie" />
+                <Item name="TV Shows" route="tv" />
+                <Item name="Anime" route="anime" />
               </div>
-            </>
-          ) : (
-            <div className="flex gap-6 items-center">
-              {/* RIGHT SIDE MOBILE */}
-              <MagnifyingGlassIcon
-                className="h-6 w-auto stroke-current cursor-pointer"
-                color={isSearching ? "#a35fe8" : "white"}
-                strokeWidth={1}
-                onClick={() => setIsSearching(!isSearching)}
-                ref={mobielRef}
-              />
-              {currentProfile ? (
-                <img
-                  src={currentProfile.imgUrl}
-                  className="rounded-full object-cover h-[26px] w-[26px] cursor-pointer"
-                  onClick={() => setIsMobileMenuOpen(true)}
-                />
-              ) : (
-                <UserCircleIcon
-                  className="text-white h-[26px] w-auto stroke-current cursor-pointer"
-                  strokeWidth={0.8}
-                  onClick={() => setIsMobileMenuOpen(true)}
-                />
-              )}
+              {/* INNER RIGHT SIDE */}
+              <div className={`${flexBetween} gap-6 relative`}>
+                <div
+                  className={`flex border-[2px] rounded transition-width duration-300 overflow-hidden gap-0 ${
+                    isSearching
+                      ? "w-[275px] border-[#757575] py-1"
+                      : "w-8 border-transparent"
+                  }`}
+                  ref={searchRef}
+                >
+                  <MagnifyingGlassIcon
+                    className={`text-white h-6 w-6 stroke-current cursor-pointer ${
+                      isSearching && "mx-2"
+                    }`}
+                    strokeWidth={1.5}
+                    onClick={toggleSearch}
+                  />
+                  {isSearching && (
+                    <>
+                      <input
+                        className="text-white w-full whitespace-nowrap bg-transparent text-sm text-white placeholder:text-[#858383] outline-none"
+                        name="search"
+                        value={inputs.search}
+                        placeholder="Titles, actors or genres..."
+                        autoFocus
+                        autoComplete="off"
+                        ref={searchInputRef}
+                        onChange={(e) => {
+                          handleChange(e);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && handleSearch) {
+                            handleSearch();
+                          }
+                        }}
+                      />
+                      <button
+                        className={`text-[#a3a3a3] focus:outline-none px-2 ${
+                          inputs.search.length > 0 ? "opacity-100" : "opacity-0"
+                        }`}
+                        onClick={() => clearSearch("desktop")}
+                      >
+                        x
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {!currentProfile && (
+                  <AdjustmentsHorizontalIcon
+                    className="h-7 w-7 stroke-current cursor-pointer rounded-2xl p-1 transition duration-150 text-white hover:bg-[rgba(255,255,255,0.1)]"
+                    strokeWidth={1.5}
+                    ref={desktopMenuButtonRef}
+                    onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+                  />
+                )}
+                {currentProfile ? (
+                  <img
+                    src={currentProfile.imgUrl}
+                    className="h-9 w-9 rounded-full object-cover cursor-pointer"
+                    ref={desktopMenuButtonRef}
+                    onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+                  />
+                ) : (
+                  <Link
+                    href="/login"
+                    className="text-white px-3.5 py-1.5 rounded w-max mx-auto transition duration-500 p-2 bg-[#6C0386] hover:bg-[#510266]"
+                  >
+                    <button>Sign in</button>
+                  </Link>
+                )}
+              </div>
             </div>
-          )}
-        </>
-      </div>
+          </>
+        ) : (
+          <div className="flex gap-6 items-center">
+            {/* RIGHT SIDE MOBILE */}
+            <MagnifyingGlassIcon
+              className="h-6 w-auto stroke-current cursor-pointer"
+              color={isSearching ? "#a35fe8" : "white"}
+              strokeWidth={1}
+              onClick={() => setIsSearching(!isSearching)}
+              ref={mobielRef}
+            />
+            {currentProfile ? (
+              <img
+                src={currentProfile.imgUrl}
+                className="rounded-full object-cover h-[26px] w-[26px] cursor-pointer"
+                onClick={() => setIsMobileMenuOpen(true)}
+              />
+            ) : (
+              <UserCircleIcon
+                className="text-white h-[26px] w-auto stroke-current cursor-pointer"
+                strokeWidth={0.8}
+                onClick={() => setIsMobileMenuOpen(true)}
+              />
+            )}
+          </div>
+        )}
+      </>
       {isMobileMenuOpen && (
         <MobileMenu
           setIsMobileMenuOpen={setIsMobileMenuOpen}
