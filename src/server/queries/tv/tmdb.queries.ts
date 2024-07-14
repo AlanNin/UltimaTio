@@ -1,5 +1,7 @@
 "use server";
 import axios from "axios";
+import prisma from "../../prisma-client";
+import { getCurrentProfile } from ".././authMiddleware";
 
 // GET FEED (TV)
 export async function getFeedTV(): Promise<any | { error: string }> {
@@ -37,6 +39,36 @@ export async function getContentTV(
     );
 
     const content = fullDataResponse.data;
+
+    let profileContent = null;
+    try {
+      const profile_id = await getCurrentProfile();
+      if (profile_id !== null) {
+        const contentDB = await prisma.content.findFirst({
+          where: {
+            tmdb_id: content.id,
+            category: "tv",
+          },
+        });
+        if (contentDB) {
+          profileContent = await prisma.profileContent.findMany({
+            where: {
+              content_id: contentDB.id,
+              profile_id: profile_id,
+            },
+            orderBy: {
+              updated_at: "desc",
+            },
+            include: {
+              content: true,
+              profile: true,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      profileContent = null;
+    }
 
     const studios = content.production_companies.map((studio: any) => ({
       id: studio.id,
@@ -84,17 +116,40 @@ export async function getContentTV(
 
         const seasonDetails = seasonDetailsResponse.data;
 
-        const episodes = seasonDetails.episodes.map((episode: any) => ({
-          episodeNumber: episode.episode_number,
-          episodePoster: episode.still_path
-            ? `https://media.themoviedb.org/t/p/w300_and_h450_bestv2${episode.still_path}`
-            : null,
-          rating: Math.round(episode.vote_average * 10) / 10,
-          title: episode.name,
-          airDate: new Date(episode.air_date),
-          episodeDuration: episode.runtime * 60,
-          overview: episode.overview,
-        }));
+        const episodes = await Promise.all(
+          seasonDetails.episodes.map(async (episode: any) => {
+            let episodeWatchProgress = 0;
+            let episodeDuration = episode.runtime * 60;
+
+            // Check if there's profileContent available and find matching episode
+            if (profileContent) {
+              const matchedEpisode = profileContent.find(
+                (pc: any) =>
+                  pc.episode === episode.episode_number &&
+                  pc.season === season.season_number
+              );
+              if (matchedEpisode) {
+                episodeWatchProgress = matchedEpisode.watchProgress.toNumber();
+                episodeDuration = matchedEpisode.duration
+                  ? matchedEpisode.duration.toNumber()
+                  : episodeDuration;
+              }
+            }
+
+            return {
+              episodeNumber: episode.episode_number,
+              episodePoster: episode.still_path
+                ? `https://media.themoviedb.org/t/p/w300_and_h450_bestv2${episode.still_path}`
+                : null,
+              rating: Math.round(episode.vote_average * 10) / 10,
+              title: episode.name,
+              airDate: new Date(episode.air_date),
+              episodeDuration: episodeDuration,
+              watchProgress: episodeWatchProgress,
+              overview: episode.overview,
+            };
+          })
+        );
 
         return {
           season: {
@@ -131,6 +186,7 @@ export async function getContentTV(
       seasons: sortedSeasons,
       similarContent,
       category: "tv",
+      profileContent: profileContent || null,
     };
   } catch (error) {
     console.error("Error fetching content:", error);

@@ -18,10 +18,19 @@ type Props = {
 };
 
 const TopSection: React.FC<Props> = ({ content, isLoading }) => {
-  const isAboveDesktopScreens = useMediaQuery("(min-width: 1100px)");
-  const isAboveMobileScreens = useMediaQuery("(min-width: 770px)");
+  const isAboveMobileScreens = useMediaQuery("(min-width: 900px)");
   const [showMore, setShowMore] = useState(false);
   const router = useRouter();
+
+  const watchPercentage =
+    content?.profileContent?.[0]?.watchProgress &&
+    content?.profileContent?.[0]?.duration
+      ? Math.floor(
+          (content.profileContent[0].watchProgress /
+            content.profileContent[0].duration) *
+            100
+        )
+      : 0;
 
   const handleNavigateToWatch = () => {
     const isAMovie = content.category === "movie";
@@ -33,6 +42,24 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
     } else {
       router.push(
         `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=1&episode=1`
+      );
+    }
+  };
+
+  const handleResumeWatching = () => {
+    const isAMovie = content.category === "movie";
+
+    if (isAMovie) {
+      router.push(
+        `/watch?tmdbid=${content.tmdbid}&category=${content.category}`
+      );
+    } else {
+      router.push(
+        `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=${
+          content?.profileContent && content?.profileContent[0]?.season
+        }&episode=${
+          content?.profileContent && content?.profileContent[0]?.episode
+        }`
       );
     }
   };
@@ -60,9 +87,9 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent via-5% to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F0F0F] via-transparent via-5% to-transparent pointer-events-none" />
         <div
-          className={`flex w-max h-max z-10 ${
-            isAboveMobileScreens ? "py-14" : "py-10"
-          } px-6 gap-10 flex-wrap items-center justify-center`}
+          className={`flex  w-max h-max z-10 ${
+            isAboveMobileScreens ? "py-14 flex-wrap" : "py-10 flex-col"
+          } px-6 gap-10 items-center justify-center`}
         >
           <div
             className={`flex justify-center flex-wrap ${
@@ -70,16 +97,23 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             }`}
           >
             {/* POSTER */}
-            <img
-              src={content!.posterUrl}
-              alt="Content Image"
-              className="w-[158px] h-[240px] bg-cover drop-shadow-lg rounded-sm"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
-              }}
-            />
-            <div className="flex flex-col gap-1 h-full px-4">
+            <div
+              className={`${
+                !isAboveMobileScreens &&
+                "relative basis-full flex items-center justify-center"
+              }`}
+            >
+              <img
+                src={content!.posterUrl}
+                alt="Content Image"
+                className={`w-[158px] h-[240px] bg-cover drop-shadow-lg rounded-sm`}
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
+                }}
+              />
+            </div>
+            <div className="flex flex-col gap-1 h-full px-4 ">
               {isAboveMobileScreens && (
                 <>
                   <div className="flex gap-2 mb-3">
@@ -170,17 +204,35 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             </div>
           </div>
           {/* BUTTONS MOBILE*/}
-          {!isAboveDesktopScreens && (
+          {!isAboveMobileScreens && (
             <div className="flex basis-full flex-wrap gap-3 items-center justify-center">
               <div
-                className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)]"
-                onClick={handleNavigateToWatch}
+                className="relative flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)] overflow-hidden"
+                onClick={
+                  content?.profileContent &&
+                  content?.profileContent[0]?.watchProgress
+                    ? handleResumeWatching
+                    : handleNavigateToWatch
+                }
               >
                 <PlayIcon
-                  className="w-[20px] h-[20px] text-white fill-white"
+                  className="w-[20px] h-[20px] text-white fill-white z-10"
                   strokeWidth={0.8}
                 />
-                <h1 className="text-sm text-[#ebebeb]"> Watch Now</h1>
+                <h1 className="text-sm text-[#ebebeb] z-10">
+                  {content?.profileContent &&
+                  content?.profileContent[0]?.watchProgress
+                    ? `${
+                        content.category === "movie"
+                          ? "Continue Watching"
+                          : `Continue Watching S${content?.profileContent[0]?.season}:E${content?.profileContent[0]?.episode}`
+                      } `
+                    : "Watch Now"}
+                </h1>
+                <div
+                  className="absolute inset-0 w-full h-full bg-gradient-to-r from-[rgba(135,15,73,0.4)] to-[rgba(124,38,212,0.4)] z-0"
+                  style={{ width: watchPercentage + "%" }}
+                />
               </div>
               <div className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)]">
                 <SquaresPlusIcon
@@ -254,17 +306,35 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             </div>
           </div>
           <div className="basis-full w-max items-center flex justify-center mt-2">
-            {isAboveDesktopScreens && (
+            {isAboveMobileScreens && (
               <div className="flex flex-wrap gap-4 items-center">
                 <div
-                  className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)]"
-                  onClick={handleNavigateToWatch}
+                  className="relative flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)] overflow-hidden"
+                  onClick={
+                    content?.profileContent &&
+                    content?.profileContent[0]?.watchProgress
+                      ? handleResumeWatching
+                      : handleNavigateToWatch
+                  }
                 >
                   <PlayIcon
-                    className="w-[24px] h-[24px] text-white fill-white"
+                    className="w-[24px] h-[24px] text-white fill-white z-10"
                     strokeWidth={0.8}
                   />
-                  <h1 className="text-md text-[#ebebeb]"> Watch Now</h1>
+                  <h1 className="text-md text-[#ebebeb] z-10">
+                    {content?.profileContent &&
+                    content?.profileContent[0]?.watchProgress
+                      ? `${
+                          content.category === "movie"
+                            ? "Continue Watching"
+                            : `Continue Watching S${content?.profileContent[0]?.season}:E${content?.profileContent[0]?.episode}`
+                        } `
+                      : "Watch Now"}
+                  </h1>
+                  <div
+                    className="absolute inset-0 w-full h-full bg-gradient-to-r from-[rgba(135,15,73,0.4)] to-[rgba(124,38,212,0.4)] z-0"
+                    style={{ width: watchPercentage + "%" }}
+                  />
                 </div>
                 <div className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)]">
                   <SquaresPlusIcon
@@ -304,7 +374,11 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
 function formatDuration(seconds: number) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-  return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  return hours > 0
+    ? minutes > 0
+      ? `${hours}h ${minutes}m`
+      : `${hours}h`
+    : `${minutes}m`;
 }
 
 export default TopSection;

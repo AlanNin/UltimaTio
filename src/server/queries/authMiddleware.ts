@@ -44,7 +44,7 @@ const authMiddleware = async (): Promise<User> => {
   }
 };
 
-const profileMiddleware = async (): Promise<Profile> => {
+const profileMiddleware = async (): Promise<Profile | null> => {
   const cookieStore = cookies();
   const profile_id = cookieStore.get("currentProfile")?.value;
 
@@ -53,11 +53,15 @@ const profileMiddleware = async (): Promise<Profile> => {
   }
 
   try {
-    const profile: Profile = {
-      id: profile_id as string,
-    };
+    if (profile_id) {
+      const profile: Profile = {
+        id: profile_id as string,
+      };
 
-    return profile;
+      return profile;
+    } else {
+      return null;
+    }
   } catch (error) {
     throw new Error("Invalid token");
   }

@@ -17,9 +17,6 @@ const SliderCard: React.FC<Props> = ({ content, history }) => {
     ? Math.floor((content.watchProgress / content.duration) * 100)
     : null;
 
-  if (history) {
-    console.log(watchPercentage);
-  }
   const handleNavigate = () => {
     if (content.category === "movie") {
       // HANDLE IF MOVIE
@@ -34,10 +31,12 @@ const SliderCard: React.FC<Props> = ({ content, history }) => {
     }
   };
 
+  console.log(content);
+
   const handleNavigateHistory = () => {
     if (content.category === "movie") {
       router.push(
-        `/watch?tmdbid=${content.tmdbid}&category=${content.category}`
+        `/watch?tmdbid=${content.content.tmdb_id}&category=${content.category}`
       );
     } else {
       router.push(

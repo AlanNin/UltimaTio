@@ -1,5 +1,7 @@
 "use server";
 import axios from "axios";
+import { getCurrentProfile } from "../authMiddleware";
+import prisma from "~/server/prisma-client";
 
 // GET FEED (ANIME)
 export async function getFeedAnime(): Promise<any | { error: string }> {
@@ -42,6 +44,36 @@ export async function getContentAnime(
 
     const content = fullDataResponse.data;
 
+    let profileContent = null;
+    try {
+      const profile_id = await getCurrentProfile();
+      if (profile_id !== null) {
+        const contentDB = await prisma.content.findFirst({
+          where: {
+            tmdb_id: content.id,
+            category: "anime",
+          },
+        });
+        if (contentDB) {
+          profileContent = await prisma.profileContent.findMany({
+            where: {
+              content_id: contentDB.id,
+              profile_id: profile_id,
+            },
+            orderBy: {
+              updated_at: "desc",
+            },
+            include: {
+              content: true,
+              profile: true,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      profileContent = null;
+    }
+
     const studios = content.production_companies.map((studio: any) => ({
       id: studio.id,
       name: studio.name,
@@ -74,7 +106,6 @@ export async function getContentAnime(
       name: actor.name,
       imgUrl: actor.imgUrl,
     }));
-
     const seasons = await Promise.all(
       content.seasons.map(async (season: any) => {
         const seasonDetailsResponse = await axios.get(
@@ -88,17 +119,40 @@ export async function getContentAnime(
 
         const seasonDetails = seasonDetailsResponse.data;
 
-        const episodes = seasonDetails.episodes.map((episode: any) => ({
-          episodeNumber: episode.episode_number,
-          episodePoster: episode.still_path
-            ? `https://media.themoviedb.org/t/p/w300_and_h450_bestv2${episode.still_path}`
-            : null,
-          rating: Math.round(episode.vote_average * 10) / 10,
-          title: episode.name,
-          airDate: new Date(episode.air_date),
-          episodeDuration: episode.runtime * 60,
-          overview: episode.overview,
-        }));
+        const episodes = await Promise.all(
+          seasonDetails.episodes.map(async (episode: any) => {
+            let episodeWatchProgress = 0;
+            let episodeDuration = episode.runtime * 60;
+
+            // Check if there's profileContent available and find matching episode
+            if (profileContent) {
+              const matchedEpisode = profileContent.find(
+                (pc: any) =>
+                  pc.episode === episode.episode_number &&
+                  pc.season === season.season_number
+              );
+              if (matchedEpisode) {
+                episodeWatchProgress = matchedEpisode.watchProgress.toNumber();
+                episodeDuration = matchedEpisode.duration
+                  ? matchedEpisode.duration.toNumber()
+                  : episodeDuration;
+              }
+            }
+
+            return {
+              episodeNumber: episode.episode_number,
+              episodePoster: episode.still_path
+                ? `https://media.themoviedb.org/t/p/w300_and_h450_bestv2${episode.still_path}`
+                : null,
+              rating: Math.round(episode.vote_average * 10) / 10,
+              title: episode.name,
+              airDate: new Date(episode.air_date),
+              episodeDuration: episodeDuration,
+              watchProgress: episodeWatchProgress,
+              overview: episode.overview,
+            };
+          })
+        );
 
         return {
           season: {
@@ -135,6 +189,7 @@ export async function getContentAnime(
       seasons: sortedSeasons,
       similarContent,
       category: "anime",
+      profileContent: profileContent || null,
     };
   } catch (error) {
     console.error("Error fetching content:", error);

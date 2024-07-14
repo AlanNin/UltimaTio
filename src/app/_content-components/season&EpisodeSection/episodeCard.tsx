@@ -24,8 +24,6 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
     return null;
   }
 
-  console.log(episode);
-
   const imageUrl =
     !episode.episodePoster ||
     episode.episodePoster.includes("questionmark") ||
@@ -33,9 +31,13 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
       ? NotFound
       : episode.episodePoster;
 
+  const watchPercentage = episode?.watchProgress
+    ? Math.floor((episode?.watchProgress / episode?.episodeDuration) * 100)
+    : 0;
+
   return (
     <div
-      className="relative flex flex-col cursor-pointer h-[160px] w-[340px] rounded-md gap-3 bg-[rgba(181,181,181,0.1)] py-2 px-3"
+      className="relative flex flex-col cursor-pointer h-[170px] w-[340px] rounded-md gap-3 bg-[rgba(181,181,181,0.1)] py-2 px-3"
       onClick={handleNavigateToWatch}
     >
       <div className="flex h-max w-max gap-4">
@@ -68,6 +70,14 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
       <h1 className="text-sm font-light text-[#c2c2c2] h-full flex max-h-[100px] overflow-y-auto ">
         {episode.overview}
       </h1>
+      {episode?.watchProgress > 0 && (
+        <div className="h-4 w-full rounded-md bg-[rgba(255,255,255,0.35)]">
+          <div
+            className={`rounded-md bg-[#7c26d4] h-full`}
+            style={{ width: watchPercentage + "%" }}
+          />
+        </div>
+      )}
     </div>
   );
 };

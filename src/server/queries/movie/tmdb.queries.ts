@@ -1,5 +1,7 @@
 "use server";
 import axios from "axios";
+import prisma from "~/server/prisma-client";
+import { getCurrentProfile } from "../authMiddleware";
 
 // GET FEED (MOVIE)
 export async function getFeedMovie(): Promise<any | { error: string }> {
@@ -43,6 +45,36 @@ export async function getContentMovie(
     );
 
     const content = fullDataResponse.data;
+
+    let profileContent = null;
+    try {
+      const profile_id = await getCurrentProfile();
+      if (profile_id !== null) {
+        const contentDB = await prisma.content.findFirst({
+          where: {
+            tmdb_id: content.id,
+            category: "movie",
+          },
+        });
+        if (contentDB) {
+          profileContent = await prisma.profileContent.findMany({
+            where: {
+              content_id: contentDB.id,
+              profile_id: profile_id,
+            },
+            orderBy: {
+              updated_at: "desc",
+            },
+            include: {
+              content: true,
+              profile: true,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      profileContent = null;
+    }
 
     const studios = fullDataResponse.data.production_companies.map(
       (studio: any) => ({
@@ -96,6 +128,7 @@ export async function getContentMovie(
       ContentActor: actors,
       similarContent,
       category: "movie",
+      profileContent: profileContent || null,
     };
   } catch (error) {
     console.error("Error fetching content:", error);
