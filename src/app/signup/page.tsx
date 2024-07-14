@@ -5,6 +5,8 @@ import {
   ChevronRightIcon,
   XCircleIcon,
   CheckCircleIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import GoogleIcon from "~/assets/GoogleIcon2.png";
 import { Reveal } from "~/utils/framer-motion/reveal";
@@ -13,6 +15,7 @@ import { useState, useEffect } from "react";
 import LogoL from "~/assets/UltimatioLogo_Lighter.png";
 import { SignUpAccount, validateEmail } from "~/server/queries/auth.queries";
 import Image from "next/image";
+import Loading from "react-loading";
 
 const SignUp = () => {
   const isAboveLargeScreens = useMediaQuery("(min-width: 1280px)");
@@ -23,6 +26,10 @@ const SignUp = () => {
   const [isPasswordValid, setIsPasswordValid] = useState<boolean>(false);
   const [isErrorCreatingAcc, setIsErrorCreatingAcc] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState<any>(0);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(
+    false
+  );
 
   interface Inputs {
     email?: string;
@@ -74,23 +81,35 @@ const SignUp = () => {
 
   const handleGoBack = (backTo: any) => {
     setCurrentStep(backTo);
+    setInputs({
+      email: undefined,
+      checkbox: false,
+      password: undefined,
+      confirmpassword: undefined,
+    });
   };
 
+  const [handlingFirstStep, setHandlingFirstStep] = useState<boolean>(false);
   const handleFirstStep = async () => {
     if (inputs.email !== undefined && inputs.email.length > 0) {
       try {
+        setHandlingFirstStep(true);
         const response = await validateEmail(inputs.email);
         if (response.success === true) {
           handleNextStep();
+          setHandlingFirstStep(false);
         } else {
           setIsEmailTaken(true);
+          setHandlingFirstStep(false);
         }
       } catch (error) {
+        setHandlingFirstStep(false);
         console.error("Error al validar el correo electrónico:", error);
       }
     }
   };
 
+  const [handlingSecondStep, setHandlingSecondStep] = useState<boolean>(false);
   const handleSecondStep = async () => {
     if (
       inputs.email !== undefined &&
@@ -102,6 +121,7 @@ const SignUp = () => {
       inputs.checkbox !== undefined
     ) {
       try {
+        setHandlingSecondStep(true);
         const response = await SignUpAccount(
           inputs.email,
           inputs.password,
@@ -111,11 +131,14 @@ const SignUp = () => {
 
         if (response.success === true) {
           handleNextStep();
+          setHandlingSecondStep(false);
         } else {
           setIsErrorCreatingAcc(true);
+          setHandlingSecondStep(false);
         }
       } catch (error) {
         console.error("Error al validar el correo electrónico:", error);
+        setHandlingSecondStep(false);
       }
     }
   };
@@ -203,11 +226,19 @@ const SignUp = () => {
                 value={inputs.email !== undefined ? inputs.email : ""}
                 required
                 name="email"
+                autoFocus={true}
+                autoComplete="off"
                 onChange={(e) => {
                   handleChange(e);
                   setIsEmailTaken(false);
                 }}
-                className={`bg-[#292929] px-4 p-2 rounded text-white placeholder:text-[#8a8a8a] placeholder:text-sm
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && handleFirstStep) {
+                    handleFirstStep();
+                  }
+                }}
+                className={`font-normal placeholder:font-semibold text-sm
+                  bg-[#292929] px-4 py-2.5 rounded text-white placeholder:text-[#8a8a8a] placeholder:text-sm focus:outline-none
                 ${isSmallTablet && !isAboveMediumScreens && "min-w-[340px]"}
                 ${isAboveLargeScreens ? "w-[430px]" : "min-w-full"}`}
               />
@@ -267,9 +298,19 @@ const SignUp = () => {
             </div>
 
             <div className="mt-8">
-              <ChevronRightIcon
-                strokeWidth={0.8}
-                className={`text-white
+              {handlingFirstStep ? (
+                <Loading
+                  className={`text-white border-[#383838] cursor-progress
+                  h-max w-max p-3 border-[2.5px] rounded-3xl stroke-current bg-[rgba(158,16,90,0.5)] border-transparent`}
+                  type="bars"
+                  color="rgb(184, 184, 184, 0.4)"
+                  height="60px"
+                  width="60px"
+                />
+              ) : (
+                <ChevronRightIcon
+                  strokeWidth={0.8}
+                  className={`text-white
                 h-[60px] p-2 pr-1.5 pl-2.5 border-[2.5px] border-[#383838] rounded-3xl stroke-current cursor-pointer
                 ${
                   currentStep === 0
@@ -280,8 +321,9 @@ const SignUp = () => {
                       }`
                     : "transparent"
                 }`}
-                onClick={handleFirstStep}
-              />
+                  onClick={handleFirstStep}
+                />
+              )}
             </div>
 
             <Link href="/login">
@@ -301,17 +343,47 @@ const SignUp = () => {
             </h1>
 
             <div className="flex flex-col gap-5 items-start w-full">
-              <input
-                placeholder="Password"
-                required
-                value={inputs.password !== undefined ? inputs.password : ""}
-                type="password"
-                name="password"
-                onChange={handleChange}
-                className={`bg-[#292929] px-4 p-2 rounded text-white placeholder:text-[#8a8a8a] placeholder:text-sm
+              <div
+                className={`relative bg-[#292929] rounded text-white placeholder:text-[#8a8a8a] placeholder:text-sm
                 ${isSmallTablet && !isAboveMediumScreens && "min-w-[340px]"}
                 ${isAboveLargeScreens ? "w-[430px]" : "min-w-full"}`}
-              />
+              >
+                <input
+                  placeholder="Password"
+                  required
+                  autoFocus={true}
+                  autoComplete="new-password"
+                  value={inputs.password !== undefined ? inputs.password : ""}
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  onChange={handleChange}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && handleSecondStep) {
+                      handleSecondStep();
+                    }
+                  }}
+                  className={`font-normal placeholder:font-semibold text-sm
+                    bg-transparent text-white placeholder:text-[#8a8a8a] placeholder:text-sm w-full py-2.5 px-4 pr-12 focus:outline-none
+                   `}
+                />
+                {inputs.password && inputs.password.length > 0 && (
+                  <>
+                    {showPassword ? (
+                      <EyeSlashIcon
+                        strokeWidth={0.8}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
+                        onClick={() => setShowPassword(false)}
+                      />
+                    ) : (
+                      <EyeIcon
+                        strokeWidth={0.8}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
+                        onClick={() => setShowPassword(true)}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
 
               <div className="flex mt-[-5px] mb-2 items-center gap-2">
                 {inputs.password !== undefined && inputs.password.length > 8 ? (
@@ -387,21 +459,51 @@ const SignUp = () => {
                 </h1>
               </div>
 
-              <input
-                placeholder="Confirm Password"
-                required
-                value={
-                  inputs.confirmpassword !== undefined
-                    ? inputs.confirmpassword
-                    : ""
-                }
-                type="password"
-                name="confirmpassword"
-                onChange={handleChange}
-                className={`bg-[#292929] px-4 p-2 rounded text-white placeholder:text-[#8a8a8a] placeholder:text-sm
+              <div
+                className={`relative bg-[#292929] rounded text-white placeholder:text-[#8a8a8a] placeholder:text-sm
                 ${isSmallTablet && !isAboveMediumScreens && "min-w-[340px]"}
                 ${isAboveLargeScreens ? "w-[430px]" : "min-w-full"}`}
-              />
+              >
+                <input
+                  placeholder="Confirm Password"
+                  required
+                  autoComplete="new-password"
+                  value={
+                    inputs.confirmpassword !== undefined
+                      ? inputs.confirmpassword
+                      : ""
+                  }
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmpassword"
+                  onChange={handleChange}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && handleSecondStep) {
+                      handleSecondStep();
+                    }
+                  }}
+                  className={`font-normal placeholder:font-semibold text-sm
+                    bg-transparent text-white placeholder:text-[#8a8a8a] placeholder:text-sm w-full py-2.5 px-4 pr-12 focus:outline-none
+                  `}
+                />
+                {inputs.confirmpassword &&
+                  inputs.confirmpassword.length > 0 && (
+                    <>
+                      {showConfirmPassword ? (
+                        <EyeSlashIcon
+                          strokeWidth={0.8}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
+                          onClick={() => setShowConfirmPassword(false)}
+                        />
+                      ) : (
+                        <EyeIcon
+                          strokeWidth={0.8}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
+                          onClick={() => setShowConfirmPassword(true)}
+                        />
+                      )}
+                    </>
+                  )}
+              </div>
 
               {(inputs.password || inputs.confirmpassword) &&
                 inputs.password !== inputs.confirmpassword && (
@@ -420,9 +522,19 @@ const SignUp = () => {
             </div>
 
             <div className="mt-5">
-              <ChevronRightIcon
-                strokeWidth={0.8}
-                className={`text-white h-[60px] p-2 pr-1.5 pl-2.5 border-[2.5px] border-[#383838] rounded-3xl stroke-current cursor-pointer
+              {handlingSecondStep ? (
+                <Loading
+                  className={`text-white border-[#383838] cursor-progress
+                  h-max w-max p-3 border-[2.5px] rounded-3xl stroke-current bg-[rgba(158,16,90,0.5)] border-transparent`}
+                  type="bars"
+                  color="rgb(184, 184, 184, 0.4)"
+                  height="60px"
+                  width="60px"
+                />
+              ) : (
+                <ChevronRightIcon
+                  strokeWidth={0.8}
+                  className={`text-white h-[60px] p-2 pr-1.5 pl-2.5 border-[2.5px] border-[#383838] rounded-3xl stroke-current cursor-pointer
                 ${
                   currentStep === 0
                     ? inputs.email !== undefined && isEmailValid
@@ -434,8 +546,9 @@ const SignUp = () => {
                       : ""
                     : "transparent"
                 }`}
-                onClick={handleSecondStep}
-              />
+                  onClick={handleSecondStep}
+                />
+              )}
             </div>
           </>
         )}

@@ -3,7 +3,12 @@ import LogoL from "~/assets/UltimatioLogo_Lighter.png";
 import GoogleIcon from "~/assets/GoogleIcon2.png";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import Link from "next/link";
-import { ChevronRightIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronRightIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -15,6 +20,7 @@ import Cookies from "js-cookie";
 import Image from "next/image";
 import { SignInAccount } from "~/server/queries/auth.queries";
 import { useRouter } from "next/navigation";
+import Loading from "react-loading";
 
 const LogIn = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 800px)");
@@ -30,8 +36,10 @@ const LogIn = () => {
     email: undefined,
     password: undefined,
   });
+  const [loginStarted, setLoginStarted] = useState<boolean>(false);
   const [isWrongCredentials, setIsWrongCredentials] = useState<boolean>(false);
   const [isLoginError, setIsLoginError] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const dispatch = useDispatch();
 
   const handleChange = (e: any) => {
@@ -47,6 +55,7 @@ const LogIn = () => {
       inputs.password !== undefined
     ) {
       try {
+        setLoginStarted(true);
         dispatch(loginStart());
         const response = await SignInAccount(
           inputs.email.trim(),
@@ -57,12 +66,15 @@ const LogIn = () => {
           dispatch(loginSuccess(response.response));
           Cookies.set("access_token", response.token!, { expires: 365 });
           router.push("/");
+          setLoginStarted(false);
         } else {
           setIsWrongCredentials(true);
           dispatch(loginFailure());
+          setLoginStarted(false);
         }
       } catch (error) {
         setIsLoginError(true);
+        setLoginStarted(false);
       }
     }
   };
@@ -109,25 +121,60 @@ const LogIn = () => {
             setIsWrongCredentials(false);
             setIsLoginError(false);
           }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && handleLogin) {
+              handleLogin();
+            }
+          }}
           name="email"
+          autoComplete="new-email"
+          autoFocus={true}
           required
-          className="bg-[#292929]
-            px-4 p-2 rounded text-white w-full text-sm placeholder:text-sm placeholder:text-[#8a8a8a]"
+          className="bg-[#292929] focus:outline-none font-normal placeholder:font-semibold
+            px-4 py-2.5 rounded text-white w-full text-sm placeholder:text-sm placeholder:text-[#8a8a8a]"
         />
 
-        <input
-          placeholder="Password"
-          type="password"
-          onChange={(e) => {
-            handleChange(e);
-            setIsWrongCredentials(false);
-            setIsLoginError(false);
-          }}
-          name="password"
-          required
-          className="bg-[#292929]
-            px-4 p-2 rounded text-white w-full tx-sm placeholder:text-sm placeholder:text-[#8a8a8a]"
-        />
+        <div
+          className={`relative bg-[#292929] rounded w-full m-0 p-0
+              `}
+        >
+          <input
+            placeholder="Password"
+            required
+            autoComplete="new-password"
+            type={showPassword ? "text" : "password"}
+            name="password"
+            onChange={(e) => {
+              handleChange(e);
+              setIsWrongCredentials(false);
+              setIsLoginError(false);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && handleLogin) {
+                handleLogin();
+              }
+            }}
+            className={`bg-transparent text-white placeholder:text-[#8a8a8a] text-sm placeholder:text-sm w-full py-2.5 px-4 pr-12 focus:outline-none font-normal placeholder:font-semibold
+                   `}
+          />
+          {inputs.password && inputs.password.length > 0 && (
+            <>
+              {showPassword ? (
+                <EyeSlashIcon
+                  strokeWidth={0.8}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
+                  onClick={() => setShowPassword(false)}
+                />
+              ) : (
+                <EyeIcon
+                  strokeWidth={0.8}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
+                  onClick={() => setShowPassword(true)}
+                />
+              )}
+            </>
+          )}
+        </div>
 
         <div className="bg-[#ebf7ff] w-full py-1 flex justify-center rounded cursor-pointer max-w-[400px]">
           <Image alt="Google" src={GoogleIcon} className="h-5 w-5" />
@@ -160,10 +207,20 @@ const LogIn = () => {
             </div>
           )}
 
-        <div className="mt-1" onClick={handleLogin}>
-          <ChevronRightIcon
-            strokeWidth={0.8}
-            className={`text-white border-[#383838]
+        <div className="mt-1">
+          {loginStarted ? (
+            <Loading
+              className={`text-white border-[#383838] cursor-progress
+              h-max w-max p-3 border-[2.5px] rounded-3xl stroke-current bg-[rgba(158,16,90,0.5)] border-transparent`}
+              type="bars"
+              color="rgb(184, 184, 184, 0.4)"
+              height="60px"
+              width="60px"
+            />
+          ) : (
+            <ChevronRightIcon
+              strokeWidth={0.8}
+              className={`text-white border-[#383838]
               h-[60px] p-2 pr-1.5 pl-2.5 border-[2.5px] rounded-3xl stroke-current cursor-pointer
               ${
                 inputs.email != undefined &&
@@ -173,7 +230,9 @@ const LogIn = () => {
                   ? "bg-[rgba(158,16,90)] border-transparent"
                   : "cursor-not-allowed"
               }`}
-          />
+              onClick={handleLogin}
+            />
+          )}
         </div>
 
         <Link href="/recover">
