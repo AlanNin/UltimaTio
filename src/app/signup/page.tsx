@@ -118,7 +118,9 @@ const SignUp = () => {
       inputs.password.length > 0 &&
       inputs.confirmpassword !== undefined &&
       inputs.confirmpassword.length > 0 &&
-      inputs.checkbox !== undefined
+      inputs.checkbox !== undefined &&
+      isPasswordValid &&
+      isEmailValid
     ) {
       try {
         setHandlingSecondStep(true);
