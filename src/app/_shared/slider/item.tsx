@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import TMDBIcon from "~/assets/TMDB.png";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import useMediaQuery from "~/hooks/useMediaQuery";
+import { PlayIcon } from "@heroicons/react/24/outline";
 
 type Props = {
   content: any;
@@ -48,22 +47,18 @@ const SliderCard: React.FC<Props> = ({ content, history }) => {
   return (
     <div
       className="flex w-full h-full pr-4"
-      // onMouseEnter={() => (isAboveSmallTablet ? setIsHovered(true) : null)}
-      // onMouseLeave={() => (isAboveSmallTablet ? setIsHovered(false) : null)}
+      onMouseEnter={() => (isAboveSmallTablet ? setIsHovered(true) : null)}
+      onMouseLeave={() => (isAboveSmallTablet ? setIsHovered(false) : null)}
     >
       <div
-        className="h-full w-max overflow-hidden relative rounded-sm cursor-pointer"
+        className="h-full w-max relative rounded-sm cursor-pointer"
         onClick={history ? handleNavigateHistory : handleNavigate}
       >
         <img
           src={content?.posterUrl}
           alt="Content Image"
           loading="lazy"
-          className={`object-cover w-full h-full cursor-pointer rounded-sm transition-all duration-500 ${
-            isHovered
-              ? "scale-125 brightness-[0.25]"
-              : "scale-100 brightness-100"
-          }`}
+          className={`object-cover w-full h-full cursor-pointer rounded-sm transition-all duration-500 `}
           style={{
             userSelect: "none",
             pointerEvents: "none",
@@ -71,28 +66,33 @@ const SliderCard: React.FC<Props> = ({ content, history }) => {
               "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
           }}
         />
-        <div
-          className={`absolute inset-0 flex flex-col text-center items-center justify-center transition-opacity duration-500 ${
-            isHovered ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <h1 className="text-white text-lg">{content?.title}</h1>
-          <div className="flex items-center justify-center gap-1.5">
-            <Image alt="TMDB" src={TMDBIcon} className="w-6 h-6 object-cover" />
-            <p className="text-md text-[#d8d7d7] font-normal">
-              {content?.rating.toFixed(1)}{" "}
-            </p>
-          </div>
-        </div>
+
         {history && (
-          <div className={`absolute bottom-2 left-0 right-0 h-1.5 w-full px-2`}>
-            <div className="h-full w-full rounded-md bg-[rgba(255,255,255,0.35)]">
-              <div
-                className={`rounded-md bg-[#7c26d4] h-full`}
-                style={{ width: watchPercentage + "%" }}
-              />
+          <>
+            <PlayIcon
+              strokeWidth={0.8}
+              height={isAboveSmallTablet ? 90 : 50}
+              className={`absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 cursor-pointer m-0 rounded-full transition-all duration-300 border-2 fill-[rgba(240,240,240,0.8)]
+                ${
+                  isAboveSmallTablet ? "py-5 pl-5 pr-4" : "py-2.5 pl-2.5 pr-1.5"
+                }
+                 ${
+                   !isHovered
+                     ? "text-[rgba(240,240,240,0.8)] bg-transparent border-white"
+                     : "text-[rgba(240,240,240,0.8)] bg-[rgba(124,38,212,0.8)] border-[rgba(124,38,212,0.8)]"
+                 }`}
+            />
+            <div
+              className={`absolute bottom-2.5 left-0 right-0 h-1.5 w-full px-3`}
+            >
+              <div className="h-full w-full rounded-md bg-[rgba(255,255,255,0.4)]">
+                <div
+                  className={`rounded-md bg-[#9231f5] h-full`}
+                  style={{ width: watchPercentage + "%" }}
+                />
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

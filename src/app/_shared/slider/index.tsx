@@ -61,7 +61,7 @@ const Slider: React.FC<Props> = ({ content, history }) => {
           <div
             className={`absolute cursor-pointer left-0 bottom-0 top-0 ${
               isAboveTabletScreens ? "p-2.5" : "p-0.5"
-            } rounded-md flex justify-center items-center bg-[rgba(219,219,219,0.05)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
+            } flex justify-center items-center bg-[rgba(219,219,219,0.08)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
           >
             <ChevronLeftIcon
               className={`cursor-pointer text-white ${
@@ -75,7 +75,7 @@ const Slider: React.FC<Props> = ({ content, history }) => {
           <div
             className={`absolute cursor-pointer right-0 bottom-0 top-0 ${
               isAboveTabletScreens ? "p-2.5" : "p-0.5"
-            }  rounded-md flex justify-center items-center bg-[rgba(219,219,219,0.05)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
+            }  flex justify-center items-center bg-[rgba(219,219,219,0.08)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
           >
             <ChevronRightIcon
               className={`cursor-pointer text-white ${

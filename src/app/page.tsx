@@ -32,22 +32,18 @@ const Home = () => {
     const fetchFeed = async () => {
       setIsLoading(true);
       try {
-        const response = await getHomeFeed();
-        setFeed({
-          trending: response.trending,
-          popular: response.popular,
-          topRated: response.topRated,
-          upcoming: response.upcoming,
-          history: [],
-        });
+        const [homeFeedResponse, profileHistoryResponse] = await Promise.all([
+          getHomeFeed(),
+          currentProfile ? getProfileHistory() : Promise.resolve(null),
+        ]);
 
-        if (currentProfile) {
-          const history = await getProfileHistory();
-          setFeed((prevFeed) => ({
-            ...prevFeed,
-            history: history || [],
-          }));
-        }
+        setFeed({
+          trending: homeFeedResponse.trending,
+          popular: homeFeedResponse.popular,
+          topRated: homeFeedResponse.topRated,
+          upcoming: homeFeedResponse.upcoming,
+          history: profileHistoryResponse || [],
+        });
       } catch (error) {
         console.error("Error fetching home feed:", error);
       } finally {
