@@ -5,6 +5,7 @@ import { GeistSans } from "geist/font/sans";
 import TopNavbar from "./_shared/layout/top-navbar";
 import Footer from "./_shared/layout/footer";
 import WhoIsWatching from "./_shared/profile/whos-watching";
+import CheckerProvider from "~/utils/profile-user-checker/checker-provider";
 
 export const metadata = {
   title: "UltimaTio",
@@ -21,10 +22,12 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className={`${GeistSans.className} app`}>
         <ReduxProvider>
-          <WhoIsWatching />
-          <TopNavbar />
-          {children}
-          <Footer />
+          <CheckerProvider>
+            <WhoIsWatching />
+            <TopNavbar />
+            {children}
+            <Footer />
+          </CheckerProvider>
         </ReduxProvider>
       </body>
     </html>

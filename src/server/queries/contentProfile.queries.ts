@@ -290,7 +290,6 @@ export async function getProfileHistory(): Promise<any[] | null> {
 
     return history.filter((item) => item !== null);
   } catch (error) {
-    console.error("Error fetching profile history:", error);
     return null;
   }
 }

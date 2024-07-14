@@ -27,9 +27,12 @@ export async function SignUpAccount(
     throw new Error("Passwords do not match");
   }
 
-  const existingUser = await prisma.user.findUnique({
+  const existingUser = await prisma.user.findFirst({
     where: {
-      email,
+      email: {
+        equals: email.toLowerCase(),
+        mode: "insensitive",
+      },
     },
   });
 
@@ -38,7 +41,7 @@ export async function SignUpAccount(
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
+  if (!emailRegex.test(email.toLowerCase())) {
     throw new Error("Invalid email format");
   }
 
@@ -51,7 +54,7 @@ export async function SignUpAccount(
   // CREATE NEW USER
   await prisma.user.create({
     data: {
-      email,
+      email: email.toLowerCase(),
       password: hash,
       profiles: {
         create: {
@@ -85,9 +88,13 @@ export async function SignInAccount(
 }> {
   try {
     // GET USER
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: { profiles: true, userSettings: true },
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email.toLowerCase(),
+          mode: "insensitive",
+        },
+      },
     });
 
     // VALIDATIONS
@@ -119,7 +126,15 @@ export async function validateEmail(
   success: boolean;
 }> {
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email.toLowerCase(),
+          mode: "insensitive",
+        },
+      },
+    });
+
     if (existingUser) {
       return { success: false };
     }
