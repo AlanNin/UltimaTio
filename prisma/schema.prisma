@@ -120,6 +120,7 @@ model ProfileContent {
   watchProgress Decimal
   duration Decimal
   likeStatus Int
+  showResume Boolean?
 
   // RELATIONSHIP WITH CONTENT AND GENRE
   content  Content  @relation(fields: [content_id ], references: [id])

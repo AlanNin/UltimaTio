@@ -61,6 +61,7 @@ export async function saveProfileContentProgress(
         },
         data: {
           watchProgress: progress,
+          showResume: true,
         },
       });
       return { success: true, message: "Content progress updated" };
@@ -77,6 +78,7 @@ export async function saveProfileContentProgress(
           episode:
             category === "tv" || category === "anime" ? episode : undefined,
           likeStatus: 0,
+          showResume: true,
         },
       });
       return { success: true, message: "Content progress updated" };
@@ -142,7 +144,148 @@ export async function getProfileContentProgress(
   }
 }
 
-// GET PROFILE Activity
+// GET PROFILE HISTORY
+export async function getProfileHistory(): Promise<any[] | null> {
+  try {
+    const profile_id = await getCurrentProfile();
+    const user_id = await getUserFromAuth();
+
+    const profile = await prisma.profile.findUnique({
+      where: {
+        id: profile_id,
+      },
+    });
+
+    if (!profile) {
+      return null;
+    }
+    if (profile.user_id !== user_id) {
+      return null;
+    }
+
+    const profileHistory = await prisma.profileContent.findMany({
+      where: {
+        profile_id,
+        showResume: true,
+        watchProgress: {
+          gt: 0,
+        },
+      },
+      distinct: ["content_id"],
+      orderBy: {
+        updated_at: "desc",
+      },
+      include: {
+        content: {
+          select: {
+            id: true,
+            tmdb_id: true,
+            category: true,
+          },
+        },
+      },
+    });
+
+    const history = await Promise.all(
+      profileHistory.map(async (item) => {
+        try {
+          const content = await fetchTMDBContent(
+            item.content.tmdb_id.toString(),
+            item.content.category
+          );
+          if (!content) {
+            return null; //
+          }
+
+          return {
+            id: item.id,
+            content_id: item.content_id,
+            profile_id: item.profile_id,
+            season: item.season,
+            episode: item.episode,
+            watchProgress: Number(item.watchProgress),
+            duration: Number(item.duration),
+            likeStatus: item.likeStatus,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+            showResume: item.showResume,
+            content: {
+              id: item.content.id,
+              tmdb_id: item.content.tmdb_id,
+              category: item.content.category,
+            },
+            ...content,
+          };
+        } catch (error) {
+          console.error(
+            "Error fetching TMDB content:",
+            item.content.tmdb_id,
+            error
+          );
+          return null;
+        }
+      })
+    );
+
+    return history.filter((item) => item !== null);
+  } catch (error) {
+    return null;
+  }
+}
+
+// HIDE RESUME WATCHING
+export async function hideResumeWatching(
+  id: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const profile_id = await getCurrentProfile();
+    const user_id = await getUserFromAuth();
+
+    const profile = await prisma.profile.findUnique({
+      where: {
+        id: profile_id,
+      },
+    });
+
+    if (!profile) {
+      return {
+        success: false,
+        message: `Profile not found: ${profile_id}`,
+      };
+    }
+    if (profile.user_id !== user_id) {
+      return {
+        success: false,
+        message: `Unauthorized: Profile does not belong to the user: ${profile_id}`,
+      };
+    }
+
+    const updateResumeState = await prisma.profileContent.update({
+      where: {
+        id,
+      },
+      data: {
+        showResume: false,
+      },
+    });
+
+    if (!updateResumeState) {
+      return {
+        success: false,
+        message: `Failed to update resume state: ${id}`,
+      };
+    } else {
+      return { success: true, message: "Resume watching hidden" };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: `Failed to hide resume watching: ${error}`,
+    };
+  }
+}
+
+// GET PROFILE ACTIVITY
 export async function getProfileActivity(): Promise<any | null> {
   try {
     const profile_id = await getCurrentProfile();
@@ -204,93 +347,6 @@ export async function getProfileActivity(): Promise<any | null> {
     return activity;
   } catch (error) {
     return error;
-  }
-}
-
-// GET PROFILE HISTORY
-export async function getProfileHistory(): Promise<any[] | null> {
-  try {
-    const profile_id = await getCurrentProfile();
-    const user_id = await getUserFromAuth();
-
-    const profile = await prisma.profile.findUnique({
-      where: {
-        id: profile_id,
-      },
-    });
-
-    if (!profile) {
-      return null;
-    }
-    if (profile.user_id !== user_id) {
-      return null;
-    }
-
-    const profileHistory = await prisma.profileContent.findMany({
-      where: {
-        profile_id,
-        watchProgress: {
-          gt: 0,
-        },
-      },
-      distinct: ["content_id"],
-      orderBy: {
-        updated_at: "desc",
-      },
-      include: {
-        content: {
-          select: {
-            id: true,
-            tmdb_id: true,
-            category: true,
-          },
-        },
-      },
-    });
-
-    const history = await Promise.all(
-      profileHistory.map(async (item) => {
-        try {
-          const content = await fetchTMDBContent(
-            item.content.tmdb_id.toString(),
-            item.content.category
-          );
-          if (!content) {
-            return null; //
-          }
-
-          return {
-            id: item.id,
-            content_id: item.content_id,
-            profile_id: item.profile_id,
-            season: item.season,
-            episode: item.episode,
-            watchProgress: Number(item.watchProgress),
-            duration: Number(item.duration),
-            likeStatus: item.likeStatus,
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-            content: {
-              id: item.content.id,
-              tmdb_id: item.content.tmdb_id,
-              category: item.content.category,
-            },
-            ...content,
-          };
-        } catch (error) {
-          console.error(
-            "Error fetching TMDB content:",
-            item.content.tmdb_id,
-            error
-          );
-          return null;
-        }
-      })
-    );
-
-    return history.filter((item) => item !== null);
-  } catch (error) {
-    return null;
   }
 }
 
