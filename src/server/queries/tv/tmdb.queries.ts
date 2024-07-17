@@ -41,6 +41,7 @@ export async function getContentTV(
     const content = fullDataResponse.data;
 
     let profileContent = null;
+    let likeStatus = null;
     try {
       const profile_id = await getCurrentProfile();
       if (profile_id !== null) {
@@ -48,6 +49,9 @@ export async function getContentTV(
           where: {
             tmdb_id: content.id,
             category: "tv",
+          },
+          include: {
+            profile_likes: true,
           },
         });
         if (contentDB) {
@@ -64,6 +68,15 @@ export async function getContentTV(
               profile: true,
             },
           });
+          const profileLikes = await prisma.profileLike.findFirst({
+            where: {
+              profile_id,
+              content_id: contentDB.id,
+            },
+          });
+          if (profileLikes) {
+            likeStatus = profileLikes.likeStatus;
+          }
         }
       }
     } catch (error) {
@@ -187,6 +200,7 @@ export async function getContentTV(
       similarContent,
       category: "tv",
       profileContent: profileContent || null,
+      likeStatus: likeStatus || 0,
     };
   } catch (error) {
     console.error("Error fetching content:", error);

@@ -67,6 +67,9 @@ model Profile {
   // REFERENCE WITH PROFILE CONTENT
   profile_content ProfileContent[]
 
+   // REFERENCE WITH PROFILE LIKES
+  profile_likes ProfileLike[]
+
   @@map("profiles")
 }
 
@@ -119,7 +122,6 @@ model ProfileContent {
   episode Int?
   watchProgress Decimal
   duration Decimal
-  likeStatus Int
   showResume Boolean?
 
   // RELATIONSHIP WITH CONTENT AND GENRE
@@ -132,6 +134,24 @@ model ProfileContent {
   updated_at DateTime @updatedAt
 
   @@map("profile_content")
+}
+
+// PROFILE LIKE MODEL
+model ProfileLike {
+  id         String   @id @default(uuid())
+  profile_id String
+  content_id String
+  likeStatus Int @default(0)
+
+  // RELATIONSHIPS
+  profile    Profile  @relation(fields: [profile_id], references: [id])
+  content    Content  @relation(fields: [content_id], references: [id])
+
+  // CREATED AT & UPDATED AT
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("profile_likes")
 }
 
 // BRIDGE TABLE CONTENT_LIBRARY
@@ -164,8 +184,11 @@ model Content {
   // REFERENCE WITH LIBRARY
   library_content LibraryContent[]
 
-    // REFERENCE WITH PROFILE CONTENT
+  // REFERENCE WITH PROFILE CONTENT
   profile_content ProfileContent[]
+
+ // REFERENCE WITH PROFILE LIKES
+  profile_likes ProfileLike[]
 
   @@map("contents")
 }

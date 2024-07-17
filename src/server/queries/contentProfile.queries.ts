@@ -77,7 +77,6 @@ export async function saveProfileContentProgress(
             category === "tv" || category === "anime" ? season : undefined,
           episode:
             category === "tv" || category === "anime" ? episode : undefined,
-          likeStatus: 0,
           showResume: true,
         },
       });
@@ -132,7 +131,6 @@ export async function getProfileContentProgress(
         season: profileContent.season,
         episode: profileContent.episode,
         watchProgress: Number(profileContent.watchProgress),
-        likeStatus: profileContent.likeStatus,
         created_at: profileContent.created_at,
         updated_at: profileContent.updated_at,
       };
@@ -205,7 +203,6 @@ export async function getProfileHistory(): Promise<any[] | null> {
             episode: item.episode,
             watchProgress: Number(item.watchProgress),
             duration: Number(item.duration),
-            likeStatus: item.likeStatus,
             created_at: item.created_at,
             updated_at: item.updated_at,
             showResume: item.showResume,
@@ -334,7 +331,6 @@ export async function getProfileActivity(): Promise<any | null> {
       season: item.season,
       episode: item.episode,
       watchProgress: Number(item.watchProgress),
-      likeStatus: item.likeStatus,
       created_at: item.created_at,
       updated_at: item.updated_at,
       content: {
@@ -350,6 +346,81 @@ export async function getProfileActivity(): Promise<any | null> {
   }
 }
 
+// LIKE OR DISLIKE CONTENT
+export async function handleLikeOrDislike(
+  tmdb_id: number,
+  category: string,
+  likeStatus: number
+): Promise<{ success: boolean; message: string; likeStatus?: number }> {
+  try {
+    const profile_id = await getCurrentProfile();
+
+    let content = await prisma.content.findFirst({
+      where: {
+        tmdb_id,
+        category,
+      },
+    });
+
+    if (!content) {
+      const createdContent = await prisma.content.create({
+        data: {
+          tmdb_id,
+          category,
+        },
+      });
+      content = createdContent;
+    }
+
+    const existingLike = await prisma.profileLike.findFirst({
+      where: {
+        content_id: content.id,
+        profile_id,
+      },
+    });
+
+    let newLikeStatus;
+    if (!existingLike) {
+      newLikeStatus = likeStatus;
+    } else if (existingLike.likeStatus === likeStatus) {
+      newLikeStatus = 0;
+    } else {
+      newLikeStatus = likeStatus;
+    }
+
+    if (!existingLike) {
+      await prisma.profileLike.create({
+        data: {
+          content_id: content.id,
+          profile_id,
+          likeStatus: newLikeStatus,
+        },
+      });
+    } else {
+      await prisma.profileLike.update({
+        where: {
+          id: existingLike.id,
+        },
+        data: {
+          likeStatus: newLikeStatus,
+        },
+      });
+    }
+
+    return {
+      success: true,
+      message: "Operation successful",
+      likeStatus: newLikeStatus,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to update like status: " + error,
+    };
+  }
+}
+
+// Fetch TMDB CONTENT
 async function fetchTMDBContent(
   tmdb_id: string,
   category: string

@@ -5,6 +5,7 @@ import {
   AdjustmentsHorizontalIcon,
   UserCircleIcon,
   MagnifyingGlassIcon,
+  SquaresPlusIcon,
 } from "@heroicons/react/24/outline";
 import { usePathname, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
@@ -140,10 +141,10 @@ const TopNavbar = () => {
 
   return (
     <nav
-      className={`max-w-[1920px] fixed top-0 z-30 w-full py-2.5 left-0 right-0 mx-auto`}
+      className={`max-w-[1920px] fixed top-0 z-30 w-full left-0 right-0 mx-auto`}
     >
       <div
-        className={`bg-[#0F0F0F] gap-10 ${flexBetween}
+        className={`bg-[#0F0F0F] gap-10 py-2.5 ${flexBetween}
         ${isAboveMediumScreens ? "px-12 " : "px-6"} 
         ${!isTopOfPage && "shadow-md border-b border-white border-opacity-5"}`}
       >
@@ -157,7 +158,7 @@ const TopNavbar = () => {
         </Link>
         {isAboveMediumScreens ? (
           <>
-            {/* RIGHT SIDE DESKTOP */}
+            {/* DESKTOP */}
             <div className={`${flexBetween} w-full items-center`}>
               {/* INNER LEFT SIDE */}
               <div className={`${flexBetween} gap-8 text-sm mt-1`}>
@@ -172,7 +173,7 @@ const TopNavbar = () => {
                   className={`flex border-[2px] rounded transition-width duration-300 overflow-hidden gap-0 ${
                     isSearching
                       ? "w-[275px] border-[#757575] py-1"
-                      : "w-8 border-transparent"
+                      : "w-7 border-transparent"
                   }`}
                   ref={searchRef}
                 >
@@ -223,12 +224,18 @@ const TopNavbar = () => {
                   />
                 )}
                 {currentProfile ? (
-                  <img
-                    src={currentProfile.imgUrl}
-                    className="h-9 w-9 rounded-full object-cover cursor-pointer"
-                    ref={desktopMenuButtonRef}
-                    onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
-                  />
+                  <>
+                    <SquaresPlusIcon
+                      className="w-[34px] h-[34px] text-white cursor-pointer ml-[-6.5px] rounded-2xl p-1.5 transition duration-300 hover:bg-[rgba(255,255,255,0.08)]"
+                      strokeWidth={1.5}
+                    />
+                    <img
+                      src={currentProfile.imgUrl}
+                      className="h-9 w-9 rounded-full object-cover cursor-pointer"
+                      ref={desktopMenuButtonRef}
+                      onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+                    />
+                  </>
                 ) : (
                   <Link
                     href="/login"
@@ -244,18 +251,24 @@ const TopNavbar = () => {
           <div className="flex gap-6 items-center">
             {/* RIGHT SIDE MOBILE */}
             <MagnifyingGlassIcon
-              className="h-6 w-auto stroke-current cursor-pointer"
+              className="h-5 w-auto stroke-current cursor-pointer"
               color={isSearching ? "#a35fe8" : "white"}
               strokeWidth={1}
               onClick={() => setIsSearching(!isSearching)}
               ref={mobielRef}
             />
             {currentProfile ? (
-              <img
-                src={currentProfile.imgUrl}
-                className="rounded-full object-cover h-[26px] w-[26px] cursor-pointer"
-                onClick={() => setIsMobileMenuOpen(true)}
-              />
+              <>
+                <SquaresPlusIcon
+                  className="w-5 h-5 text-white cursor-pointer ml-[-6px]"
+                  strokeWidth={0.8}
+                />
+                <img
+                  src={currentProfile.imgUrl}
+                  className="rounded-full object-cover h-[26px] w-[26px] cursor-pointer"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                />
+              </>
             ) : (
               <UserCircleIcon
                 className="text-white h-[26px] w-auto stroke-current cursor-pointer"

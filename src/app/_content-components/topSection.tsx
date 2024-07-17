@@ -11,6 +11,7 @@ import {
   SquaresPlusIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
+import { handleLikeOrDislike } from "~/server/queries/contentProfile.queries";
 
 type Props = {
   content: any;
@@ -20,6 +21,7 @@ type Props = {
 const TopSection: React.FC<Props> = ({ content, isLoading }) => {
   const isAboveMobileScreens = useMediaQuery("(min-width: 900px)");
   const [showMore, setShowMore] = useState(false);
+  const [likeStatus, setLikeStatus] = useState(content?.likeStatus || 0);
   const router = useRouter();
 
   const watchPercentage =
@@ -61,6 +63,24 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
           content?.profileContent && content?.profileContent[0]?.episode
         }`
       );
+    }
+  };
+
+  const handleLikeOrDislikeButton = async (status: number) => {
+    try {
+      setLikeStatus(status === likeStatus ? 0 : status);
+      const response = await handleLikeOrDislike(
+        content.tmdbid,
+        content.category,
+        status
+      );
+      if (response.success) {
+        setLikeStatus(response.likeStatus);
+      } else {
+        throw response.message;
+      }
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -252,12 +272,15 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                 <HandThumbUpIcon
                   className="w-[20px] h-[20px] text-white cursor-pointer"
                   strokeWidth={1.5}
+                  fill={likeStatus === 1 ? "white" : "transparent"}
+                  onClick={() => handleLikeOrDislikeButton(1)}
                 />
                 <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
-                {/* Línea vertical */}
                 <HandThumbDownIcon
                   className="w-[20px] h-[20px] text-white cursor-pointer"
                   strokeWidth={1.5}
+                  fill={likeStatus === -1 ? "white" : "transparent"}
+                  onClick={() => handleLikeOrDislikeButton(-1)}
                 />
               </div>
             </div>
@@ -354,12 +377,16 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   <HandThumbUpIcon
                     className="w-[24px] h-[24px] text-white cursor-pointer"
                     strokeWidth={1.5}
+                    fill={likeStatus === 1 ? "white" : "transparent"}
+                    onClick={() => handleLikeOrDislikeButton(1)}
                   />
                   <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
                   {/* Línea vertical */}
                   <HandThumbDownIcon
                     className="w-[24px] h-[24px] text-white cursor-pointer"
                     strokeWidth={1.5}
+                    fill={likeStatus === -1 ? "white" : "transparent"}
+                    onClick={() => handleLikeOrDislikeButton(-1)}
                   />
                 </div>
               </div>

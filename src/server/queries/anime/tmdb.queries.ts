@@ -2,6 +2,7 @@
 import axios from "axios";
 import { getCurrentProfile } from "../authMiddleware";
 import prisma from "~/server/prisma-client";
+import { profile } from "console";
 
 // GET FEED (ANIME)
 export async function getFeedAnime(): Promise<any | { error: string }> {
@@ -45,6 +46,7 @@ export async function getContentAnime(
     const content = fullDataResponse.data;
 
     let profileContent = null;
+    let likeStatus = null;
     try {
       const profile_id = await getCurrentProfile();
       if (profile_id !== null) {
@@ -52,6 +54,9 @@ export async function getContentAnime(
           where: {
             tmdb_id: content.id,
             category: "anime",
+          },
+          include: {
+            profile_likes: true,
           },
         });
         if (contentDB) {
@@ -68,6 +73,15 @@ export async function getContentAnime(
               profile: true,
             },
           });
+          const profileLikes = await prisma.profileLike.findFirst({
+            where: {
+              profile_id,
+              content_id: contentDB.id,
+            },
+          });
+          if (profileLikes) {
+            likeStatus = profileLikes.likeStatus;
+          }
         }
       }
     } catch (error) {
@@ -190,6 +204,7 @@ export async function getContentAnime(
       similarContent,
       category: "anime",
       profileContent: profileContent || null,
+      likeStatus: likeStatus || 0,
     };
   } catch (error) {
     console.error("Error fetching content:", error);
