@@ -140,11 +140,13 @@ const TopNavbar = () => {
 
   return (
     <nav
-      className={`max-w-[1920px] fixed top-0 z-30 w-full gap-10 py-2.5 left-0 right-0 mx-auto bg-[#0F0F0F] 
-        ${flexBetween} ${isAboveMediumScreens ? "px-12 " : "px-6"} 
-      ${!isTopOfPage && "shadow-md border-b border-white border-opacity-5"}`}
+      className={`max-w-[1920px] fixed top-0 z-30 w-full py-2.5 left-0 right-0 mx-auto`}
     >
-      <>
+      <div
+        className={`bg-[#0F0F0F] gap-10 ${flexBetween}
+        ${isAboveMediumScreens ? "px-12 " : "px-6"} 
+        ${!isTopOfPage && "shadow-md border-b border-white border-opacity-5"}`}
+      >
         {/* LEFT SIDE */}
         <Link href="/">
           <Image
@@ -263,7 +265,7 @@ const TopNavbar = () => {
             )}
           </div>
         )}
-      </>
+      </div>
       {isMobileMenuOpen && (
         <MobileMenu
           setIsMobileMenuOpen={setIsMobileMenuOpen}
