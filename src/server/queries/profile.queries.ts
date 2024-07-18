@@ -82,6 +82,19 @@ export async function createProfile(
         name,
         imgUrl,
         user_id,
+        library: {
+          createMany: {
+            data: [
+              { name: "Following" },
+              { name: "Plan To Watch" },
+              { name: "On Hold" },
+              { name: "Completed" },
+            ],
+          },
+        },
+      },
+      include: {
+        library: true,
       },
     });
 

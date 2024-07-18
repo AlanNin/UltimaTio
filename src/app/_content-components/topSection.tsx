@@ -1,7 +1,7 @@
 "use client";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   HandThumbUpIcon,
   HandThumbDownIcon,
@@ -12,6 +12,11 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
 import { handleLikeOrDislike } from "~/server/queries/contentProfile.queries";
+import AddLibraryModule from "./addLibraryModule";
+import {
+  addOrRemoveContentFromLibrary,
+  getLibraryForContent,
+} from "~/server/queries/contentLibrary.queries";
 
 type Props = {
   content: any;
@@ -22,6 +27,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
   const isAboveMobileScreens = useMediaQuery("(min-width: 900px)");
   const [showMore, setShowMore] = useState(false);
   const [likeStatus, setLikeStatus] = useState(content?.likeStatus || 0);
+  const [openLibraryModal, setOpenLibraryModal] = useState(false);
   const router = useRouter();
 
   const watchPercentage =
@@ -84,6 +90,104 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
     }
   };
 
+  // HANDLE CLICK OUTSIDE
+  const libraryModalRef = useRef<HTMLDivElement>(null);
+  const libraryButtonRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      const isClickOnButton =
+        libraryButtonRef.current &&
+        libraryButtonRef.current.contains(event.target);
+      if (
+        libraryModalRef.current &&
+        !libraryModalRef.current.contains(event.target) &&
+        !isClickOnButton
+      ) {
+        setOpenLibraryModal(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  });
+
+  // LIBRARIES
+  const [isLoadingLibraries, setIsLoadingLibraries] = useState(true);
+
+  const [libraries, setLibraries] = useState([
+    { name: "Following", added: false },
+    { name: "Plan To Watch", added: false },
+    { name: "On Hold", added: false },
+    { name: "Completed", added: false },
+  ]);
+
+  useEffect(() => {
+    const handleGetLibraryForContent = async () => {
+      try {
+        setIsLoadingLibraries(true);
+        const response = await getLibraryForContent(
+          content.tmdb_id,
+          content.category
+        );
+        if (response && response.length > 0) {
+          const updatedLibraries = libraries.map((library) => ({
+            ...library,
+            added: response.some((item: any) => item.name === library.name),
+          }));
+          setLibraries(updatedLibraries);
+        } else {
+          const updatedLibraries = libraries.map((library) => ({
+            ...library,
+            added: false,
+          }));
+          setLibraries(updatedLibraries);
+        }
+      } catch (error) {
+        console.error("Error fetching library content:", error);
+      } finally {
+        setIsLoadingLibraries(false);
+      }
+    };
+
+    handleGetLibraryForContent();
+  }, [content.tmdb_id, content.category]);
+
+  const handleAddToLibrary = async (library_name: string) => {
+    try {
+      setIsLoadingLibraries(true);
+      await addOrRemoveContentFromLibrary(
+        content.tmdb_id,
+        content.category,
+        library_name
+      );
+
+      const updatedLibraries = libraries.map((library) =>
+        library.name === library_name
+          ? { ...library, added: !library.added }
+          : library
+      );
+      setLibraries(updatedLibraries);
+    } catch (error) {
+      console.error("Error adding/removing content:", error);
+    } finally {
+      setIsLoadingLibraries(false);
+    }
+  };
+
+  // STOP MOBILE SCROLLING
+  useEffect(() => {
+    if (openLibraryModal && !isAboveMobileScreens) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [openLibraryModal, isAboveMobileScreens]);
+
   if (isLoading) {
     return;
   }
@@ -125,7 +229,6 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             >
               <img
                 src={content!.posterUrl}
-                alt="Content Image"
                 className={`w-[158px] h-[240px] bg-cover drop-shadow-lg rounded-sm`}
                 style={{
                   background:
@@ -254,7 +357,10 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   style={{ width: watchPercentage + "%" }}
                 />
               </div>
-              <div className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)]">
+              <div
+                className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)]"
+                onClick={() => setOpenLibraryModal(true)}
+              >
                 <SquaresPlusIcon
                   className="w-[20px] h-[20px] text-white fill-white"
                   strokeWidth={0.8}
@@ -344,7 +450,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                     className="w-[24px] h-[24px] text-white fill-white z-10"
                     strokeWidth={0.8}
                   />
-                  <h1 className="text-md text-[#ebebeb] z-10">
+                  <h1 className="text-md text-[#ebebeb] z-10 select-none">
                     {content?.profileContent &&
                     content?.profileContent[0]?.watchProgress
                       ? `${
@@ -359,19 +465,40 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                     style={{ width: watchPercentage + "%" }}
                   />
                 </div>
-                <div className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)]">
-                  <SquaresPlusIcon
-                    className="w-[24px] h-[24px] text-white fill-white"
-                    strokeWidth={0.8}
-                  />
-                  <h1 className="text-md text-[#ebebeb]"> Add to Library </h1>
+                <div className="relative">
+                  <div
+                    className={` flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)] ${
+                      openLibraryModal && "bg-[rgba(181,181,181,0.4)]"
+                    }`}
+                    onClick={() => setOpenLibraryModal(!openLibraryModal)}
+                    ref={libraryButtonRef}
+                  >
+                    <SquaresPlusIcon
+                      className="w-[24px] h-[24px] text-white fill-white"
+                      strokeWidth={0.8}
+                    />
+                    <h1 className="text-md text-[#ebebeb] select-none">
+                      Add to Library
+                    </h1>
+                  </div>
+                  {openLibraryModal && (
+                    <AddLibraryModule
+                      ref={libraryModalRef}
+                      isLoadingLibraries={isLoadingLibraries}
+                      libraries={libraries}
+                      handleAddToLibrary={handleAddToLibrary}
+                    />
+                  )}
                 </div>
                 <div className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(131,74,189,0.3)] hover:bg-[rgba(131,74,189,0.5)]">
                   <UserGroupIcon
                     className="w-[24px] h-[24px] text-white fill-white"
                     strokeWidth={0.8}
                   />
-                  <h1 className="text-md text-[#ebebeb]"> Watch Party </h1>
+                  <h1 className="text-md text-[#ebebeb] select-none">
+                    {" "}
+                    Watch Party{" "}
+                  </h1>
                 </div>
                 <div className="flex bg-[rgba(181,181,181,0.2)] gap-2.5 items-center rounded-3xl py-2 px-3.5">
                   <HandThumbUpIcon
@@ -393,6 +520,14 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             )}
           </div>
         </div>
+        {openLibraryModal && !isAboveMobileScreens && (
+          <AddLibraryModule
+            ref={libraryModalRef}
+            isLoadingLibraries={isLoadingLibraries}
+            libraries={libraries}
+            handleAddToLibrary={handleAddToLibrary}
+          />
+        )}
       </div>
     </>
   );

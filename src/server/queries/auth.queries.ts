@@ -60,6 +60,16 @@ export async function SignUpAccount(
         create: {
           name: "Default",
           imgUrl: profilePicture,
+          library: {
+            createMany: {
+              data: [
+                { name: "Following" },
+                { name: "Plan To Watch" },
+                { name: "On Hold" },
+                { name: "Completed" },
+              ],
+            },
+          },
         },
       },
       userSettings: {
