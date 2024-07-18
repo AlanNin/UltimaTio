@@ -22,7 +22,6 @@ const Search = () => {
         setIsLoading(true);
         try {
           const response = await handleSearch(query!);
-          console.log(response);
           setContent(response);
         } catch (error) {
           console.error("Error fetching search:", error);
