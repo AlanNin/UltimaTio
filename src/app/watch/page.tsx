@@ -20,7 +20,7 @@ const Watch = () => {
   const router = useRouter();
   const { currentProfile } = useSelector((state: any) => state.profile);
   const [isLoading, setIsLoading] = useState(true);
-  const providers = ["Smashy", "VidSrcPro"];
+  const providers = ["VidSrcPro", "Smashy"];
   // const providers = ["Smashy", "VidSrcPro", "2Embed", "VidSrc"];
   const [currentProvider, setCurrentProvider] = useState<string>(providers[0]!);
   const searchParams = useSearchParams();

@@ -63,8 +63,8 @@ const Search = () => {
                 <span className="text-[#a35fe8]">{query}</span>
               </h1>
               <div className="w-full h-full px-4 flex flex-wrap gap-4 justify-center items-center">
-                {content.map((content: any, index: number) => (
-                  <SearchCard key={index} content={content} />
+                {content.map((content: any) => (
+                  <SearchCard key={content.id} content={content} />
                 ))}
               </div>
             </div>
