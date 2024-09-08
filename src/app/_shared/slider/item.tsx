@@ -44,17 +44,21 @@ const SliderCard: React.FC<Props> = ({
     }
   };
 
-  // const handleNavigateWatch = () => {
-  //   if (content.category === "movie") {
-  //     router.push(
-  //       `/watch?tmdbid=${content.content.tmdb_id}&category=${content.category}`
-  //     );
-  //   } else {
-  //     router.push(
-  //       `/watch?tmdbid=${content.content.tmdb_id}&category=${content.category}&season=${content.season}&episode=${content.episode}`
-  //     );
-  //   }
-  // };
+  const handleNavigateWatch = () => {
+    if (content.category === "movie") {
+      router.push(
+        `/watch?tmdbid=${content.tmdbid || content.content.tmdb_id}&category=${
+          content.category
+        }`
+      );
+    } else {
+      router.push(
+        `/watch?tmdbid=${content.tmdbid || content.content.tmdb_id}&category=${
+          content.category
+        }&season=${content.season}&episode=${content.episode}`
+      );
+    }
+  };
 
   return (
     <div
