@@ -1,4 +1,3 @@
-"use server";
 import axios from "axios";
 
 // SCRAP VIDEO EMBED FROM RABBIT STREAM
