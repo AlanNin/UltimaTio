@@ -44,17 +44,17 @@ const SliderCard: React.FC<Props> = ({
     }
   };
 
-  const handleNavigateWatch = () => {
-    if (content.category === "movie") {
-      router.push(
-        `/watch?tmdbid=${content.content.tmdb_id}&category=${content.category}`
-      );
-    } else {
-      router.push(
-        `/watch?tmdbid=${content.content.tmdb_id}&category=${content.category}&season=${content.season}&episode=${content.episode}`
-      );
-    }
-  };
+  // const handleNavigateWatch = () => {
+  //   if (content.category === "movie") {
+  //     router.push(
+  //       `/watch?tmdbid=${content.content.tmdb_id}&category=${content.category}`
+  //     );
+  //   } else {
+  //     router.push(
+  //       `/watch?tmdbid=${content.content.tmdb_id}&category=${content.category}&season=${content.season}&episode=${content.episode}`
+  //     );
+  //   }
+  // };
 
   return (
     <div
@@ -74,9 +74,7 @@ const SliderCard: React.FC<Props> = ({
               background:
                 "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
             }}
-            onClick={
-              isAboveMediumScreens ? handleNavigate : handleNavigateWatch
-            }
+            onClick={handleNavigate}
           />
 
           {history && (
