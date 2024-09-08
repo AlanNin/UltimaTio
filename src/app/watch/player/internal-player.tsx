@@ -12,6 +12,7 @@ import {
 type Props = {
   scrapData: any;
   title?: any;
+  category?: any;
   season?: any;
   episode?: any;
   handleCurrentTimeUpdate: any;
@@ -19,7 +20,7 @@ type Props = {
   watchProgress: any;
 };
 
-const InternalPlayer: React.FC<Props> = ({ scrapData, title, season, episode, handleCurrentTimeUpdate, handleDurationUpdate, watchProgress  }) => {
+const InternalPlayer: React.FC<Props> = ({ scrapData, title, category, season, episode, handleCurrentTimeUpdate, handleDurationUpdate, watchProgress  }) => {
 
     // define player ref
     let playerRef = useRef<MediaPlayerInstance>(null);
@@ -52,7 +53,7 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, season, episode, ha
         <div className="w-full h-full">
 
         <MediaPlayer
-            title={`${title} - S${season}E${episode}`}
+            title={category === "movie" ? title : `${title} - S${season}E${episode}`}
             src={url}
             autoPlay={true}
             onCanPlay={handlePlay}
