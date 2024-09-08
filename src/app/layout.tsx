@@ -22,16 +22,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className={`${GeistSans.className} app`}>
-        <ReactQueryProvider>
-          <ReduxProvider>
-            <CheckerProvider>
-              <WhoIsWatching />
-              <TopNavbar />
-              {children}
-              <Footer />
-            </CheckerProvider>
-          </ReduxProvider>
-        </ReactQueryProvider>
+        <ReduxProvider>
+          <CheckerProvider>
+            <WhoIsWatching />
+            <TopNavbar />
+            {children}
+            <Footer />
+          </CheckerProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

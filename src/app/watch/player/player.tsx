@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import {
   scrapRabbitTokenEmbed,
@@ -9,15 +9,11 @@ import { Loading } from "~/utils/loading/loading";
 import InternalPlayer from "./internal-player";
 import ExternalPlayer from "./external-player";
 import { useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { MediaPlayerInstance } from "@vidstack/react";
 import { useSelector } from "react-redux";
 import {
   getProfileContentProgress,
   saveProfileContentProgress,
 } from "~/server/queries/contentProfile.queries";
-import { current } from "@reduxjs/toolkit";
-import { set } from "zod";
 
 type Props = {
   title: any;
@@ -47,55 +43,55 @@ const Player: React.FC<Props> = ({
   const seasonParam = searchParams.get("season") || "";
   const episodeParam = searchParams.get("episode") || "";
 
-  /// define query for rabbit token
-  const {
-    data: rabbitToken,
-    error: RabbitError,
-    isLoading: RabbitIsLoading,
-  } = useQuery({
-    queryKey: [
-      "rabbitToken",
-      tmdbidParam,
-      categoryParam,
-      seasonParam,
-      episodeParam,
-    ],
-    queryFn: async () =>
-      await scrapRabbitTokenEmbed(
-        encodedTitle,
-        year,
-        categoryParam || "",
-        tmdbidParam || "",
-        episodeParam || "1",
-        seasonParam || "1"
-      ),
-    refetchOnWindowFocus: false,
-  });
+  /// rabbit token
+  const [rabbitToken, setRabbitToken] = useState<any>({});
+  const [isRabbitTokenLoading, setIsRabbitTokenLoading] = useState(true);
+  useEffect(() => {
+    setIsRabbitTokenLoading(true);
+    const fetchRabbitToken = async () => {
+      try {
+        const response = await scrapRabbitTokenEmbed(
+          encodedTitle,
+          year,
+          categoryParam || "",
+          tmdbidParam || "",
+          episodeParam || "1",
+          seasonParam || "1"
+        );
+        setRabbitToken(response);
+      } catch (error) {
+        console.error("Error fetching rabbit token:", error);
+      } finally {
+        setIsRabbitTokenLoading(false);
+      }
+    };
+    fetchRabbitToken();
+  }, [tmdbidParam, categoryParam, seasonParam, episodeParam]);
 
-  /// define query for scrap data
-  const {
-    data: scrapData,
-    isError: ScrapIsError,
-    isLoading: ScrapIsLoading,
-  } = useQuery({
-    queryKey: [
-      "content",
-      tmdbidParam,
-      categoryParam,
-      seasonParam,
-      episodeParam,
-    ],
-    queryFn: async () =>
-      await scrapVideoEmbed(
-        encodedTitle,
-        year,
-        categoryParam || "",
-        tmdbidParam || "",
-        episodeParam || "1",
-        seasonParam || "1"
-      ),
-    refetchOnWindowFocus: false,
-  });
+  /// scrap data
+  const [scrapData, setScrapData] = useState<any>({});
+  const [isScrapDataLoading, setIsScrapDataLoading] = useState(true);
+  useEffect(() => {
+    setIsScrapDataLoading(true);
+    const fetchScrapData = async () => {
+      try {
+        const response = await scrapVideoEmbed(
+          encodedTitle,
+          year,
+          categoryParam || "",
+          tmdbidParam || "",
+          episodeParam || "1",
+          seasonParam || "1"
+        );
+        setScrapData(response);
+      } catch (error) {
+        console.error("Error fetching scrap data:", error);
+      } finally {
+        setIsScrapDataLoading(false);
+      }
+    };
+    fetchScrapData();
+  }, [tmdbidParam, categoryParam, seasonParam, episodeParam]);
 
   // FETCH PROFILE CONTENT PROGRESS
   useEffect(() => {
@@ -167,8 +163,8 @@ const Player: React.FC<Props> = ({
           "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
       }}
     >
-      {(ScrapIsLoading && currentProvider === "Internal Player (Beta)") ||
-      (RabbitIsLoading && currentProvider === "RabbitStream") ||
+      {(isScrapDataLoading && currentProvider === "Internal Player (Beta)") ||
+      (isRabbitTokenLoading && currentProvider === "RabbitStream") ||
       isLoading ? (
         <div className="w-full h-full flex justify-center items-center">
           <Loading type="spin" color="white" />
