@@ -49,6 +49,8 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, category, season, e
         videoPlayer?.play();
     };
 
+    console.log(url)
+
     return (
         <div className="w-full h-full">
 
@@ -59,6 +61,7 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, category, season, e
             onCanPlay={handlePlay}
             ref={playerRef}
             onTimeUpdate={() => handleCurrentTimeUpdate(playerRef.current?.currentTime)}
+            crossOrigin="anonymous"
         >
             <MediaProvider>
 
