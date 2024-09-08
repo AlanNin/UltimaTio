@@ -37,10 +37,19 @@ export async function scrapVideoEmbed(
       response: response_scrapper.data,
     };
   } catch (error) {
-    return { success: false, response: error };
+    // Handle the error safely
+    if (axios.isAxiosError(error)) {
+      // Axios-specific error handling
+      throw new Error(`Axios error: ${error.message}`);
+    } else if (error instanceof Error) {
+      // General error handling
+      throw new Error(`General error: ${error.message}`);
+    } else {
+      // Unknown error
+      throw new Error("Unknown error occurred");
+    }
   }
 }
-
 // SCRAP VIDEO RABBIT EMBED TOKEN FROM RABBIT STREAM
 export async function scrapRabbitTokenEmbed(
   title: string,
@@ -69,6 +78,16 @@ export async function scrapRabbitTokenEmbed(
       response: rabbit_token,
     };
   } catch (error) {
-    return { success: false, response: error };
+    // Handle the error safely
+    if (axios.isAxiosError(error)) {
+      // Axios-specific error handling
+      throw new Error(`Axios error: ${error.message}`);
+    } else if (error instanceof Error) {
+      // General error handling
+      throw new Error(`General error: ${error.message}`);
+    } else {
+      // Unknown error
+      throw new Error("Unknown error occurred");
+    }
   }
 }
