@@ -23,7 +23,7 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, handleCurrentTimeUp
     let playerRef = useRef<MediaPlayerInstance>(null);
 
     // define tracks
-    const tracks = scrapData?.captions?.map((track: any) => ({
+    const tracks = scrapData.captions && scrapData?.captions?.map((track: any) => ({
         ...track,
         src: track.file, // Renombrar 'file' a 'src'
         kind: track.kind === "captions" ? "subtitles" : track.kind, // Cambiar 'kind' si es 'captions'
@@ -58,7 +58,7 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, handleCurrentTimeUp
         >
             <MediaProvider>
 
-            {tracks.map((track: any) => (
+            {tracks && tracks?.map((track: any) => (
                 <Track {...track} key={track.src} />
             ))}
             </MediaProvider>
