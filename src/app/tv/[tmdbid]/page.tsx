@@ -18,8 +18,6 @@ const Content = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  console.log(content);
-
   useEffect(() => {
     if (!tmdbid || isNaN(Number(tmdbid))) {
       router.push("/tv");

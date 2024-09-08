@@ -6,6 +6,7 @@ import TopNavbar from "./_shared/layout/top-navbar";
 import Footer from "./_shared/layout/footer";
 import WhoIsWatching from "./_shared/profile/whos-watching";
 import CheckerProvider from "~/utils/profile-user-checker/checker-provider";
+import ReactQueryProvider from "~/utils/react-query";
 
 export const metadata = {
   title: "UltimaTio",
@@ -21,14 +22,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className={`${GeistSans.className} app`}>
-        <ReduxProvider>
-          <CheckerProvider>
-            <WhoIsWatching />
-            <TopNavbar />
-            {children}
-            <Footer />
-          </CheckerProvider>
-        </ReduxProvider>
+        <ReactQueryProvider>
+          <ReduxProvider>
+            <CheckerProvider>
+              <WhoIsWatching />
+              <TopNavbar />
+              {children}
+              <Footer />
+            </CheckerProvider>
+          </ReduxProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

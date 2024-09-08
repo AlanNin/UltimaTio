@@ -2,7 +2,7 @@
 import useMediaQuery from "~/hooks/useMediaQuery";
 import { useState, useRef, useEffect } from "react";
 import { Loading } from "~/utils/loading/loading";
-import Player from "./_components/player";
+import Player from "./player/player";
 import TopNav from "./_components/top-nav";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getContentMovie } from "~/server/queries/movie/tmdb.queries";
@@ -20,7 +20,12 @@ const Watch = () => {
   const router = useRouter();
   const { currentProfile } = useSelector((state: any) => state.profile);
   const [isLoading, setIsLoading] = useState(true);
-  const providers = ["VidSrcPro", "Smashy"];
+  const providers = [
+    "Internal Player (Beta)",
+    "RabbitStream",
+    "VidSrcPro",
+    "Smashy",
+  ];
   // const providers = ["Smashy", "VidSrcPro", "2Embed", "VidSrc"];
   const [currentProvider, setCurrentProvider] = useState<string>(providers[0]!);
   const searchParams = useSearchParams();
@@ -28,13 +33,9 @@ const Watch = () => {
   const tmdbidParam = searchParams.get("tmdbid");
   const seasonParam = searchParams.get("season");
   const episodeParam = searchParams.get("episode");
-  const tmdbid = tmdbidParam ? parseInt(tmdbidParam) : null;
-  const currentSeason = seasonParam ? parseInt(seasonParam) : null;
-  const currentEpisode = episodeParam ? parseInt(episodeParam) : null;
   const [content, setContent] = useState<any>({});
-  const playerCurrentTimeRef = useRef(null);
-  const [watchProgress, setWatchProgress] = useState<number>(0);
-  const playerCurrentDurationRef = useRef(null);
+  const currentTimeRef = useRef<any>();
+  const contentDurationRef = useRef<any>();
 
   useEffect(() => {
     if (!tmdbidParam) {
@@ -47,11 +48,11 @@ const Watch = () => {
       try {
         let response;
         if (category === "movie") {
-          response = await getContentMovie(tmdbid!);
+          response = await getContentMovie(Number(tmdbidParam)!);
         } else if (category === "tv") {
-          response = await getContentTV(tmdbid!);
+          response = await getContentTV(Number(tmdbidParam)!);
         } else if (category === "anime") {
-          response = await getContentAnime(tmdbid!);
+          response = await getContentAnime(Number(tmdbidParam)!);
         }
         setContent(response);
       } catch (error) {
@@ -66,14 +67,14 @@ const Watch = () => {
 
   const saveProfileProgress = (callback: () => void) => {
     try {
-      if (currentProfile) {
+      if (currentProfile && currentTimeRef.current > 0) {
         saveProfileContentProgress(
-          tmdbid!,
-          category!,
-          playerCurrentTimeRef.current!,
-          playerCurrentDurationRef.current!,
-          currentSeason!,
-          currentEpisode!
+          Number(tmdbidParam)!,
+          String(category)!,
+          Number(currentTimeRef.current),
+          Number(contentDurationRef.current),
+          Number(seasonParam)!,
+          Number(episodeParam)!
         );
       }
     } catch (error) {
@@ -98,15 +99,11 @@ const Watch = () => {
         <div className="h-full w-full flex flex-col items-center">
           <TopNav saveProfileProgress={saveProfileProgress} />
           <Player
-            tmdbid={tmdbid}
-            category={category}
-            season={currentSeason}
-            episode={currentEpisode}
-            provider={currentProvider}
-            playerCurrentTimeRef={playerCurrentTimeRef}
-            watchProgress={watchProgress}
-            setWatchProgress={setWatchProgress}
-            playerCurrentDurationRef={playerCurrentDurationRef}
+            title={content.title}
+            year={String(new Date(content.date).getFullYear())}
+            currentProvider={currentProvider}
+            currentTimeRef={currentTimeRef}
+            contentDurationRef={contentDurationRef}
           />
           <Providers
             providers={providers}
@@ -118,25 +115,25 @@ const Watch = () => {
             <div className="w-full flex flex-col gap-4">
               <Episodes
                 content={content}
-                tmdbid={tmdbid!}
+                tmdbid={Number(tmdbidParam)!}
                 category={category}
-                currentSeason={currentSeason!}
-                currentEpisode={currentEpisode!}
+                currentSeason={Number(seasonParam)!}
+                currentEpisode={Number(episodeParam)!}
                 saveProfileProgress={saveProfileProgress}
               />
               <Seasons
                 content={content}
-                tmdbid={tmdbid!}
+                tmdbid={Number(tmdbidParam)!}
                 category={category}
-                currentSeason={currentSeason!}
+                currentSeason={Number(seasonParam)!}
                 saveProfileProgress={saveProfileProgress}
               />
             </div>
           )}
           <Info
             content={content!}
-            season={currentSeason}
-            episode={currentEpisode}
+            season={Number(seasonParam)}
+            episode={Number(episodeParam)}
             saveProfileProgress={saveProfileProgress}
           />
         </div>
