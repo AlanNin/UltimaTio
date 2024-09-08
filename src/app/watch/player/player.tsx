@@ -97,6 +97,11 @@ const Player: React.FC<Props> = ({
     refetchOnWindowFocus: false,
   });
 
+  console.log(scrapData);
+  if (ScrapIsError) {
+    console.log("Error getting scrap data:", ScrapIsError);
+  }
+
   // FETCH PROFILE CONTENT PROGRESS
   useEffect(() => {
     setIsLoading(true);
