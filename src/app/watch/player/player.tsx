@@ -60,8 +60,8 @@ const Player: React.FC<Props> = ({
       seasonParam,
       episodeParam,
     ],
-    queryFn: () =>
-      scrapRabbitTokenEmbed(
+    queryFn: async () =>
+      await scrapRabbitTokenEmbed(
         encodedTitle,
         year,
         categoryParam || "",
@@ -85,8 +85,8 @@ const Player: React.FC<Props> = ({
       seasonParam,
       episodeParam,
     ],
-    queryFn: () =>
-      scrapVideoEmbed(
+    queryFn: async () =>
+      await scrapVideoEmbed(
         encodedTitle,
         year,
         categoryParam || "",
@@ -96,11 +96,6 @@ const Player: React.FC<Props> = ({
       ),
     refetchOnWindowFocus: false,
   });
-
-  console.log(scrapData);
-  if (ScrapIsError) {
-    console.log("Error getting scrap data:", ScrapIsError);
-  }
 
   // FETCH PROFILE CONTENT PROGRESS
   useEffect(() => {
