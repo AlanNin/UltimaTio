@@ -145,7 +145,9 @@ const Player: React.FC<Props> = ({
   return (
     <div
       className={`${
-        isAboveMediumScreens ? "w-[854px] h-[480px] rounded-md" : "w-full"
+        isAboveMediumScreens
+          ? "w-[854px] h-[480px] rounded-md"
+          : "w-full h-auto"
       }`}
       style={{
         background:
@@ -155,7 +157,7 @@ const Player: React.FC<Props> = ({
       {(ScrapIsLoading && currentProvider === "Internal Player (Beta)") ||
       (RabbitIsLoading && currentProvider === "RabbitStream") ||
       isLoading ? (
-        <div className="w-full h-full flex justify-center items-center">
+        <div className="w-full h-full min-h-[200px] flex justify-center items-center">
           <Loading type="spin" color="white" />
         </div>
       ) : (
