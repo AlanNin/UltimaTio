@@ -8,19 +8,19 @@ import {
 import { Loading } from "~/utils/loading/loading";
 import InternalPlayer from "./internal-player";
 import ExternalPlayer from "./external-player";
-import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { MediaPlayerInstance } from "@vidstack/react";
 import { useSelector } from "react-redux";
 import {
   getProfileContentProgress,
   saveProfileContentProgress,
 } from "~/server/queries/contentProfile.queries";
-import { current } from "@reduxjs/toolkit";
-import { set } from "zod";
 
 type Props = {
   title: any;
+  tmdbid: any;
+  category: any;
+  season: any;
+  episode: any;
   year: any;
   currentProvider: any;
   currentTimeRef: any;
@@ -29,6 +29,10 @@ type Props = {
 
 const Player: React.FC<Props> = ({
   title,
+  tmdbid,
+  category,
+  season,
+  episode,
   year,
   currentProvider,
   currentTimeRef,
@@ -40,34 +44,21 @@ const Player: React.FC<Props> = ({
   const [watchProgress, setWatchProgress] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // define search params
-  const searchParams = useSearchParams();
-  const tmdbidParam = searchParams.get("tmdbid");
-  const categoryParam = searchParams.get("category");
-  const seasonParam = searchParams.get("season") || "";
-  const episodeParam = searchParams.get("episode") || "";
-
   /// define query for rabbit token
   const {
     data: rabbitToken,
     error: RabbitError,
     isLoading: RabbitIsLoading,
   } = useQuery({
-    queryKey: [
-      "rabbitToken",
-      tmdbidParam,
-      categoryParam,
-      seasonParam,
-      episodeParam,
-    ],
+    queryKey: ["rabbitToken", tmdbid, category, season, episode],
     queryFn: () =>
       scrapRabbitTokenEmbed(
         encodedTitle,
         year,
-        categoryParam || "",
-        tmdbidParam || "",
-        episodeParam || "1",
-        seasonParam || "1"
+        category || "",
+        tmdbid || "",
+        episode || "1",
+        season || "1"
       ),
     refetchOnWindowFocus: false,
   });
@@ -78,21 +69,15 @@ const Player: React.FC<Props> = ({
     isError: ScrapIsError,
     isLoading: ScrapIsLoading,
   } = useQuery({
-    queryKey: [
-      "content",
-      tmdbidParam,
-      categoryParam,
-      seasonParam,
-      episodeParam,
-    ],
+    queryKey: ["content", tmdbid, category, season, episode],
     queryFn: async () =>
       scrapVideoEmbed(
         encodedTitle,
         year,
-        categoryParam || "",
-        tmdbidParam || "",
-        episodeParam || "1",
-        seasonParam || "1"
+        category || "",
+        tmdbid || "",
+        episode || "1",
+        season || "1"
       ),
     refetchOnWindowFocus: false,
   });
@@ -109,10 +94,10 @@ const Player: React.FC<Props> = ({
     const fetchProfileContentProgress = async () => {
       try {
         const response = await getProfileContentProgress(
-          Number(tmdbidParam) || 0,
-          categoryParam || "",
-          Number(seasonParam) || 0,
-          Number(episodeParam) || 0
+          Number(tmdbid) || 0,
+          category || "",
+          Number(season) || 0,
+          Number(episode) || 0
         );
         setWatchProgress(response.watchProgress);
       } catch (error) {
@@ -122,7 +107,7 @@ const Player: React.FC<Props> = ({
       }
     };
     fetchProfileContentProgress();
-  }, [seasonParam, episodeParam, currentProvider, tmdbidParam]);
+  }, [season, episode, currentProvider, tmdbid]);
 
   // manage current time
   const handleCurrentTimeUpdate = (time: any) => {
@@ -141,12 +126,12 @@ const Player: React.FC<Props> = ({
     }
     const handleBeforeUnload = async () => {
       saveProfileContentProgress(
-        Number(tmdbidParam) || 0,
-        categoryParam!,
+        Number(tmdbid) || 0,
+        category!,
         currentTimeRef.current,
         contentDurationRef.current,
-        Number(seasonParam) || 0,
-        Number(episodeParam) || 0
+        Number(season) || 0,
+        Number(episode) || 0
       );
     };
 
@@ -179,8 +164,8 @@ const Player: React.FC<Props> = ({
             <InternalPlayer
               scrapData={scrapData?.response}
               title={title}
-              season={Number(seasonParam)}
-              episode={Number(episodeParam)}
+              season={Number(season)}
+              episode={Number(episode)}
               handleCurrentTimeUpdate={handleCurrentTimeUpdate}
               handleDurationUpdate={handleDurationUpdate}
               watchProgress={watchProgress}
@@ -188,10 +173,10 @@ const Player: React.FC<Props> = ({
           ) : (
             <ExternalPlayer
               src={determineSrc(
-                tmdbidParam,
-                categoryParam,
-                seasonParam,
-                episodeParam,
+                tmdbid,
+                category,
+                season,
+                episode,
                 currentProvider,
                 rabbitToken?.response
               )}

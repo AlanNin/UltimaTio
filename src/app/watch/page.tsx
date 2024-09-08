@@ -100,6 +100,10 @@ const Watch = () => {
           <TopNav saveProfileProgress={saveProfileProgress} />
           <Player
             title={content.title}
+            tmdbid={Number(tmdbidParam)}
+            category={category}
+            season={Number(seasonParam)}
+            episode={Number(episodeParam)}
             year={String(new Date(content.date).getFullYear())}
             currentProvider={currentProvider}
             currentTimeRef={currentTimeRef}
