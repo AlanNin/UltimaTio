@@ -12,27 +12,30 @@ import {
 type Props = {
   scrapData: any;
   title?: any;
+  season?: any;
+  episode?: any;
   handleCurrentTimeUpdate: any;
   handleDurationUpdate: any;
   watchProgress: any;
 };
 
-const InternalPlayer: React.FC<Props> = ({ scrapData, title, handleCurrentTimeUpdate, handleDurationUpdate, watchProgress  }) => {
+const InternalPlayer: React.FC<Props> = ({ scrapData, title, season, episode, handleCurrentTimeUpdate, handleDurationUpdate, watchProgress  }) => {
 
     // define player ref
     let playerRef = useRef<MediaPlayerInstance>(null);
 
     // define tracks
-    const tracks = scrapData.captions && scrapData?.captions?.map((track: any) => ({
+    const tracks = scrapData?.captions?.length
+    ? scrapData.captions.map((track: any) => ({
         ...track,
         src: track.file, // Renombrar 'file' a 'src'
         kind: track.kind === "captions" ? "subtitles" : track.kind, // Cambiar 'kind' si es 'captions'
-        // Eliminamos la propiedad 'file'
-        file: undefined
-      }));
+        file: undefined // Eliminamos la propiedad 'file'
+      }))
+    : [];
 
-      // define url
-    const url = scrapData?.decoded[0]?.file;
+    // define url
+    const url = scrapData?.decoded?.[0]?.file || "";
 
     // define handlePlay
     const handlePlay = () => {
@@ -49,7 +52,7 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, handleCurrentTimeUp
         <div className="w-full h-full">
 
         <MediaPlayer
-            title={title}
+            title={`${title} - S${season}E${episode}`}
             src={url}
             autoPlay={true}
             onCanPlay={handlePlay}
@@ -58,8 +61,9 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, handleCurrentTimeUp
         >
             <MediaProvider>
 
-            {tracks && tracks?.map((track: any) => (
-                <Track {...track} key={track.src} />
+            {tracks.length > 0 &&
+            tracks.map((track: any) => (
+              <Track {...track} key={track.src} />
             ))}
             </MediaProvider>
 

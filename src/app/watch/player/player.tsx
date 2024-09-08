@@ -179,6 +179,8 @@ const Player: React.FC<Props> = ({
             <InternalPlayer
               scrapData={scrapData?.response}
               title={title}
+              season={Number(seasonParam)}
+              episode={Number(episodeParam)}
               handleCurrentTimeUpdate={handleCurrentTimeUpdate}
               handleDurationUpdate={handleDurationUpdate}
               watchProgress={watchProgress}
