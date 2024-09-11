@@ -128,6 +128,129 @@ export async function SignInAccount(
     throw new Error("An error occurred during sign-in");
   }
 }
+// SIGN IN WITH GOOGLE
+export async function SignInWithGoogle(
+  google_id: string,
+): Promise<{
+  success: boolean;
+  response: User | string | null;
+  token?: string;
+}> {
+  try {
+    // GET USER
+    const user = await prisma.user.findFirst({
+      where: {
+        id: {
+          equals: google_id,
+          mode: "insensitive",
+        },
+      },
+    }); 
+
+       // VALIDATIONS
+       if (!user) {
+        return { response: "Incorrect credentials. Try Again", success: false };
+      }
+
+    // TOKEN
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!);
+
+    // EXCLUDE USER PASSWORD FROM ANSWER
+    const { password: _, ...userData } = user;
+
+    return { token, response: userData, success: true };
+  } catch (error) {
+    console.error("Error in SignInAccount:", error);
+    throw new Error("An error occurred during sign-in");
+  }
+}
+
+// SIGN UP WITH GOOGLE
+export async function SignUpWithGoogle(
+  google_id: string,
+  email: string,
+  password: string,
+  confirm_password: string,
+  receive_emails: boolean
+): Promise<{
+  success: boolean;
+  response: User | string | null;
+}> {
+  try {
+
+    if (password !== confirm_password) {
+      throw new Error("Passwords do not match");
+    }
+  
+    if (!google_id) {
+      throw new Error("Google ID is required");
+    }
+
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email.toLowerCase(),
+          mode: "insensitive",
+        },
+      },
+    });
+  
+    if (existingUser) {
+      SignInWithGoogle(google_id);
+    }
+  
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.toLowerCase())) {
+      throw new Error("Invalid email format");
+    }
+  
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(password, salt);
+  
+    // GET DEFAULT PROFILE PICTURE
+    const profilePicture = (await getRandomProfilePicture()) || "";
+  
+    // CREATE NEW USER
+    const newUser = await prisma.user.create({
+      data: {
+        id: google_id,
+        email: email.toLowerCase(),
+        password: hash,
+        profiles: {
+          create: {
+            name: "Default",
+            imgUrl: profilePicture,
+            library: {
+              createMany: {
+                data: [
+                  { name: "Following" },
+                  { name: "Plan To Watch" },
+                  { name: "On Hold" },
+                  { name: "Completed" },
+                ],
+              },
+            },
+          },
+        },
+        userSettings: {
+          create: {
+            receive_emails,
+          },
+        },
+      },
+      include: { profiles: true, userSettings: true },
+    });
+  
+    return {
+      success: true,
+      response: newUser,
+    };
+  
+  } catch (error) {
+    console.error("Error in SignUpWithGoogle:", error);
+    throw new Error("An error occurred during sign-up");
+  }
+}
 
 // VALIDATE EMAIL
 export async function validateEmail(

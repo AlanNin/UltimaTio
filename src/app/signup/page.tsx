@@ -13,9 +13,14 @@ import { Reveal } from "~/utils/framer-motion/reveal";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import LogoL from "~/assets/UltimatioLogo_Lighter.png";
-import { SignUpAccount, validateEmail } from "~/server/queries/auth.queries";
+import { SignUpAccount, SignUpWithGoogle, validateEmail } from "~/server/queries/auth.queries";
 import Image from "next/image";
 import Loading from "react-loading";
+import { useDispatch } from "react-redux";
+import { loginFailure, loginStart, loginSuccess } from "~/utils/redux/user-slice";
+import { signInWithPopup } from "firebase/auth";
+import { auth, GoogleProvider } from "~/firebase/config"
+import { useRouter } from "next/navigation";	
 
 const SignUp = () => {
   const isAboveLargeScreens = useMediaQuery("(min-width: 1280px)");
@@ -144,6 +149,45 @@ const SignUp = () => {
       }
     }
   };
+
+  // DEFINE REDUX
+  const dispatch = useDispatch();
+
+  // DEFINE ROUTER
+  const router = useRouter();
+
+  // HANDLE SIGN UP WITH GOOGLE
+  const signUpWithGoogle = async () => {
+    dispatch(loginStart());
+
+    try {
+      const result = await signInWithPopup(auth, GoogleProvider);
+
+      console.log(result);
+      // Check if the name and email are already registered
+      const isEmailAvailable = await validateEmail(result.user.email!);
+
+      if (!isEmailAvailable) {
+        dispatch(loginFailure());
+        return;
+      }
+
+      const {success, response} = await SignUpWithGoogle(result.user.uid, result.user.email!, "", "", true);
+
+      if (!success) {
+        dispatch(loginFailure());
+        return;
+      }
+
+      dispatch(loginSuccess(response));
+      router.push("/");
+
+    } catch (error) {
+      console.error("Error in signUpWithGoogle:", error);
+      dispatch(loginFailure());
+    }
+  };
+
 
   return (
     <section
@@ -295,7 +339,7 @@ const SignUp = () => {
                 : "Or create an account with"}
             </h1>
 
-            <div className="bg-[#ebf7ff] w-full py-1 flex justify-center rounded cursor-pointer">
+            <div className="bg-[#ebf7ff] w-full py-1 flex justify-center rounded cursor-pointer" onClick={signUpWithGoogle}>
               <Image alt="Google" src={GoogleIcon} className="h-5 w-5" />
             </div>
 
