@@ -65,6 +65,22 @@ const Watch = () => {
     fetchContent();
   }, [tmdbidParam]);
 
+  const reFetchContent = async () => {
+    try {
+      let response;
+      if (category === "movie") {
+        response = await getContentMovie(Number(tmdbidParam)!);
+      } else if (category === "tv") {
+        response = await getContentTV(Number(tmdbidParam)!);
+      } else if (category === "anime") {
+        response = await getContentAnime(Number(tmdbidParam)!);
+      }
+      setContent(response);
+    } catch (error) {
+      console.error("Error getting content -->:", error);
+    }
+  };
+
   const saveProfileProgress = (callback: () => void) => {
     try {
       if (currentProfile && currentTimeRef.current > 0) {
@@ -81,6 +97,7 @@ const Watch = () => {
       console.error("Error saving profile content progress:", error);
     } finally {
       callback();
+      reFetchContent();
     }
   };
 
@@ -124,6 +141,7 @@ const Watch = () => {
                 currentSeason={Number(seasonParam)!}
                 currentEpisode={Number(episodeParam)!}
                 saveProfileProgress={saveProfileProgress}
+                profileContent={content.profileContent}
               />
               <Seasons
                 content={content}

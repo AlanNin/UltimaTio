@@ -2,7 +2,7 @@
 import React, { useRef } from "react";
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
-import { MediaPlayer, MediaProvider, type MediaPlayerInstance, Track } from "@vidstack/react";
+import { MediaPlayer, MediaProvider, type MediaPlayerInstance, Track, isGoogleCastProvider, type MediaProviderAdapter, type MediaProviderSetupEvent, } from "@vidstack/react";
 import {
   DefaultAudioLayout,
   defaultLayoutIcons,
@@ -49,7 +49,8 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, category, season, e
         videoPlayer?.play();
     };
 
-    console.log(url)
+
+
 
     return (
         <div className="w-full h-full">
@@ -62,6 +63,11 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, category, season, e
             ref={playerRef}
             onTimeUpdate={() => handleCurrentTimeUpdate(playerRef.current?.currentTime)}
             crossOrigin="anonymous"
+            googleCast={{
+              autoJoinPolicy: "origin-scope" as any,
+              language: 'en-US',
+              receiverApplicationId: '...',
+            }}
         >
             <MediaProvider>
 
