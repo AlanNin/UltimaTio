@@ -18,9 +18,12 @@ import {
 } from "~/utils/redux/user-slice";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import { SignInAccount } from "~/server/queries/auth.queries";
+import { SignInAccount, SignInWithGoogle } from "~/server/queries/auth.queries";
 import { useRouter } from "next/navigation";
 import Loading from "react-loading";
+import { signInWithPopup } from "firebase/auth";
+import { GoogleProvider, auth } from "~/firebase/config";
+import { Loader2 } from "lucide-react";
 
 const LogIn = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 800px)");
@@ -76,6 +79,32 @@ const LogIn = () => {
         setIsLoginError(true);
         setLoginStarted(false);
       }
+    }
+  };
+
+  // HANDLE SIGN UP WITH GOOGLE
+  const signUpWithGoogle = async () => {
+    dispatch(loginStart());
+
+    try {
+      const result = await signInWithPopup(auth, GoogleProvider);
+
+      const { success, response, token } = await SignInWithGoogle(
+        result.user.email!
+      );
+
+      if (!success) {
+        dispatch(loginFailure());
+        return;
+      }
+
+      if (token) {
+        dispatch(loginSuccess(response));
+        Cookies.set("access_token", token, { expires: 365 });
+        router.push("/");
+      }
+    } catch (error) {
+      dispatch(loginFailure());
     }
   };
 
@@ -176,7 +205,10 @@ const LogIn = () => {
           )}
         </div>
 
-        <div className="bg-[#ebf7ff] w-full py-1 flex justify-center rounded cursor-pointer max-w-[400px]">
+        <div
+          className="bg-[#ebf7ff] w-full py-1 flex justify-center rounded cursor-pointer max-w-[400px]"
+          onClick={signUpWithGoogle}
+        >
           <Image alt="Google" src={GoogleIcon} className="h-5 w-5" />
         </div>
 
@@ -209,14 +241,9 @@ const LogIn = () => {
 
         <div className="mt-1">
           {loginStarted ? (
-            <Loading
-              className={`text-white border-[#383838] cursor-progress
-              h-max w-max p-3 border-[2.5px] rounded-3xl stroke-current bg-[rgba(158,16,90,0.5)] border-transparent`}
-              type="bars"
-              color="rgb(184, 184, 184, 0.4)"
-              height="60px"
-              width="60px"
-            />
+            <div className="border-transparent p-4 bg-[rgba(158,16,90,0.5)]  rounded-3xl">
+              <Loader2 className="h-7 w-7 text-white animate-spin cursor-progress " />
+            </div>
           ) : (
             <ChevronRightIcon
               strokeWidth={0.8}

@@ -111,6 +111,7 @@ export async function SignInAccount(
     if (!user) {
       return { response: "Incorrect credentials. Try Again", success: false };
     }
+
     const isCorrect = await bcrypt.compare(password, user.password);
     if (!isCorrect) {
       return { response: "Incorrect credentials. Try Again", success: false };
@@ -130,7 +131,7 @@ export async function SignInAccount(
 }
 // SIGN IN WITH GOOGLE
 export async function SignInWithGoogle(
-  google_id: string,
+  email: string
 ): Promise<{
   success: boolean;
   response: User | string | null;
@@ -140,17 +141,17 @@ export async function SignInWithGoogle(
     // GET USER
     const user = await prisma.user.findFirst({
       where: {
-        id: {
-          equals: google_id,
+        email: {
+          equals: email.toLowerCase(),
           mode: "insensitive",
         },
       },
-    }); 
+    });
 
-       // VALIDATIONS
-       if (!user) {
-        return { response: "Incorrect credentials. Try Again", success: false };
-      }
+    // VALIDATIONS
+    if (!user) {
+      return { response: "Incorrect credentials. Try Again", success: false };
+    }
 
     // TOKEN
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!);
@@ -167,25 +168,13 @@ export async function SignInWithGoogle(
 
 // SIGN UP WITH GOOGLE
 export async function SignUpWithGoogle(
-  google_id: string,
-  email: string,
-  password: string,
-  confirm_password: string,
-  receive_emails: boolean
+  email: string
 ): Promise<{
   success: boolean;
   response: User | string | null;
+  token?: string;
 }> {
   try {
-
-    if (password !== confirm_password) {
-      throw new Error("Passwords do not match");
-    }
-  
-    if (!google_id) {
-      throw new Error("Google ID is required");
-    }
-
     const existingUser = await prisma.user.findFirst({
       where: {
         email: {
@@ -194,28 +183,25 @@ export async function SignUpWithGoogle(
         },
       },
     });
-  
+
     if (existingUser) {
-      SignInWithGoogle(google_id);
+      const response = await SignInWithGoogle(existingUser.email);
+      return response;
     }
-  
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.toLowerCase())) {
       throw new Error("Invalid email format");
     }
-  
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(password, salt);
-  
+
     // GET DEFAULT PROFILE PICTURE
     const profilePicture = (await getRandomProfilePicture()) || "";
-  
+
     // CREATE NEW USER
     const newUser = await prisma.user.create({
       data: {
-        id: google_id,
         email: email.toLowerCase(),
-        password: hash,
+        password: "",
         profiles: {
           create: {
             name: "Default",
@@ -234,18 +220,15 @@ export async function SignUpWithGoogle(
         },
         userSettings: {
           create: {
-            receive_emails,
+            receive_emails: false,
           },
         },
       },
       include: { profiles: true, userSettings: true },
     });
-  
-    return {
-      success: true,
-      response: newUser,
-    };
-  
+
+    const response = await SignInWithGoogle(newUser.email);
+    return response;
   } catch (error) {
     console.error("Error in SignUpWithGoogle:", error);
     throw new Error("An error occurred during sign-up");

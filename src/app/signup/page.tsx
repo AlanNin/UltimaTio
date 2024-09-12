@@ -13,14 +13,24 @@ import { Reveal } from "~/utils/framer-motion/reveal";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import LogoL from "~/assets/UltimatioLogo_Lighter.png";
-import { SignUpAccount, SignUpWithGoogle, validateEmail } from "~/server/queries/auth.queries";
+import {
+  SignUpAccount,
+  SignUpWithGoogle,
+  validateEmail,
+} from "~/server/queries/auth.queries";
 import Image from "next/image";
 import Loading from "react-loading";
 import { useDispatch } from "react-redux";
-import { loginFailure, loginStart, loginSuccess } from "~/utils/redux/user-slice";
+import {
+  loginFailure,
+  loginStart,
+  loginSuccess,
+} from "~/utils/redux/user-slice";
 import { signInWithPopup } from "firebase/auth";
-import { auth, GoogleProvider } from "~/firebase/config"
-import { useRouter } from "next/navigation";	
+import { auth, GoogleProvider } from "~/firebase/config";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { Loader2 } from "lucide-react";
 
 const SignUp = () => {
   const isAboveLargeScreens = useMediaQuery("(min-width: 1280px)");
@@ -163,31 +173,26 @@ const SignUp = () => {
     try {
       const result = await signInWithPopup(auth, GoogleProvider);
 
-      console.log(result);
-      // Check if the name and email are already registered
-      const isEmailAvailable = await validateEmail(result.user.email!);
-
-      if (!isEmailAvailable) {
-        dispatch(loginFailure());
-        return;
-      }
-
-      const {success, response} = await SignUpWithGoogle(result.user.uid, result.user.email!, "", "", true);
+      const { success, response, token } = await SignUpWithGoogle(
+        result.user.email!
+      );
 
       if (!success) {
         dispatch(loginFailure());
         return;
       }
 
-      dispatch(loginSuccess(response));
-      router.push("/");
-
+      if (token) {
+        console.log("TOKEN", token);
+        dispatch(loginSuccess(response));
+        Cookies.set("access_token", token, { expires: 365 });
+        router.push("/");
+      }
     } catch (error) {
       console.error("Error in signUpWithGoogle:", error);
       dispatch(loginFailure());
     }
   };
-
 
   return (
     <section
@@ -339,20 +344,18 @@ const SignUp = () => {
                 : "Or create an account with"}
             </h1>
 
-            <div className="bg-[#ebf7ff] w-full py-1 flex justify-center rounded cursor-pointer" onClick={signUpWithGoogle}>
+            <div
+              className="bg-[#ebf7ff] w-full py-1 flex justify-center rounded cursor-pointer"
+              onClick={signUpWithGoogle}
+            >
               <Image alt="Google" src={GoogleIcon} className="h-5 w-5" />
             </div>
 
             <div className="mt-8">
               {handlingFirstStep ? (
-                <Loading
-                  className={`text-white border-[#383838] cursor-progress
-                  h-max w-max p-3 border-[2.5px] rounded-3xl stroke-current bg-[rgba(158,16,90,0.5)] border-transparent`}
-                  type="bars"
-                  color="rgb(184, 184, 184, 0.4)"
-                  height="60px"
-                  width="60px"
-                />
+                <div className="border-transparent p-4 bg-[rgba(158,16,90,0.5)]  rounded-3xl">
+                  <Loader2 className="h-7 w-7 text-white animate-spin cursor-progress " />
+                </div>
               ) : (
                 <ChevronRightIcon
                   strokeWidth={0.8}
@@ -569,14 +572,9 @@ const SignUp = () => {
 
             <div className="mt-5">
               {handlingSecondStep ? (
-                <Loading
-                  className={`text-white border-[#383838] cursor-progress
-                  h-max w-max p-3 border-[2.5px] rounded-3xl stroke-current bg-[rgba(158,16,90,0.5)] border-transparent`}
-                  type="bars"
-                  color="rgb(184, 184, 184, 0.4)"
-                  height="60px"
-                  width="60px"
-                />
+                <div className="border-transparent p-4 bg-[rgba(158,16,90,0.5)]  rounded-3xl">
+                  <Loader2 className="h-7 w-7 text-white animate-spin cursor-progress " />
+                </div>
               ) : (
                 <ChevronRightIcon
                   strokeWidth={0.8}

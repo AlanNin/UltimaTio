@@ -9,7 +9,7 @@ const firebaseConfig = {
   projectId: "ultimatio-7811e",
   storageBucket: "ultimatio-7811e.appspot.com",
   messagingSenderId: "799431591013",
-  appId: "1:799431591013:web:2f2a7b2af18e53cadfb28c"
+  appId: "1:799431591013:web:2f2a7b2af18e53cadfb28c",
 };
 
 // initialize Firebase
