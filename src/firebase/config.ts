@@ -1,15 +1,16 @@
 // import firebase dependecies
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { env } from "~/env";
 
 // import firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyC4mYjH0kIn4KY8KDuI2lyKzCGWXAfD3F4",
-  authDomain: "ultimatio-7811e.firebaseapp.com",
-  projectId: "ultimatio-7811e",
-  storageBucket: "ultimatio-7811e.appspot.com",
-  messagingSenderId: "799431591013",
-  appId: "1:799431591013:web:2f2a7b2af18e53cadfb28c",
+  apiKey: env.FIREBASE_API_KEY,
+  authDomain: env.FIREBASE_AUTH_DOMAIN,
+  projectId: env.FIREBASE_PROJECT_ID,
+  storageBucket: env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: env.FIREBASE_APP_ID,
 };
 
 // initialize Firebase
