@@ -26,17 +26,19 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, category, season, e
     let playerRef = useRef<MediaPlayerInstance>(null);
 
     // define tracks
-    const tracks = scrapData?.captions?.length
-    ? scrapData.captions.map((track: any) => ({
+    const tracks = scrapData?.stream.captions?.length
+    ? scrapData.stream.captions?.map((track: any) => ({
         ...track,
-        src: track.file, // Renombrar 'file' a 'src'
-        kind: track.kind === "captions" ? "subtitles" : track.kind, // Cambiar 'kind' si es 'captions'
-        file: undefined // Eliminamos la propiedad 'file'
+        src: track.url, // Renombrar 'file' a 'src'
+        kind:"subtitles",
+        label: track.language,
+        file: undefined,
+        default: track.language.toLowerCase().includes("english")
       }))
     : [];
 
     // define url
-    const url = scrapData?.decoded?.[0]?.file || "";
+    const url = scrapData?.stream?.playlist;
 
     // define handlePlay
     const handlePlay = () => {
@@ -48,9 +50,6 @@ const InternalPlayer: React.FC<Props> = ({ scrapData, title, category, season, e
         }
         videoPlayer?.play();
     };
-
-
-
 
     return (
         <div className="w-full h-full">

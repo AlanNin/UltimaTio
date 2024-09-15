@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import useMediaQuery from "~/hooks/useMediaQuery";
 import {
   scrapRabbitTokenEmbed,
-  scrapVideoEmbed,
+  scrapForInternalPlayer,
 } from "~/server/queries/scrap.queries";
 import { Loading } from "~/utils/loading/loading";
 import InternalPlayer from "./internal-player";
@@ -71,10 +71,8 @@ const Player: React.FC<Props> = ({
   } = useQuery({
     queryKey: ["content", tmdbid, category, season, episode],
     queryFn: async () =>
-      scrapVideoEmbed(
-        encodedTitle,
-        year,
-        category === "anime" ? "tv" : category || "",
+      scrapForInternalPlayer(
+        category || "",
         tmdbid || "",
         episode || "1",
         season || "1"
@@ -164,7 +162,7 @@ const Player: React.FC<Props> = ({
         <>
           {currentProvider === "Internal Player (Beta)" ? (
             <InternalPlayer
-              scrapData={scrapData?.response}
+              scrapData={scrapData?.response?.data}
               title={title}
               category={category}
               season={Number(season)}
