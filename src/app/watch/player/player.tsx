@@ -55,7 +55,7 @@ const Player: React.FC<Props> = ({
       scrapRabbitTokenEmbed(
         encodedTitle,
         year,
-        category || "",
+        category === "anime" ? "tv" : category || "",
         tmdbid || "",
         episode || "1",
         season || "1"
@@ -74,7 +74,7 @@ const Player: React.FC<Props> = ({
       scrapVideoEmbed(
         encodedTitle,
         year,
-        category || "",
+        category === "anime" ? "tv" : category || "",
         tmdbid || "",
         episode || "1",
         season || "1"

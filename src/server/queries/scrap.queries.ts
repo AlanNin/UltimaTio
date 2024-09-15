@@ -15,7 +15,7 @@ export async function scrapVideoEmbed(
   try {
     // GET RABBIT TOKEN
     const response_rabbit_token = await axios.get(
-      `https://api.braflix.ru/upcloud/sources-with-title?title=${title}&year=${year}&mediaType=${media_type}&episodeId=${
+      `https://api.braflix.st/upcloud/sources-with-title?title=${title}&year=${year}&mediaType=${media_type}&episodeId=${
         episode || "1"
       }&seasonId=${season || "1"}&tmdbId=${tmdb_id}`
     );
@@ -64,7 +64,7 @@ export async function scrapRabbitTokenEmbed(
   try {
     // GET RABBIT TOKEN
     const response_rabbit_token = await axios.get(
-      `https://api.braflix.ru/upcloud/sources-with-title?title=${title}&year=${year}&mediaType=${media_type}&episodeId=${
+      `https://api.braflix.st/upcloud/sources-with-title?title=${title}&year=${year}&mediaType=${media_type}&episodeId=${
         episode || "1"
       }&seasonId=${season || "1"}&tmdbId=${tmdb_id}`
     );
