@@ -1,6 +1,6 @@
 # UltimaTio - Your Ultimate Multimedia Platform
 
-![Spammy Homepage](./public/public_assets/homepage-screenshot.png)
+![UltimaTio Homepage](./public/public_assets/homepage-screenshot.png)
 
 **UltimaTio** is a web-based multimedia platform where users can stream movies, TV series, and other media content. It offers personalized user experiences, allowing users to track their viewing progress, create playlists, and enjoy content across various devices. Whether you're a movie buff or a binge-watcher, **UltimaTio** has you covered with a sleek interface and powerful user features.
 
