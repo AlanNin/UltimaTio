@@ -11,7 +11,7 @@ import ReactQueryProvider from "~/utils/react-query";
 export const metadata = {
   title: "UltimaTio",
   description: "#1 Streaming Platform",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [{ rel: "icon", url: "/favicon.svg", type: "image/svg+xml" }],
 };
 
 export default function RootLayout({
