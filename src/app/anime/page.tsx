@@ -3,12 +3,12 @@ import useMediaQuery from "~/hooks/use-media-query";
 import { getFeedAnime } from "~/server/queries/anime/tmdb.queries";
 import { Loading } from "~/utils/loading/loading";
 import Section from "~/components/section/section";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export default function AnimeScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
-  const { data: feedData, isLoading: isFeedLoading } = useSuspenseQuery({
+  const { data: feedData, isLoading: isFeedLoading } = useQuery({
     queryKey: ["anime-feed"],
     queryFn: () => getFeedAnime(),
     staleTime: 1000 * 60 * 15,

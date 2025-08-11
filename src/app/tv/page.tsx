@@ -3,12 +3,12 @@ import useMediaQuery from "~/hooks/use-media-query";
 import { getFeedTV } from "~/server/queries/tv/tmdb.queries";
 import { Loading } from "~/utils/loading/loading";
 import Section from "~/components/section/section";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export default function TVShowsScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
-  const { data: feedData, isLoading: isFeedLoading } = useSuspenseQuery({
+  const { data: feedData, isLoading: isFeedLoading } = useQuery({
     queryKey: ["tv-feed"],
     queryFn: () => getFeedTV(),
     staleTime: 1000 * 60 * 15,

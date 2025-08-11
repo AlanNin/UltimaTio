@@ -4,7 +4,7 @@ import { getHomeFeed } from "~/server/queries/tmdb.queries";
 import { Loading } from "~/utils/loading/loading";
 import HomeCarousel from "~/components/carousel";
 import Section from "~/components/section/section";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { getProfileHistory } from "~/server/queries/contentProfile.queries";
 
@@ -13,7 +13,7 @@ export default function HomeScreen() {
 
   const { currentProfile } = useSelector((state: any) => state.profile);
 
-  const { data: feedData, isLoading: isFeedLoading } = useSuspenseQuery({
+  const { data: feedData, isLoading: isFeedLoading } = useQuery({
     queryKey: ["home-feed"],
     queryFn: () => getHomeFeed(),
     staleTime: 1000 * 60 * 15,
@@ -23,7 +23,7 @@ export default function HomeScreen() {
     data: watchHistoryData,
     isLoading: isWatchHistoryLoading,
     dataUpdatedAt: watchHistoryVersion,
-  } = useSuspenseQuery({
+  } = useQuery({
     queryKey: ["watch-history", currentProfile ? currentProfile.id : undefined],
     queryFn: () => getProfileHistory(),
   });
