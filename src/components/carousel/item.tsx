@@ -121,9 +121,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                         </div>
 
                         <div className="mt-3 mb-10">
-                          <p className="text-lg font-normal text-[#c2c2c2] max-w-[750px]">
+                          <p className="text-lg font-normal text-[#c2c2c2] max-w-[750px] line-clamp-3">
                             {content.description.length > 0
-                              ? truncateText(content.description, 440)
+                              ? content.description
                               : "No description available"}
                           </p>
                         </div>
@@ -218,9 +218,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                         </div>
 
                         <div className="mt-3 mb-10">
-                          <p className="text-md font-normal text-[#c2c2c2] max-w-[550px]">
+                          <p className="text-md font-normal text-[#c2c2c2] max-w-[550px] line-clamp-2">
                             {content.description.length > 0
-                              ? truncateText(content.description, 210)
+                              ? content.description
                               : "No description available"}
                           </p>
                         </div>
@@ -346,13 +346,6 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
     </div>
   );
 };
-
-function truncateText(text: string, maxLength: number) {
-  if (text.length <= maxLength) {
-    return text;
-  }
-  return text.substring(0, maxLength) + "...";
-}
 
 function formatDuration(seconds: number) {
   const hours = Math.floor(seconds / 3600);
