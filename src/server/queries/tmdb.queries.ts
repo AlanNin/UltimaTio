@@ -1,6 +1,5 @@
 "use server";
 import axios from "axios";
-import { getProfileHistory } from "./contentProfile.queries";
 
 // SEARCH TMDB FEED (COMBINED)
 async function searchTMDBFeed(url: string): Promise<any[]> {
@@ -234,7 +233,6 @@ export async function getHomeFeed(): Promise<any | { error: string }> {
     const trendingTV = await searchTMDBFeed("trending/tv/week?language=en-US");
     const popularTV = await searchTMDBFeed("tv/popular?language=en-US");
     const topRatedTV = await searchTMDBFeed("tv/top_rated?language=en-US");
-    const watchHistory = await getProfileHistory();
 
     const homeFeed = {
       trending: shuffleArray([
@@ -250,7 +248,6 @@ export async function getHomeFeed(): Promise<any | { error: string }> {
         ...topRatedTV.slice(0, 8),
       ]),
       upcoming: shuffleArray([...upcomingMovies]),
-      watchHistory,
     };
 
     return homeFeed;

@@ -6,6 +6,7 @@ import HomeCarousel from "~/components/carousel";
 import Section from "~/components/section/section";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
+import { getProfileHistory } from "~/server/queries/contentProfile.queries";
 
 export default function HomeScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
@@ -13,10 +14,21 @@ export default function HomeScreen() {
   const { currentProfile } = useSelector((state: any) => state.profile);
 
   const { data: feedData, isLoading: isFeedLoading } = useSuspenseQuery({
-    queryKey: ["home-feed", currentProfile.id ?? undefined],
+    queryKey: ["home-feed"],
     queryFn: () => getHomeFeed(),
     staleTime: 1000 * 60 * 15,
   });
+
+  const {
+    data: watchHistoryData,
+    isLoading: isWatchHistoryLoading,
+    dataUpdatedAt: watchHistoryVersion,
+  } = useSuspenseQuery({
+    queryKey: ["watch-history", currentProfile.id ?? undefined],
+    queryFn: () => getProfileHistory(),
+  });
+
+  const isLoading = isFeedLoading || isWatchHistoryLoading;
 
   return (
     <section
@@ -25,7 +37,7 @@ export default function HomeScreen() {
         isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
       }`}
     >
-      {isFeedLoading ? (
+      {isLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
             isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
@@ -41,10 +53,11 @@ export default function HomeScreen() {
               isAboveMediumScreens ? "pt-10" : "pt-6"
             }`}
           >
-            {feedData.watchHistory && feedData.watchHistory.length > 0 && (
+            {watchHistoryData && (
               <Section
+                key={`wh-${watchHistoryVersion}`}
                 text="Continue Watching"
-                content={feedData.watchHistory}
+                content={watchHistoryData}
                 watchHistory={true}
               />
             )}

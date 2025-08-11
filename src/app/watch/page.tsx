@@ -14,12 +14,13 @@ import Providers from "~/components/watch/providers/providers";
 import Episodes from "~/components/watch/episodes/episodes";
 import Seasons from "~/components/watch/seasons/seasons";
 import Info from "~/components/watch/info";
+import { useQuery } from "@tanstack/react-query";
+import { getQueryClient } from "~/hooks/get-query-client";
 
 const Watch = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
   const router = useRouter();
   const { currentProfile } = useSelector((state: any) => state.profile);
-  const [isLoading, setIsLoading] = useState(true);
   const providers = ["VidSrcPro", "Smashy"];
   const [currentProvider, setCurrentProvider] = useState<string>(providers[0]!);
   const searchParams = useSearchParams();
@@ -27,53 +28,34 @@ const Watch = () => {
   const tmdbidParam = searchParams.get("tmdbid");
   const seasonParam = searchParams.get("season");
   const episodeParam = searchParams.get("episode");
-  const [content, setContent] = useState<any>({});
   const currentTimeRef = useRef<any>();
   const contentDurationRef = useRef<any>();
+  const queryClient = getQueryClient();
 
-  useEffect(() => {
-    if (!tmdbidParam) {
-      router.push("/");
-      return;
-    }
+  if (!tmdbidParam) {
+    router.push("/");
+    return;
+  }
 
-    const fetchContent = async () => {
-      setIsLoading(true);
-      try {
-        let response;
-        if (category === "movie") {
-          response = await getContentMovie(Number(tmdbidParam)!);
-        } else if (category === "tv") {
-          response = await getContentTV(Number(tmdbidParam)!);
-        } else if (category === "anime") {
-          response = await getContentAnime(Number(tmdbidParam)!);
-        }
-        setContent(response);
-      } catch (error) {
-        console.error("Error getting content -->:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchContent();
-  }, [tmdbidParam]);
-
-  const reFetchContent = async () => {
-    try {
-      let response;
+  const { data: contentData, isLoading: isContentLoading } = useQuery({
+    queryKey: [
+      "watch-content",
+      tmdbidParam,
+      category,
+      seasonParam,
+      episodeParam,
+    ],
+    queryFn: () => {
       if (category === "movie") {
-        response = await getContentMovie(Number(tmdbidParam)!);
+        return getContentMovie(Number(tmdbidParam)!);
       } else if (category === "tv") {
-        response = await getContentTV(Number(tmdbidParam)!);
+        return getContentTV(Number(tmdbidParam)!);
       } else if (category === "anime") {
-        response = await getContentAnime(Number(tmdbidParam)!);
+        return getContentAnime(Number(tmdbidParam)!);
       }
-      setContent(response);
-    } catch (error) {
-      console.error("Error getting content -->:", error);
-    }
-  };
+      return null;
+    },
+  });
 
   const saveProfileProgress = (callback: () => void) => {
     try {
@@ -86,12 +68,15 @@ const Watch = () => {
           Number(seasonParam)!,
           Number(episodeParam)!
         );
+
+        queryClient.invalidateQueries({
+          queryKey: ["watch-history", currentProfile.id ?? undefined],
+        });
       }
     } catch (error) {
       console.error("Error saving profile content progress:", error);
     } finally {
       callback();
-      reFetchContent();
     }
   };
 
@@ -102,7 +87,7 @@ const Watch = () => {
         isAboveMediumScreens ? "pb-10" : "pb-16"
       }`}
     >
-      {isLoading ? (
+      {isContentLoading ? (
         <div className={`flex w-full h-screen items-center justify-center`}>
           <Loading type="bars" />
         </div>
@@ -110,12 +95,12 @@ const Watch = () => {
         <div className="h-full w-full flex flex-col items-center">
           <TopNav saveProfileProgress={saveProfileProgress} />
           <Player
-            title={content.title}
+            title={contentData.title}
             tmdbid={Number(tmdbidParam)}
             category={category}
             season={Number(seasonParam)}
             episode={Number(episodeParam)}
-            year={String(new Date(content.date).getFullYear())}
+            year={String(new Date(contentData.date).getFullYear())}
             currentProvider={currentProvider}
             currentTimeRef={currentTimeRef}
             contentDurationRef={contentDurationRef}
@@ -129,16 +114,16 @@ const Watch = () => {
           {(category === "tv" || category === "anime") && (
             <div className="w-full flex flex-col gap-4">
               <Episodes
-                content={content}
+                content={contentData}
                 tmdbid={Number(tmdbidParam)!}
                 category={category}
                 currentSeason={Number(seasonParam)!}
                 currentEpisode={Number(episodeParam)!}
                 saveProfileProgress={saveProfileProgress}
-                profileContent={content.profileContent}
+                profileContent={contentData.profileContent}
               />
               <Seasons
-                content={content}
+                content={contentData}
                 tmdbid={Number(tmdbidParam)!}
                 category={category}
                 currentSeason={Number(seasonParam)!}
@@ -147,7 +132,7 @@ const Watch = () => {
             </div>
           )}
           <Info
-            content={content!}
+            content={contentData!}
             season={Number(seasonParam)}
             episode={Number(episodeParam)}
             saveProfileProgress={saveProfileProgress}

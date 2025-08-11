@@ -8,6 +8,7 @@ import { getFeedTV } from "~/server/queries/tv/tmdb.queries";
 import { getFeedAnime } from "~/server/queries/anime/tmdb.queries";
 import { useSelector } from "react-redux";
 import { getQueryClient } from "~/hooks/get-query-client";
+import { getProfileHistory } from "~/server/queries/contentProfile.queries";
 
 export default function ReactQueryProvider({
   children,
@@ -17,10 +18,15 @@ export default function ReactQueryProvider({
   const queryClient = getQueryClient();
   const { currentProfile } = useSelector((state: any) => state.profile);
 
-  queryClient.prefetchQuery({
-    queryKey: ["home-feed", currentProfile.id ?? undefined],
-    queryFn: () => getHomeFeed(),
-  }),
+  Promise.all([
+    queryClient.prefetchQuery({
+      queryKey: ["home-feed"],
+      queryFn: () => getHomeFeed(),
+    }),
+    queryClient.prefetchQuery({
+      queryKey: ["watch-history", currentProfile.id ?? undefined],
+      queryFn: () => getProfileHistory(),
+    }),
     queryClient.prefetchQuery({
       queryKey: ["movie-feed"],
       queryFn: () => getFeedMovie(),
@@ -32,7 +38,8 @@ export default function ReactQueryProvider({
     queryClient.prefetchQuery({
       queryKey: ["anime-feed"],
       queryFn: () => getFeedAnime(),
-    });
+    }),
+  ]);
 
   return (
     <QueryClientProvider client={queryClient}>
