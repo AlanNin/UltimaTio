@@ -11,7 +11,6 @@ import { useSelector } from "react-redux";
 import Link from "next/link";
 import Logo from "~/assets/icons/ultimatio-lighter.png";
 import Item from "./item";
-import Image from "next/image";
 import useMediaQuery from "~/hooks/use-media-query";
 import MobileMenu from "./menu/mobilemenu";
 import DesktopMenu from "./menu/desktopmenu";
@@ -152,9 +151,9 @@ export default function TopNavbar() {
       >
         {/* LEFT SIDE */}
         <Link href="/">
-          <Image
+          <img
             alt="logo"
-            src={Logo}
+            src={Logo.src}
             className="h-[25px] w-auto cursor-pointer"
           />
         </Link>
@@ -180,9 +179,14 @@ export default function TopNavbar() {
                   ref={searchRef}
                 >
                   <MagnifyingGlassIcon
-                    className={`text-white h-6 w-6 stroke-current cursor-pointer ${
+                    className={`h-6 w-6 stroke-current cursor-pointer ${
                       isSearching && "mx-2"
                     }`}
+                    color={
+                      location.toLocaleLowerCase().includes("/search")
+                        ? "#a35fe8"
+                        : "white"
+                    }
                     strokeWidth={1.5}
                     onClick={toggleSearch}
                   />
@@ -254,7 +258,11 @@ export default function TopNavbar() {
             {/* RIGHT SIDE MOBILE */}
             <MagnifyingGlassIcon
               className="h-5 w-auto stroke-current cursor-pointer"
-              color={isSearching ? "#a35fe8" : "white"}
+              color={
+                isSearching || location.toLocaleLowerCase().includes("/search")
+                  ? "#a35fe8"
+                  : "white"
+              }
               strokeWidth={1}
               onClick={() => setIsSearching(!isSearching)}
               ref={mobielRef}
@@ -330,7 +338,11 @@ export default function TopNavbar() {
 
           <MagnifyingGlassIcon
             className="h-6 w-auto stroke-current cursor-pointer ml-3"
-            color={"white"}
+            color={
+              location.toLocaleLowerCase().includes("/search")
+                ? "#a35fe8"
+                : "white"
+            }
             strokeWidth={1}
             onClick={handleSearch}
           />

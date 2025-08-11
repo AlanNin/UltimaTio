@@ -15,12 +15,7 @@ export default function TVShowsScreen() {
   });
 
   return (
-    <section
-      id="home"
-      className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto ${
-        isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
-      }`}
-    >
+    <section id="home">
       {isFeedLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
@@ -30,7 +25,11 @@ export default function TVShowsScreen() {
           <Loading type="bars" />
         </div>
       ) : (
-        <>
+        <div
+          className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto ${
+            isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
+          }`}
+        >
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
             {feedData.airingTodayTV && feedData.airingTodayTV.length > 0 && (
               <Section text="Airing Today" content={feedData.airingTodayTV} />
@@ -45,7 +44,7 @@ export default function TVShowsScreen() {
               <Section text="Top Rated" content={feedData.topRatedTV} />
             )}
           </div>
-        </>
+        </div>
       )}
     </section>
   );

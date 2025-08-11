@@ -26,17 +26,13 @@ export default function HomeScreen() {
   } = useQuery({
     queryKey: ["watch-history", currentProfile ? currentProfile.id : undefined],
     queryFn: () => getProfileHistory(),
+    enabled: !!currentProfile,
   });
 
   const isLoading = isFeedLoading || isWatchHistoryLoading;
 
   return (
-    <section
-      id="home"
-      className={`w-full h-full min-h-screen relative ${
-        isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
-      }`}
-    >
+    <section id="home">
       {isLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
@@ -46,7 +42,11 @@ export default function HomeScreen() {
           <Loading type="bars" />
         </div>
       ) : (
-        <>
+        <div
+          className={`w-full h-full min-h-screen relative ${
+            isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
+          }`}
+        >
           <HomeCarousel content={feedData.trending} />
           <div
             className={`max-w-[1920px] m-auto ${
@@ -65,7 +65,7 @@ export default function HomeScreen() {
             <Section text="Top Rated" content={feedData.topRated} />
             <Section text="Upcoming" content={feedData.upcoming} />
           </div>
-        </>
+        </div>
       )}
     </section>
   );

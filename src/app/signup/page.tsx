@@ -18,7 +18,6 @@ import {
   SignUpWithGoogle,
   validateEmail,
 } from "~/server/queries/auth.queries";
-import Image from "next/image";
 import { useDispatch } from "react-redux";
 import {
   loginFailure,
@@ -182,10 +181,9 @@ const SignUp = () => {
       }
 
       if (token) {
-        console.log("TOKEN", token);
         dispatch(loginSuccess(response));
         Cookies.set("access_token", token, { expires: 365 });
-        router.push("/");
+        router.replace("/");
       }
     } catch (error) {
       console.error("Error in signUpWithGoogle:", error);
@@ -201,9 +199,9 @@ const SignUp = () => {
       } fixed w-full h-full overflow-y-auto`}
     >
       <Link href="/">
-        <Image
+        <img
           alt="logo"
-          src={LogoL}
+          src={LogoL.src}
           className={`fixed z-20 ${
             isAboveMediumScreens
               ? "top-10 left-10 h-14 w-auto "
@@ -351,7 +349,7 @@ const SignUp = () => {
               className="bg-[#ebf7ff] w-full py-1.5 flex justify-center rounded cursor-pointer"
               onClick={signUpWithGoogle}
             >
-              <Image alt="Google" src={GoogleIcon} className="h-5 w-5" />
+              <img alt="Google" src={GoogleIcon.src} className="h-5 w-5" />
             </div>
 
             <div className="mt-8">

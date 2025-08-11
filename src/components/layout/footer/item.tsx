@@ -1,9 +1,9 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import { HomeIcon, TvIcon } from "@heroicons/react/24/outline";
 import { FilmIcon, CurrencyYenIcon } from "@heroicons/react/24/solid";
 import { useEffect } from "react";
+import Link from "next/link";
 
 type Props = {
   name: string;
@@ -12,7 +12,6 @@ type Props = {
 
 function Item({ name, route }: Props) {
   let location = usePathname();
-  const router = useRouter();
 
   useEffect(() => {
     if (!location) {
@@ -23,13 +22,8 @@ function Item({ name, route }: Props) {
   const lowerCasePage = route.toLowerCase().replace(/ /g, "");
 
   return (
-    <p
-      onClick={() => {
-        if (location === `/${lowerCasePage}`) {
-          return;
-        }
-        router.push(`/${lowerCasePage}`);
-      }}
+    <Link
+      href={route}
       className="flex flex-col items-center content-center justify-center bg-red"
     >
       {name === "Home" && (
@@ -98,7 +92,7 @@ function Item({ name, route }: Props) {
           </h1>
         </>
       )}
-    </p>
+    </Link>
   );
 }
 

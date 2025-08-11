@@ -1,16 +1,7 @@
-import { useState } from "react";
 import {
-  Cog6ToothIcon,
-  LanguageIcon,
-  QuestionMarkCircleIcon,
-  EnvelopeIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
   ArrowRightStartOnRectangleIcon,
   UsersIcon,
-  GlobeAmericasIcon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "~/providers/redux/user-slice";
 import { quitProfile } from "~/providers/redux/profile-slice";
@@ -68,14 +59,14 @@ const DesktopMenu: React.FC<Props> = ({
             </div>
           </>
         )}
-        <Link href="/settings" onClick={() => setIsDesktopMenuOpen(false)}>
+        {/* <Link href="/settings" onClick={() => setIsDesktopMenuOpen(false)}>
           <div className="relative flex items-center gap-4 text-base cursor-pointer font-normal px-5 py-2.5 rounded-sm hover:bg-[rgba(255,255,255,0.1)]">
             <Cog6ToothIcon className="text-white h-[19px] w-auto stroke-current" />
             Settings
           </div>
-        </Link>
+        </Link> */}
       </div>
-      <div className="flex flex-col border-t border-white border-opacity-5 pt-2">
+      {/* <div className="flex flex-col border-t border-white border-opacity-5 pt-2">
         <Link href="/help" onClick={() => setIsDesktopMenuOpen(false)}>
           <div className="relative flex items-center gap-4 text-base cursor-pointer font-normal px-5 py-2.5 rounded-sm hover:bg-[rgba(255,255,255,0.1)]">
             <QuestionMarkCircleIcon className="text-white h-[19px] w-auto stroke-current" />
@@ -88,7 +79,7 @@ const DesktopMenu: React.FC<Props> = ({
             Feedback
           </div>
         </Link>
-      </div>
+      </div> */}
     </div>
   );
 };

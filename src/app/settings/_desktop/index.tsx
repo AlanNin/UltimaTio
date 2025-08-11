@@ -10,7 +10,6 @@ import {
 } from "@heroicons/react/24/outline";
 import LogoL from "~/assets/icons/ultimatio-lighter.png";
 import Link from "next/link";
-import Image from "next/image";
 
 const DesktopSettings = () => {
   return (
@@ -23,9 +22,9 @@ const DesktopSettings = () => {
         className={`flex flex-col w-full items-center py-10 gap-12 shadow-md border-b border-white border-opacity-5`}
       >
         <Link href="/">
-          <Image
+          <img
             alt="logo"
-            src={LogoL}
+            src={LogoL.src}
             className="w-[52px] h-auto cursor-pointer"
           />
         </Link>

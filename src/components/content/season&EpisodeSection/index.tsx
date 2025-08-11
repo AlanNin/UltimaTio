@@ -1,8 +1,8 @@
 "use client";
-import useMediaQuery from "~/hooks/use-media-query";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import SeasonCard from "./seasonCard";
 import EpisodeCard from "./episodeCard";
+import { parseAsInteger, useQueryState } from "nuqs";
 
 type Props = {
   content: any;
@@ -10,60 +10,60 @@ type Props = {
 };
 
 const SeasonAndEpisodeSection: React.FC<Props> = ({ content, isLoading }) => {
-  const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
-  const [seasons, setSeasons] = useState<any[]>([]);
-  const [episodes, setEpisodes] = useState<any[]>([]);
-  const [selectedSeason, setSelectedSeason] = useState(
-    content?.seasons[0].season
+  const seasons: any[] = Array.isArray(content?.seasons) ? content.seasons : [];
+
+  const [selectedSeasonNumber, setSelectedSeasonNumber] = useQueryState(
+    "season",
+    parseAsInteger.withDefault(1)
   );
-  const handleChangeSeason = (season: any) => {
-    setSelectedSeason(content?.seasons[season].season);
+
+  const selectedSeasonObj = useMemo(() => {
+    if (seasons.length === 0) return undefined;
+    const idx = Number(selectedSeasonNumber - 1);
+    return seasons[idx];
+  }, [seasons, selectedSeasonNumber]);
+
+  const episodesList = useMemo<any[]>(() => {
+    const s = selectedSeasonObj as any;
+    if (!s) return [];
+    if (Array.isArray(s.season)) return s.season;
+    if (Array.isArray(s.episodes)) return s.episodes;
+    if (Array.isArray(s?.season?.episodes)) return s.season.episodes;
+    return [];
+  }, [selectedSeasonObj]);
+
+  const handleChangeSeason = (seasonIndex: number) => {
+    const num = Number(seasonIndex + 1);
+    setSelectedSeasonNumber(num);
   };
 
-  useEffect(() => {
-    setSeasons(content?.seasons);
-  }, [content?.id]);
-
-  useEffect(() => {
-    setEpisodes(selectedSeason?.episodes);
-  }, [selectedSeason]);
-
-  if (isLoading) {
-    return;
-  }
+  if (isLoading) return null;
 
   return (
-    <>
-      <div className="flex flex-col w-full h-max mt-6 gap-2">
-        <div className="flex overflow-x-auto gap-5 pb-4">
-          {seasons?.map((season: any, index: number) => (
-            <SeasonCard
-              key={index}
-              season={season}
-              selectedSeason={selectedSeason}
-              handleChangeSeason={handleChangeSeason}
-              index={index}
-            />
-          ))}
-        </div>
-        <div
-          className={`flex gap-6 pb-4 items-center ${
-            isAboveMediumScreens
-              ? "flex-wrap justify-center"
-              : "overflow-x-auto"
-          }`}
-        >
-          {episodes?.map((episode: any, index: number) => (
-            <EpisodeCard
-              key={index}
-              selectedSeason={selectedSeason}
-              episode={episode}
-              content={content}
-            />
-          ))}
-        </div>
+    <div className="flex flex-col w-full h-max mt-6 gap-2">
+      <div className="flex overflow-x-auto gap-5 pb-4">
+        {seasons.map((season: any, index: number) => (
+          <SeasonCard
+            key={season?.season_number ?? index}
+            season={season}
+            selectedSeason={selectedSeasonObj}
+            handleChangeSeason={handleChangeSeason}
+            index={index}
+          />
+        ))}
       </div>
-    </>
+
+      <div className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(320px,1fr))] pb-4 items-stretch">
+        {episodesList.map((episode: any, index: number) => (
+          <EpisodeCard
+            key={episode?.id ?? episode?.episodeNumber ?? index}
+            selectedSeason={selectedSeasonObj}
+            episode={episode}
+            content={content}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 

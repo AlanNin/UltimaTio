@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 import NotFound from "~/assets/icons/no-image.png";
+import Link from "next/link";
 
 type Props = {
   selectedSeason: any;
@@ -11,13 +10,11 @@ type Props = {
 };
 
 const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
-  const router = useRouter();
-  const handleNavigateToWatch = () => {
+  const handleGetWatchHref = () => {
     const seasonNumber = selectedSeason.season_number;
     const episodeNumber = episode.episodeNumber;
-    router.push(
-      `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=${seasonNumber}&episode=${episodeNumber}`
-    );
+
+    return `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=${seasonNumber}&episode=${episodeNumber}`;
   };
 
   if (new Date(episode.airDate) > new Date()) {
@@ -31,33 +28,45 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
       ? NotFound
       : episode.episodePoster;
 
+  const toImgSrc = (val: string | { src: string }) =>
+    typeof val === "string" ? val : val?.src ?? "";
+
   const watchPercentage = episode?.watchProgress
     ? Math.floor((episode?.watchProgress / episode?.episodeDuration) * 100)
     : 0;
 
   return (
-    <div
-      className="relative flex flex-col cursor-pointer h-[170px] w-[340px] rounded-md gap-3 bg-[rgba(181,181,181,0.1)] py-2 px-3"
-      onClick={handleNavigateToWatch}
+    <Link
+      href={handleGetWatchHref()}
+      className="relative flex flex-col cursor-pointer h-auto w-full rounded-md gap-3 transition-colors duration-300 bg-[rgba(181,181,181,0.1)] hover:bg-[rgba(181,181,181,0.2)] p-4"
     >
-      <div className="flex h-max w-max gap-4">
-        <Image
-          src={imageUrl}
-          alt="Episode Image"
-          className="w-[160px] h-[90px] object-cover rounded-md"
-          width={160}
-          height={90}
-          priority
-          unoptimized
-          style={{
-            background:
-              "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
-            backgroundPosition: "center",
-          }}
-        />
-        <div className="flex flex-col justify-center gap-1">
-          <h1 className="text-xs font-base mb-1 max-w-[135px]">
-            {episode.episodeNumber}. {truncateText(episode.title, 50)}
+      <div className="flex gap-4">
+        <div className="relative w-[160px] aspect-video shrink-0">
+          <img
+            src={toImgSrc(imageUrl)}
+            alt="Episode Image"
+            className="absolute inset-0 w-full h-full object-cover rounded-md"
+            style={{
+              background:
+                "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
+              backgroundPosition: "center",
+            }}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+          />
+          {episode?.watchProgress > 0 && (
+            <div className="absolute bottom-2 right-2 left-2 h-1.5 rounded-md bg-[rgba(255,255,255,0.35)]">
+              <div
+                className="rounded-md bg-[#7c26d4] h-full"
+                style={{ width: watchPercentage + "%" }}
+              />
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col justify-center gap-1 min-w-0">
+          <h1 className="text-xs font-base mb-1 line-clamp-3 ">
+            {episode.episodeNumber}. {episode.title}
           </h1>
           <h1 className="text-xs font-base text-[#c2c2c2]">
             Rated: {episode.rating.toFixed(1)}
@@ -67,18 +76,13 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
           </h1>
         </div>
       </div>
-      <h1 className="text-sm font-light text-[#c2c2c2] h-full flex max-h-[100px] overflow-y-auto ">
+      <label
+        className="text-sm font-light text-[#c2c2c2] line-clamp-2"
+        title={episode.overview ?? "No description available"}
+      >
         {episode.overview ?? "No description available"}
-      </h1>
-      {episode?.watchProgress > 0 && (
-        <div className="h-4 w-full rounded-md bg-[rgba(255,255,255,0.35)]">
-          <div
-            className={`rounded-md bg-[#7c26d4] h-full`}
-            style={{ width: watchPercentage + "%" }}
-          />
-        </div>
-      )}
-    </div>
+      </label>
+    </Link>
   );
 };
 
@@ -91,13 +95,6 @@ function formatDuration(seconds: number) {
   } else {
     return `${minutes}m`;
   }
-}
-
-function truncateText(text: string, maxLength: number) {
-  if (text.length <= maxLength) {
-    return text;
-  }
-  return text.substring(0, maxLength) + "...";
 }
 
 export default EpisodeCard;

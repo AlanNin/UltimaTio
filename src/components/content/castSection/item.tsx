@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import React from "react";
 import AvatarNotFound from "~/assets/icons/no-avatar.jpg";
 
@@ -17,7 +16,7 @@ const CastItem: React.FC<Props> = ({ cast }) => {
 
   return (
     <div className="relative cursor-pointer z-0 flex flex-col items-center text-center gap-1">
-      <Image
+      <img
         src={imageUrl}
         alt="Profile Picture"
         width={92}

@@ -7,6 +7,7 @@ import WhoIsWatching from "~/components/profile/whos-watching";
 import ProfileCheckerProvider from "~/providers/profile-checker";
 import ReactQueryProvider from "~/providers/react-query";
 import { QueryClient } from "@tanstack/react-query";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export const metadata = {
   title: "UltimaTio",
@@ -33,10 +34,12 @@ export default async function RootLayout({
         <ReduxProvider>
           <ReactQueryProvider>
             <ProfileCheckerProvider>
-              <WhoIsWatching />
-              <TopNavbar />
-              {children}
-              <Footer />
+              <NuqsAdapter>
+                <WhoIsWatching />
+                <TopNavbar />
+                {children}
+                <Footer />
+              </NuqsAdapter>
             </ProfileCheckerProvider>
           </ReactQueryProvider>
         </ReduxProvider>

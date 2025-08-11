@@ -15,12 +15,7 @@ export default function MovieScreen() {
   });
 
   return (
-    <section
-      id="home"
-      className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto ${
-        isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
-      }`}
-    >
+    <section id="home">
       {isFeedLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
@@ -30,7 +25,11 @@ export default function MovieScreen() {
           <Loading type="bars" />
         </div>
       ) : (
-        <>
+        <div
+          className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto ${
+            isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
+          }`}
+        >
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
             {feedData.trendingMovies && feedData.trendingMovies.length > 0 && (
               <Section text="Trending" content={feedData.trendingMovies} />
@@ -45,7 +44,7 @@ export default function MovieScreen() {
               <Section text="Upcoming" content={feedData.upcomingMovies} />
             )}
           </div>
-        </>
+        </div>
       )}
     </section>
   );

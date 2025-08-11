@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import React from "react";
 import useMediaQuery from "~/hooks/use-media-query";
 
@@ -22,7 +22,6 @@ const EpisodeBox: React.FC<Props> = ({
   profileContent,
   airDate,
 }) => {
-  const router = useRouter();
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
 
   const watchedEpisodes =
@@ -43,12 +42,17 @@ const EpisodeBox: React.FC<Props> = ({
       parseInt(pc.episode) === episode && parseInt(pc.season) === currentSeason
   );
 
+  function handleGetHref() {
+    return `/watch?tmdbid=${tmdbid}&category=${category}&season=${currentSeason}&episode=${episode}`;
+  }
+
   if (new Date(airDate) > new Date()) {
     return null;
   }
 
   return (
-    <div
+    <Link
+      href={handleGetHref()}
       className={`cursor-pointer min-w-12 w-14 text-center font-light text-[14px] border border-[rgba(255,255,255,0.1)] transition-colors duration-200 ${
         episode === currentEpisode &&
         "bg-[rgba(71,12,130,0.6)] hover:bg-[rgba(71,12,130,0.6)]"
@@ -56,14 +60,9 @@ const EpisodeBox: React.FC<Props> = ({
       ${isAboveMediumScreens && "hover:bg-[rgba(181,181,181,0.1)]"}
       ${isCurrentEpisodeWatched && "bg-[rgba(213,95,222,0.14)]"}
       `}
-      onClick={() => {
-        router.push(
-          `/watch?tmdbid=${tmdbid}&category=${category}&season=${currentSeason}&episode=${episode}`
-        );
-      }}
     >
       {episode}
-    </div>
+    </Link>
   );
 };
 

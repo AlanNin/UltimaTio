@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import useMediaQuery from "~/hooks/use-media-query";
 
 type Props = {
   season: any;
@@ -23,15 +22,12 @@ const SeasonCard: React.FC<Props> = ({
     return null;
   }
 
-  const isAboveSmallScreens = useMediaQuery("(min-width: 480px)");
   return (
     <div
-      className={`relative cursor-pointer h-max w-max py-1 px-2 rounded-md ${
-        selectedSeason.name === season.season.name
+      className={`relative cursor-pointer h-max w-max py-1 px-2 rounded-md transition-colors duration-300 ${
+        selectedSeason.season.name === season.season.name
           ? "bg-[rgba(181,181,181,0.3)]"
-          : isAboveSmallScreens
-          ? "hover:bg-[rgba(181,181,181,0.1)]"
-          : ""
+          : "hover:bg-[rgba(181,181,181,0.2)]"
       }`}
       onClick={() => handleChangeSeason(index)}
     >

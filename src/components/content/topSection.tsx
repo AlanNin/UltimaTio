@@ -1,6 +1,5 @@
 "use client";
 import useMediaQuery from "~/hooks/use-media-query";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   HandThumbUpIcon,
@@ -18,6 +17,8 @@ import {
   getLibraryForContent,
 } from "~/server/queries/contentLibrary.queries";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { cn } from "~/utils/cn";
 
 type Props = {
   content: any;
@@ -29,7 +30,6 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
   const [showMore, setShowMore] = useState(false);
   const [likeStatus, setLikeStatus] = useState(content?.likeStatus || 0);
   const [openLibraryModal, setOpenLibraryModal] = useState(false);
-  const router = useRouter();
 
   const watchPercentage =
     content?.profileContent?.[0]?.watchProgress &&
@@ -41,36 +41,32 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
         )
       : 0;
 
-  const handleNavigateToWatch = () => {
-    const isAMovie = content.category === "movie";
+  const handleGetWatchHref = (): string => {
+    const { tmdbid, category, profileContent } = content ?? {};
 
-    if (isAMovie) {
-      router.push(
-        `/watch?tmdbid=${content.tmdbid}&category=${content.category}`
-      );
-    } else {
-      router.push(
-        `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=1&episode=1`
-      );
+    const params = new URLSearchParams({
+      tmdbid: String(tmdbid ?? ""),
+      category: String(category ?? ""),
+    });
+
+    if (category === "movie") {
+      return `/watch?${params.toString()}`;
     }
+
+    const first = Array.isArray(profileContent) ? profileContent[0] : undefined;
+    const hasProgress = Number(first?.watchProgress ?? 0) > 0;
+
+    const season = hasProgress ? Number(first?.season) || 1 : 1;
+    const episode = hasProgress ? Number(first?.episode) || 1 : 1;
+
+    params.set("season", String(season));
+    params.set("episode", String(episode));
+
+    return `/watch?${params.toString()}`;
   };
 
   const handleResumeWatching = () => {
     const isAMovie = content.category === "movie";
-
-    if (isAMovie) {
-      router.push(
-        `/watch?tmdbid=${content.tmdbid}&category=${content.category}`
-      );
-    } else {
-      router.push(
-        `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=${
-          content?.profileContent && content?.profileContent[0]?.season
-        }&episode=${
-          content?.profileContent && content?.profileContent[0]?.episode
-        }`
-      );
-    }
   };
 
   const handleLikeOrDislikeButton = async (status: number) => {
@@ -225,24 +221,28 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                 }}
               />
             </div>
-            <div className="flex flex-col gap-1 h-full px-4 ">
+            <div
+              className={`flex flex-col gap-1 h-full px-4  ${
+                isAboveMobileScreens && "min-w-80"
+              }`}
+            >
               {isAboveMobileScreens && (
                 <>
                   <div className="flex gap-2 mb-3">
-                    <h1
+                    <Link
                       className="text-sm font-light cursor-pointer text-white hover:text-[#b084db] transition-property:text duration-300"
-                      onClick={() => router.push("/")}
+                      href="/"
                     >
                       Home
-                    </h1>
-                    <h1 className="text-sm font-light text-white">•</h1>
-                    <h1
+                    </Link>
+                    <span className="text-sm font-light text-white">•</span>
+                    <Link
                       className="text-sm font-light capitalize cursor-pointer text-white hover:text-[#b084db] transition-property:text duration-500"
-                      onClick={() => router.push("/" + content.category)}
+                      href={`/${content.category}`}
                     >
                       {content.category === "tv" ? "TV" : content.category}
-                    </h1>
-                    <h1 className="text-sm font-light text-white">•</h1>
+                    </Link>
+                    <span className="text-sm font-light text-white">•</span>
                     <h1 className="text-sm font-light text-[#acabab] capitalize">
                       {content!.title}
                     </h1>
@@ -318,17 +318,12 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
           {/* BUTTONS MOBILE*/}
           {!isAboveMobileScreens && (
             <div className="flex basis-full flex-wrap gap-3 items-center justify-center">
-              <div
+              <Link
+                href={handleGetWatchHref()}
                 className="relative flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)] overflow-hidden"
-                onClick={
-                  content?.profileContent &&
-                  content?.profileContent[0]?.watchProgress
-                    ? handleResumeWatching
-                    : handleNavigateToWatch
-                }
               >
                 <PlayIcon
-                  className="w-[20px] h-[20px] text-white fill-white z-10"
+                  className="size-5 text-white fill-white z-10"
                   strokeWidth={0.8}
                 />
                 <h1 className="text-sm text-[#ebebeb] z-10">
@@ -345,34 +340,37 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   className="absolute inset-0 w-full h-full bg-gradient-to-r from-[rgba(135,15,73,0.4)] to-[rgba(124,38,212,0.4)] z-0"
                   style={{ width: watchPercentage + "%" }}
                 />
-              </div>
+              </Link>
               <div
                 className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)]"
                 onClick={() => setOpenLibraryModal(true)}
               >
                 <SquaresPlusIcon
-                  className="w-[20px] h-[20px] text-white fill-white"
+                  className="size-5 text-white fill-white"
                   strokeWidth={0.8}
                 />
                 <h1 className="text-sm text-[#ebebeb]"> Add to Library </h1>
               </div>
-              <div className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(131,74,189,0.3)] hover:bg-[rgba(131,74,189,0.5)]">
+              <button
+                className="flex gap-2.5 items-center rounded-3xl transition-colors duration-500 py-2 px-3.5 bg-[rgba(131,74,189,0.3)] opacity-50"
+                disabled
+              >
                 <UserGroupIcon
-                  className="w-[20px] h-[20px] text-white fill-white"
+                  className="size-5 text-white fill-white"
                   strokeWidth={0.8}
                 />
                 <h1 className="text-sm text-[#ebebeb]"> Watch Party </h1>
-              </div>
+              </button>
               <div className="flex bg-[rgba(181,181,181,0.2)] gap-2.5 items-center rounded-3xl py-2 px-3.5">
                 <HandThumbUpIcon
-                  className="w-[20px] h-[20px] text-white cursor-pointer"
+                  className="size-5 text-white cursor-pointer"
                   strokeWidth={1.5}
                   fill={likeStatus === 1 ? "white" : "transparent"}
                   onClick={() => handleLikeOrDislikeButton(1)}
                 />
                 <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
                 <HandThumbDownIcon
-                  className="w-[20px] h-[20px] text-white cursor-pointer"
+                  className="size-5 text-white cursor-pointer"
                   strokeWidth={1.5}
                   fill={likeStatus === -1 ? "white" : "transparent"}
                   onClick={() => handleLikeOrDislikeButton(-1)}
@@ -382,58 +380,69 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
           )}
           {/* DETAILS */}
           <div className="bg-[rgba(191,191,191,0.075)] rounded-md p-4 flex flex-col gap-4 w-auto">
-            {content.duration && content.duration > 0 && (
-              <h1 className="font-light text-xs flex">
-                <p className="font-bold"> Duration: &nbsp;</p>
-                {formatDuration(content.duration || content.episodeDuration)}
-              </h1>
-            )}
+            <h1 className="font-light text-xs flex">
+              <p className="font-bold"> Duration: &nbsp;</p>
+              {content.duration && content.duration > 0
+                ? formatDuration(content.duration || content.episodeDuration)
+                : "Not Available"}
+            </h1>
             <h1 className="font-light text-xs flex">
               <p className="font-bold"> Release Year: &nbsp;</p>
-              {new Date(content.date).getFullYear()}
+              {content.date
+                ? new Date(content.date).getFullYear()
+                : "Not Available"}
             </h1>
             <h1 className="font-light text-xs flex">
               <p className="font-bold"> TMDB Rating: &nbsp;</p>
-              {content?.rating?.toFixed(1)}
+              {content?.rating ? content?.rating.toFixed(1) : "Not Available"}
             </h1>
             <div className="flex flex-wrap items-center max-w-[300px] gap-1">
               <h1 className="font-bold text-xs mr-1">Genres: </h1>
-              {content?.ContentGenre?.map((genre: any, _index: number) => (
-                <span
-                  key={genre.id}
-                  className="bg-[rgba(191,191,191,0.15)] rounded-xl py-1 px-2 font-light text-xs cursor-pointer"
-                >
-                  {genre &&
-                    genre.genre.name.charAt(0).toUpperCase() +
-                      genre.genre.name?.slice(1)}
-                </span>
-              ))}
+              {content?.ContentGenre && content?.ContentGenre.length > 0 ? (
+                <>
+                  {content?.ContentGenre?.map((genre: any, _index: number) => (
+                    <span
+                      key={genre.id}
+                      className="bg-[rgba(191,191,191,0.15)] rounded-xl py-1 px-2 font-light text-xs cursor-pointer"
+                    >
+                      {genre &&
+                        genre.genre.name.charAt(0).toUpperCase() +
+                          genre.genre.name?.slice(1)}
+                    </span>
+                  ))}
+                </>
+              ) : (
+                <p className="text-xs font-light">Not Available</p>
+              )}
             </div>
             <div className="flex flex-wrap items-center max-w-[300px] gap-1">
               <h1 className="font-bold text-xs mr-1">Producers: </h1>
-              {content?.ContentStudio?.map((studio: any, _index: number) => (
-                <span
-                  key={studio.id}
-                  className="bg-[rgba(191,191,191,0.15)] rounded-xl py-1 px-2 font-light text-xs cursor-pointer"
-                >
-                  {studio &&
-                    studio.studio.name.charAt(0).toUpperCase() +
-                      studio.studio.name?.slice(1)}
-                </span>
-              ))}
+              {content?.ContentStudio && content?.ContentStudio.length > 0 ? (
+                <>
+                  {content?.ContentStudio?.map(
+                    (studio: any, _index: number) => (
+                      <span
+                        key={studio.id}
+                        className="bg-[rgba(191,191,191,0.15)] rounded-xl py-1 px-2 font-light text-xs cursor-pointer"
+                      >
+                        {studio &&
+                          studio.studio.name.charAt(0).toUpperCase() +
+                            studio.studio.name?.slice(1)}
+                      </span>
+                    )
+                  )}
+                </>
+              ) : (
+                <p className="text-xs font-light">Not Available</p>
+              )}
             </div>
           </div>
           <div className="basis-full w-max items-center flex justify-center mt-2">
             {isAboveMobileScreens && (
               <div className="flex flex-wrap gap-4 items-center">
-                <div
+                <Link
+                  href={handleGetWatchHref()}
                   className="relative flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)] overflow-hidden"
-                  onClick={
-                    content?.profileContent &&
-                    content?.profileContent[0]?.watchProgress
-                      ? handleResumeWatching
-                      : handleNavigateToWatch
-                  }
                 >
                   <PlayIcon
                     className="w-[24px] h-[24px] text-white fill-white z-10"
@@ -453,7 +462,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                     className="absolute inset-0 w-full h-full bg-gradient-to-r from-[rgba(135,15,73,0.4)] to-[rgba(124,38,212,0.4)] z-0"
                     style={{ width: watchPercentage + "%" }}
                   />
-                </div>
+                </Link>
                 <div className="relative">
                   <div
                     className={` flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)] ${
@@ -481,27 +490,38 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                     />
                   )}
                 </div>
-                <div className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(131,74,189,0.3)] hover:bg-[rgba(131,74,189,0.5)]">
+                <button
+                  className="flex gap-2.5 items-center rounded-3xl transition-colors duration-500 py-2 px-3.5 bg-[rgba(131,74,189,0.3)] opacity-50"
+                  disabled
+                >
                   <UserGroupIcon
                     className="w-[24px] h-[24px] text-white fill-white"
                     strokeWidth={0.8}
                   />
                   <h1 className="text-md text-[#ebebeb] select-none">
-                    {" "}
-                    Watch Party{" "}
+                    Watch Party
                   </h1>
-                </div>
+                </button>
                 <div className="flex bg-[rgba(181,181,181,0.2)] gap-2.5 items-center rounded-3xl py-2 px-3.5">
                   <HandThumbUpIcon
-                    className="w-[24px] h-[24px] text-white cursor-pointer"
+                    className={cn(
+                      "size-6 cursor-pointer transitions-colors duration-300",
+                      likeStatus === 1
+                        ? "text-white "
+                        : "text-white/75 hover:text-white"
+                    )}
                     strokeWidth={1.5}
                     fill={likeStatus === 1 ? "white" : "transparent"}
                     onClick={() => handleLikeOrDislikeButton(1)}
                   />
                   <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
-                  {/* Línea vertical */}
                   <HandThumbDownIcon
-                    className="w-[24px] h-[24px] text-white cursor-pointer"
+                    className={cn(
+                      "size-6 cursor-pointer transitions-colors duration-300",
+                      likeStatus === -1
+                        ? "text-white "
+                        : "text-white/75 hover:text-white"
+                    )}
                     strokeWidth={1.5}
                     fill={likeStatus === -1 ? "white" : "transparent"}
                     onClick={() => handleLikeOrDislikeButton(-1)}

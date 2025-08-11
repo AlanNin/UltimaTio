@@ -1,30 +1,12 @@
-import React, { useState } from "react";
-import TMDBIcon from "~/assets/icons/tmdb.png";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import useMediaQuery from "~/hooks/use-media-query";
+import Link from "next/link";
 
 type Props = {
   content: any;
 };
 
 const SearchCard: React.FC<Props> = ({ content }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const router = useRouter();
-  const isAboveSmallTablet = useMediaQuery("(min-width: 650px)");
-
-  const handleNavigate = () => {
-    if (content.category === "movie") {
-      // HANDLE IF MOVIE
-      router.push(`/movie/${content.tmdbid}`);
-    }
-    if (content.category === "tv") {
-      // HANDLE IF TV
-      router.push(`/tv/${content.tmdbid}`);
-    }
-    if (content.category === "anime") {
-      router.push(`/anime/${content.tmdbid}`);
-    }
+  const handleGetNavigateHref = () => {
+    return `/${content.category}/${content.tmdbid}`;
   };
 
   const posterUrl =
@@ -39,45 +21,23 @@ const SearchCard: React.FC<Props> = ({ content }) => {
   }
 
   return (
-    <div
-      className="flex w-max h-max"
-      // onMouseEnter={() => (isAboveSmallTablet ? setIsHovered(true) : null)}
-      // onMouseLeave={() => (isAboveSmallTablet ? setIsHovered(false) : null)}
+    <Link
+      className="relative w-full aspect-[2/3]"
+      href={handleGetNavigateHref()}
     >
-      <div
-        className="h-full w-max overflow-hidden relative rounded-sm cursor-pointer"
-        onClick={handleNavigate}
-      >
-        <img
-          src={posterUrl}
-          loading="lazy"
-          className={`object-cover cursor-pointer rounded-sm transition-all duration-500
-            ${isAboveSmallTablet ? "w-[200px] h-[295px]" : "w-[95px] h-[147px]"}
-             ${
-               isHovered
-                 ? "scale-125 brightness-[0.25]"
-                 : "scale-100 brightness-100"
-             }`}
-          style={{
-            background:
-              "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
-          }}
-        />
-        <div
-          className={`absolute inset-0 flex flex-col text-center items-center justify-center transition-opacity duration-500 ${
-            isHovered ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <h1 className="text-white text-lg">{content?.title}</h1>
-          <div className="flex items-center justify-center gap-1.5">
-            <Image alt="TMDB" src={TMDBIcon} className="w-6 h-6 object-cover" />
-            <p className="text-md text-[#d8d7d7] font-normal">
-              {content?.rating.toFixed(1)}{" "}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <img
+        alt={`${content.title} Poster`}
+        src={posterUrl}
+        className="absolute inset-0 w-full h-full object-cover rounded-md"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(143,143,143,0.1), rgba(176,176,176,0.1))",
+        }}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+      />
+    </Link>
   );
 };
 

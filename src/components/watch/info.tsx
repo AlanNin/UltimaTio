@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import React from "react";
 import useMediaQuery from "~/hooks/use-media-query";
 
@@ -42,9 +42,8 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
       ? content.rating ?? null
       : episodeObj?.rating ?? seasonObj?.season?.rating ?? null;
 
-  const router = useRouter();
-  const handleNavigateToContent = () => {
-    router.push(`${content.category}/${content.tmdbid}`);
+  const handleGetContentHref = () => {
+    return `/${content.category}/${content.tmdbid}`;
   };
 
   return (
@@ -53,25 +52,26 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
         !isAboveMediumScreens && "px-4 justify-center"
       }`}
     >
-      <img
-        src={poster}
-        alt="Poster"
-        className="w-[180px] h-auto object-cover cursor-pointer"
-        onClick={handleNavigateToContent}
-      />
+      <Link href={handleGetContentHref()}>
+        <img
+          src={poster}
+          alt="Poster"
+          className="w-[180px] h-auto object-cover cursor-pointer"
+        />
+      </Link>
       <div
         className={`flex flex-col gap-2 max-w-[650px] ${
           !isAboveMediumScreens && "text-center"
         }`}
       >
-        <h1
+        <Link
+          href={handleGetContentHref()}
           className={`font-normal text-lg cursor-pointer w-fit ${
             !isAboveMediumScreens && "self-center"
           }`}
-          onClick={handleNavigateToContent}
         >
           {title}
-        </h1>
+        </Link>
         <div
           className={`flex gap-2 items-center mb-2 ${
             !isAboveMediumScreens && "self-center"

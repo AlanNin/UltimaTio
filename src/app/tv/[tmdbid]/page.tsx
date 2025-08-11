@@ -17,7 +17,7 @@ const Content = () => {
   const router = useRouter();
 
   if (!tmdbid || isNaN(Number(tmdbid))) {
-    router.push("/tv");
+    router.replace("/tv");
     return;
   }
 
@@ -28,38 +28,38 @@ const Content = () => {
   });
 
   return (
-    <>
-      <section
-        id="content"
-        className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto overflow-x-clip ${
-          isAboveMediumScreens ? "pt-16 pb-10" : "pt-11 pb-24"
-        }`}
-      >
-        {isContentLoading ? (
-          <div
-            className={`flex w-full h-screen items-center justify-center ${
-              isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
-            } `}
-          >
-            <Loading type="bars" />
-          </div>
-        ) : (
-          <>
-            <TopSection content={contentData} isLoading={isContentLoading} />
-            <div className={`${isAboveMobileScreens ? "px-8" : "px-4"}`}>
-              <CastSection cast={contentData.ContentActor} />
-              {contentData?.seasons && contentData?.seasons?.length > 0 && (
-                <SeasonAndEpisodeSection
-                  content={contentData}
-                  isLoading={isContentLoading}
-                />
+    <section id="content">
+      {isContentLoading ? (
+        <div
+          className={`flex w-full h-screen items-center justify-center ${
+            isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
+          } `}
+        >
+          <Loading type="bars" />
+        </div>
+      ) : (
+        <div
+          className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto overflow-x-clip ${
+            isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-24"
+          }`}
+        >
+          <TopSection content={contentData} isLoading={isContentLoading} />
+          <div className={`${isAboveMobileScreens ? "px-8" : "px-4"}`}>
+            <CastSection cast={contentData.ContentActor} />
+            {contentData?.seasons && contentData?.seasons?.length > 0 && (
+              <SeasonAndEpisodeSection
+                content={contentData}
+                isLoading={isContentLoading}
+              />
+            )}
+            {contentData.similarContent &&
+              contentData.similarContent.length > 0 && (
+                <SimilarSection content={contentData.similarContent} />
               )}
-              <SimilarSection content={contentData.similarContent} />
-            </div>
-          </>
-        )}
-      </section>
-    </>
+          </div>
+        </div>
+      )}
+    </section>
   );
 };
 

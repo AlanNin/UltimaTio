@@ -4,8 +4,8 @@ import { Reveal } from "~/utils/framer-motion/reveal";
 import TMDBIcon from "~/assets/icons/tmdb.png";
 import { PlayIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { cn } from "~/utils/cn";
+import Link from "next/link";
 
 type Props = {
   content: any;
@@ -19,27 +19,24 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
   const landscapeMobile = content.landscapeUrl.replace("original", "w780");
   const router = useRouter();
 
-  const handleNavigate = () => {
+  const handleGetNavigateHref = () => {
     if (content.category === "movie") {
-      router.push(`/movie/${content.tmdbid}`);
+      return `/movie/${content.tmdbid}`;
     }
     if (content.category === "tv") {
-      router.push(`/tv/${content.tmdbid}`);
+      return `/tv/${content.tmdbid}`;
     }
     if (content.category === "anime") {
-      router.push(`/anime/${content.tmdbid}`);
+      return `/anime/${content.tmdbid}`;
     }
+    return "";
   };
 
-  const handleWatch = () => {
+  const handleGetWatchHref = () => {
     if (content.category === "movie") {
-      router.push(
-        `/watch?tmdbid=${content.tmdbid}&category=${content.category}`
-      );
+      return `/watch?tmdbid=${content.tmdbid}&category=${content.category}`;
     } else {
-      router.push(
-        `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=1&episode=1`
-      );
+      return `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=1&episode=1`;
     }
   };
 
@@ -109,9 +106,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                           )}
 
                           <div className="flex items-center justify-center gap-1.5">
-                            <Image
+                            <img
                               alt="TMDB"
-                              src={TMDBIcon}
+                              src={TMDBIcon.src}
                               className="w-6 h-6"
                             />
                             <p className="text-sm text-[#c2c2c2] font-medium">
@@ -129,9 +126,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                         </div>
 
                         <div className="flex gap-6">
-                          <div
+                          <Link
+                            href={handleGetWatchHref()}
                             className="flex gap-3 items-center w-max rounded-2xl cursor-pointer transition-colors duration-500"
-                            onClick={handleWatch}
                           >
                             <PlayIcon
                               className="w-[40px] h-[40px] text-white fill-white bg-[#a35fe8] py-2.5 pl-2.5 pr-2 rounded-full"
@@ -141,15 +138,15 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                               {" "}
                               Watch Now
                             </h1>
-                          </div>
-                          <div
+                          </Link>
+                          <Link
+                            href={handleGetNavigateHref()}
                             className="flex gap-3 items-center justify-center w-max rounded-lg cursor-pointer transition-colors duration-500 bg-[rgba(131,74,189,0.4)] py-1 px-4"
-                            onClick={handleNavigate}
                           >
                             <h1 className="text-lg text-[#ebebeb] font-medium">
                               More Info
                             </h1>
-                          </div>
+                          </Link>
                         </div>
                       </>
                     </Reveal>
@@ -206,9 +203,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                           )}
 
                           <div className="flex items-center justify-center gap-1.5">
-                            <Image
+                            <img
                               alt="TMDB"
-                              src={TMDBIcon}
+                              src={TMDBIcon.src}
                               className="w-4 h-4"
                             />
                             <p className="text-sm text-[#c2c2c2] font-medium">
@@ -226,9 +223,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                         </div>
 
                         <div className="flex gap-6">
-                          <div
+                          <Link
+                            href={handleGetWatchHref()}
                             className="flex gap-3 items-center w-max rounded-2xl cursor-pointer transition-colors duration-500"
-                            onClick={handleWatch}
                           >
                             <PlayIcon
                               className="w-[35px] h-[35px] text-white fill-white bg-[#a35fe8] py-2 pl-2 pr-1.5 rounded-full"
@@ -238,15 +235,15 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                               {" "}
                               Watch Now
                             </h1>
-                          </div>
-                          <div
+                          </Link>
+                          <Link
+                            href={handleGetNavigateHref()}
                             className="flex gap-3 items-center justify-center w-max rounded-lg cursor-pointer transition-colors duration-500 bg-[rgba(131,74,189,0.4)] py-0.5 px-3"
-                            onClick={handleNavigate}
                           >
                             <h1 className="text-sm text-[#ebebeb] font-medium">
                               More Info
                             </h1>
-                          </div>
+                          </Link>
                         </div>
                       </>
                     </Reveal>
@@ -301,9 +298,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             )}
 
                             <div className="flex items-center justify-center gap-1.5">
-                              <Image
+                              <img
                                 alt="TMDB"
-                                src={TMDBIcon}
+                                src={TMDBIcon.src}
                                 className="w-4 h-4 object-cover"
                               />
                               <p className="text-xs text-[#d8d7d7] font-normal">
@@ -312,9 +309,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             </div>
                           </div>
                           <div className="flex gap-4 items-center mt-4">
-                            <div
+                            <Link
+                              href={handleGetWatchHref()}
                               className="flex gap-2.5 items-center w-max h-max rounded-2xl cursor-pointer"
-                              onClick={handleWatch}
                             >
                               <PlayIcon
                                 className="w-[24px] h-[24px] text-white fill-white bg-[#a35fe8] py-1.5 pl-1.5 pr-1 rounded-full"
@@ -323,15 +320,15 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                               <h1 className="text-sm text-[#ebebeb]">
                                 Watch Now
                               </h1>
-                            </div>
-                            <div
+                            </Link>
+                            <Link
+                              href={handleGetNavigateHref()}
                               className="flex gap-3 items-center justify-center h-max w-max rounded-lg cursor-pointer bg-[rgba(131,74,189,0.4)] py-1.5 px-2.5"
-                              onClick={handleNavigate}
                             >
                               <h1 className="text-xs text-[#ebebeb] font-medium">
                                 More Info
                               </h1>
-                            </div>
+                            </Link>
                           </div>
                         </>
                       </Reveal>

@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import React, { useState } from "react";
 
 type Props = {
@@ -17,31 +17,29 @@ const SeasonBox: React.FC<Props> = ({
   season,
   airDate,
 }) => {
-  const router = useRouter();
   const posterUrl =
     "https://media.themoviedb.org/t/p/w780" + season.poster_path;
   const [isHover, setIsHover] = useState(false);
   const isCurrentSeason = season.season_number === currentSeason;
   const firstEpisodeSeason = season?.episodes[0]?.episodeNumber;
 
+  function handleGetHref() {
+    return `/watch?tmdbid=${tmdbid}&category=${category}&season=${season.season_number}&episode=${firstEpisodeSeason}`;
+  }
+
   if (new Date(airDate) > new Date() || season.air_date === null) {
     return null;
   }
 
   return (
-    <div
+    <Link
+      href={handleGetHref()}
       className="relative overflow-clip cursor-pointer min-w-32 w-32 h-16 p-0 flex justify-center items-center text-center font-light text-[14px] border border-[rgba(255,255,255,0.1)]"
-      onClick={() => {
-        router.push(
-          `/watch?tmdbid=${tmdbid}&category=${category}&season=${season.season_number}&episode=${firstEpisodeSeason}`
-        );
-      }}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
     >
       <img
         src={posterUrl}
-        alt="Season Poster"
         className={`bg-cover cursor-pointer absolute transition-all duration-500 ${
           !isCurrentSeason && !isHover && "filter brightness-50 blur-sm"
         }`}
@@ -53,7 +51,7 @@ const SeasonBox: React.FC<Props> = ({
       >
         {season.name}
       </h1>
-    </div>
+    </Link>
   );
 };
 

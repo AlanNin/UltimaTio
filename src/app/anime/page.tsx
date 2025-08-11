@@ -15,12 +15,7 @@ export default function AnimeScreen() {
   });
 
   return (
-    <section
-      id="home"
-      className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto ${
-        isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
-      }`}
-    >
+    <section id="home">
       {isFeedLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
@@ -30,7 +25,11 @@ export default function AnimeScreen() {
           <Loading type="bars" />
         </div>
       ) : (
-        <>
+        <div
+          className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto ${
+            isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
+          }`}
+        >
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
             {feedData.airingTodayAnime &&
               feedData.airingTodayAnime.length > 0 && (
@@ -49,7 +48,7 @@ export default function AnimeScreen() {
               <Section text="Top Rated" content={feedData.topRatedAnime} />
             )}
           </div>
-        </>
+        </div>
       )}
     </section>
   );

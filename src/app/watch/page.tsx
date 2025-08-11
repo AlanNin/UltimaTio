@@ -56,7 +56,13 @@ export default function WatchScreen() {
   const startAt = useMemo(() => {
     if (!contentData?.profileContent) return 0;
 
-    return computeStartAt(contentData, category, seasonParam, episodeParam);
+    return computeStartAt(
+      contentData,
+      category,
+      seasonParam,
+      episodeParam,
+      !!currentProfile
+    );
   }, [category, seasonParam, episodeParam, !!contentData?.profileContent]);
 
   const flushProgress = useCallback(() => {
@@ -125,28 +131,27 @@ export default function WatchScreen() {
   }, [flushProgress]);
 
   if (!tmdbidParam) {
-    router.push("/");
+    router.replace("/");
     return;
   }
 
   if (isError) {
-    router.push("/");
+    router.replace("/");
     return;
   }
 
   return (
-    <section
-      id="home"
-      className={`w-full h-full min-h-screen relative max-w-[854px] m-auto ${
-        isAboveMediumScreens ? "pb-10" : "pb-16"
-      }`}
-    >
+    <section id="home">
       {isContentLoading ? (
         <div className={`flex w-full h-screen items-center justify-center`}>
           <Loading type="bars" />
         </div>
       ) : (
-        <div className="h-full w-full flex flex-col items-center">
+        <div
+          className={`w-full h-full min-h-screen relative max-w-[854px] m-auto flex flex-col ${
+            isAboveMediumScreens ? "pb-10" : "pb-16"
+          }`}
+        >
           <TopNav />
           <Player
             title={contentData.title}
@@ -196,7 +201,8 @@ function computeStartAt(
   contentData: any,
   category: string | null,
   seasonParam: string | null,
-  episodeParam: string | null
+  episodeParam: string | null,
+  currentProfileExists: boolean
 ) {
   const isTV = category === "tv" || category === "anime";
   const seasonNum = Number(seasonParam);
@@ -204,6 +210,34 @@ function computeStartAt(
 
   let start = 0;
   let duration = 0;
+
+  if (!currentProfileExists) {
+    try {
+      const raw = localStorage.getItem("vidLinkProgress");
+      if (raw) {
+        const progressData = JSON.parse(raw);
+        const stored = progressData?.[contentData.id];
+        if (stored) {
+          if (isTV) {
+            const key = `s${seasonNum}e${episodeNum}`;
+            const epProgress = stored.show_progress?.[key]?.progress;
+            if (epProgress) {
+              start = Number(epProgress.watched) || 0;
+              duration = Number(epProgress.duration) || 0;
+            }
+          } else {
+            const movieProgress = stored.progress;
+            if (movieProgress) {
+              start = Number(movieProgress.watched) || 0;
+              duration = Number(movieProgress.duration) || 0;
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Error leyendo progreso de localStorage", err);
+    }
+  }
 
   if (!contentData?.profileContent) return start;
 

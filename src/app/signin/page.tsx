@@ -17,7 +17,6 @@ import {
   loginSuccess,
 } from "~/providers/redux/user-slice";
 import Cookies from "js-cookie";
-import Image from "next/image";
 import { SignInAccount, SignInWithGoogle } from "~/server/queries/auth.queries";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithPopup } from "firebase/auth";
@@ -70,9 +69,9 @@ const LogIn = () => {
           dispatch(loginSuccess(response.response));
           Cookies.set("access_token", response.token!, { expires: 365 });
           if (redirect_fallback) {
-            router.push(redirect_fallback);
+            router.replace(redirect_fallback);
           } else {
-            router.push("/");
+            router.replace("/");
           }
           setLoginStarted(false);
         } else {
@@ -108,9 +107,9 @@ const LogIn = () => {
         Cookies.set("access_token", token, { expires: 365 });
 
         if (redirect_fallback) {
-          router.push(redirect_fallback);
+          router.replace(redirect_fallback);
         } else {
-          router.push("/");
+          router.replace("/");
         }
       }
     } catch (error) {
@@ -126,9 +125,9 @@ const LogIn = () => {
       }`}
     >
       <Link href="/">
-        <Image
+        <img
           alt="logo"
-          src={LogoL}
+          src={LogoL.src}
           className={`fixed ${
             isAboveMediumScreens
               ? "top-10 left-10 h-14 w-auto"
@@ -220,7 +219,7 @@ const LogIn = () => {
           className="bg-[#ebf7ff] w-full py-1.5 flex justify-center rounded cursor-pointer max-w-[400px]"
           onClick={signUpWithGoogle}
         >
-          <Image alt="Google" src={GoogleIcon} className="h-5 w-5" />
+          <img alt="Google" src={GoogleIcon.src} className="h-5 w-5" />
         </div>
 
         {isLoginError &&

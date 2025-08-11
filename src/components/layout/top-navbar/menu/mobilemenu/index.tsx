@@ -3,13 +3,6 @@ import useMediaQuery from "~/hooks/use-media-query";
 import {
   XMarkIcon,
   UserIcon,
-  Cog6ToothIcon,
-  LanguageIcon,
-  QuestionMarkCircleIcon,
-  EnvelopeIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-  CheckIcon,
   ArrowRightStartOnRectangleIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
@@ -98,9 +91,9 @@ const MobileMenu: React.FC<Props> = ({
       {currentUser && currentProfile ? (
         <div
           className={`px-4 py-6 flex flex-col gap-8 text-base font-light border-white`}
-          style={{
-            borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
-          }}
+          // style={{
+          //   borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+          // }}
         >
           <div
             className="flex items-center gap-6 text-base font-light cursor-pointer"
@@ -128,9 +121,9 @@ const MobileMenu: React.FC<Props> = ({
         <Link href="/signin" onClick={() => setIsMobileMenuOpen(false)}>
           <div
             className={`px-4 py-6 flex items-center gap-6 text-base font-light border-white`}
-            style={{
-              borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
-            }}
+            // style={{
+            //   borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+            // }}
           >
             <UserIcon
               className="text-white h-[24px] w-auto stroke-current cursor-pointer"
@@ -141,7 +134,7 @@ const MobileMenu: React.FC<Props> = ({
         </Link>
       )}
 
-      <Link href="/settings">
+      {/* <Link href="/settings">
         <div
           className={`px-4 py-6 flex items-center gap-6 text-base font-light border-white`}
           style={{
@@ -154,9 +147,9 @@ const MobileMenu: React.FC<Props> = ({
           />
           Settings
         </div>
-      </Link>
+      </Link> */}
 
-      <div
+      {/* <div
         className={`px-4 py-6 flex flex-col gap-8 text-base font-light border-white`}
         style={{
           borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
@@ -181,12 +174,12 @@ const MobileMenu: React.FC<Props> = ({
             Feedback
           </div>
         </Link>
-      </div>
+      </div> */}
 
       <div className="flex items-center bottom-0 w-full justify-center gap-4 mt-auto mb-2">
-        <h1 className="text-[12px] font-light">Privacy Policy</h1>
+        {/* <h1 className="text-[12px] font-light">Privacy Policy</h1>
         <h1 className="text-[12px] font-light">·</h1>
-        <h1 className="text-[12px] font-light">Terms and Conditions</h1>
+        <h1 className="text-[12px] font-light">Terms and Conditions</h1> */}
       </div>
 
       {isChangeLanguageOpen && (
