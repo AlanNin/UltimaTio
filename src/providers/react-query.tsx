@@ -24,7 +24,10 @@ export default function ReactQueryProvider({
       queryFn: () => getHomeFeed(),
     }),
     queryClient.prefetchQuery({
-      queryKey: ["watch-history", currentProfile.id ?? undefined],
+      queryKey: [
+        "watch-history",
+        currentProfile ? currentProfile.id : undefined,
+      ],
       queryFn: () => getProfileHistory(),
     }),
     queryClient.prefetchQuery({

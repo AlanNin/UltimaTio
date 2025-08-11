@@ -24,7 +24,7 @@ export default function HomeScreen() {
     isLoading: isWatchHistoryLoading,
     dataUpdatedAt: watchHistoryVersion,
   } = useSuspenseQuery({
-    queryKey: ["watch-history", currentProfile.id ?? undefined],
+    queryKey: ["watch-history", currentProfile ? currentProfile.id : undefined],
     queryFn: () => getProfileHistory(),
   });
 

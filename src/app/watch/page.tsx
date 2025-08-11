@@ -70,7 +70,10 @@ const Watch = () => {
         );
 
         queryClient.invalidateQueries({
-          queryKey: ["watch-history", currentProfile.id ?? undefined],
+          queryKey: [
+            "watch-history",
+            currentProfile ? currentProfile.id : undefined,
+          ],
         });
       }
     } catch (error) {
