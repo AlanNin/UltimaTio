@@ -8,7 +8,7 @@ import {
   ShieldCheckIcon,
   WalletIcon,
 } from "@heroicons/react/24/outline";
-import Logo from "~/assets/UltimatioLogo_Lighter.png";
+import LogoL from "~/assets/icons/ultimatio-lighter.png";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -25,7 +25,7 @@ const DesktopSettings = () => {
         <Link href="/">
           <Image
             alt="logo"
-            src={Logo}
+            src={LogoL}
             className="w-[52px] h-auto cursor-pointer"
           />
         </Link>

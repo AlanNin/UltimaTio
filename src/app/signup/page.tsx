@@ -8,24 +8,23 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
-import GoogleIcon from "~/assets/GoogleIcon2.png";
+import GoogleIcon from "~/assets/icons/google.png";
 import { Reveal } from "~/utils/framer-motion/reveal";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import LogoL from "~/assets/UltimatioLogo_Lighter.png";
+import LogoL from "~/assets/icons/ultimatio-lighter.png";
 import {
   SignUpAccount,
   SignUpWithGoogle,
   validateEmail,
 } from "~/server/queries/auth.queries";
 import Image from "next/image";
-import Loading from "react-loading";
 import { useDispatch } from "react-redux";
 import {
   loginFailure,
   loginStart,
   loginSuccess,
-} from "~/utils/redux/user-slice";
+} from "~/providers/redux/user-slice";
 import { signInWithPopup } from "firebase/auth";
 import { auth, GoogleProvider } from "~/firebase/config";
 import { useRouter } from "next/navigation";
@@ -219,7 +218,7 @@ const SignUp = () => {
 
       {isAboveLargeScreens && (
         <div className="inset-0 flex flex-col">
-          <div className="bg-signup-background-desktop bg-cover relative inset-0 w-full h-full z-0 min-h-screen">
+          <div className="bg-signup-background bg-cover relative inset-0 w-full h-full z-0 min-h-screen">
             <div className="flex items-center h-screen">
               <Reveal delay={0.25}>
                 <h1
@@ -235,10 +234,10 @@ const SignUp = () => {
       )}
 
       <div
-        className={`fixed z-30 bg-[#121212] rounded pt-2 pb-8 flex flex-col items-center gap-2 ${
+        className={`fixed z-30 bg-[#121212] shadow-md rounded-xl pt-2 pb-8 flex flex-col items-center gap-2 ${
           isAboveLargeScreens
             ? "top-[50%] right-36 transform -translate-y-1/2 px-14"
-            : "m-auto h-max w-max px-10 relative"
+            : "m-auto h-max w-max px-10 relative max-w-[85%]"
         }`}
       >
         {currentStep < 2 && (
@@ -312,6 +311,7 @@ const SignUp = () => {
                 } flex`}
               >
                 <input
+                  id="checkbox-emails"
                   type="checkbox"
                   checked={
                     inputs.checkbox !== undefined ? inputs.checkbox : undefined
@@ -326,16 +326,19 @@ const SignUp = () => {
                     isAboveLargeScreens ? "" : "size-3.5 mt-[-1px]"
                   } cursor-pointer`}
                 />
-                <p className="flex max-w-[400px] font-light text-sm">
+                <label
+                  htmlFor="checkbox-emails"
+                  className="flex max-w-[400px] font-light text-sm"
+                >
                   {isAboveLargeScreens
                     ? "I acknowledge UltimaTio may send me info about account notifications or other UltimaTio-related content."
                     : "I would like to receive news."}
-                </p>
+                </label>
               </div>
             </div>
 
             <h1
-              className={`font-light text-sm text-[#a6a6a6] mb-2 ${
+              className={`font-light text-sm text-[#b4b4b4] mb-2 ${
                 isAboveLargeScreens ? "mt-10" : "mt-6"
               }`}
             >
@@ -345,7 +348,7 @@ const SignUp = () => {
             </h1>
 
             <div
-              className="bg-[#ebf7ff] w-full py-1 flex justify-center rounded cursor-pointer"
+              className="bg-[#ebf7ff] w-full py-1.5 flex justify-center rounded cursor-pointer"
               onClick={signUpWithGoogle}
             >
               <Image alt="Google" src={GoogleIcon} className="h-5 w-5" />
@@ -375,11 +378,10 @@ const SignUp = () => {
               )}
             </div>
 
-            <Link href="/login">
-              <h1 className="font-bold text-sm text-[#a6a6a6] mt-4 mb-2 cursor-pointer">
-                Already have an account?
-              </h1>
-            </Link>
+            <h1 className="font-light text-sm mt-4 mb-2">
+              <span className="text-[#b8b8b8]"> Already have an account? </span>{" "}
+              <Link href="/signin">Sign in</Link>
+            </h1>
           </>
         )}
 
@@ -601,13 +603,13 @@ const SignUp = () => {
           <>
             <h1 className="text-2xl pt-10">Congratulations!</h1>
 
-            <h1 className="font-light text-md text-[#a6a6a6] mt-2 mb-8 text-center">
+            <h1 className="font-light text-md text-[#a6a6a6] mb-5 text-center">
               Welcome to UltimaTio, you can now log into you account.
             </h1>
 
-            <Link href="/login">
-              <div className="relative flex py-2 px-4 bg-[#6C0386] rounded-md mb-3 text-white">
-                Go to log in
+            <Link href="/signin">
+              <div className="relative flex py-2 px-6 bg-[#6C0386] rounded-md mb-3 text-white">
+                Go to sign in
               </div>
             </Link>
           </>

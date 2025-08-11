@@ -4,8 +4,8 @@ import { handleSearch } from "~/server/queries/tmdb.queries";
 import { useEffect, useState } from "react";
 import { Loading } from "~/utils/loading/loading";
 import { useRouter, useSearchParams } from "next/navigation";
-import SearchCard from "./_components/card";
 import { FaceFrownIcon } from "@heroicons/react/24/outline";
+import SearchCard from "~/components/search/card";
 
 const Search = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
@@ -39,7 +39,7 @@ const Search = () => {
     <section
       id="home"
       className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto ${
-        isAboveMediumScreens ? "pt-14 pb-10" : "pt-11 pb-24"
+        isAboveMediumScreens ? "pt-16 pb-10" : "pt-11 pb-24"
       }`}
     >
       {isLoading ? (

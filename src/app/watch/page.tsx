@@ -3,17 +3,17 @@ import useMediaQuery from "~/hooks/useMediaQuery";
 import { useState, useRef, useEffect } from "react";
 import { Loading } from "~/utils/loading/loading";
 import Player from "./player/player";
-import TopNav from "./_components/top-nav";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getContentMovie } from "~/server/queries/movie/tmdb.queries";
 import { getContentTV } from "~/server/queries/tv/tmdb.queries";
 import { getContentAnime } from "~/server/queries/anime/tmdb.queries";
-import Providers from "./_components/providers/providers";
-import Episodes from "./_components/episodes/episodes";
-import Seasons from "./_components/seasons/seasons";
-import Info from "./_components/info";
 import { useSelector } from "react-redux";
 import { saveProfileContentProgress } from "~/server/queries/contentProfile.queries";
+import TopNav from "~/components/watch/top-nav";
+import Providers from "~/components/watch/providers/providers";
+import Episodes from "~/components/watch/episodes/episodes";
+import Seasons from "~/components/watch/seasons/seasons";
+import Info from "~/components/watch/info";
 
 const Watch = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");

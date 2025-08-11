@@ -1,6 +1,222 @@
 "use server";
 import axios from "axios";
 
+// SEARCH TMDB FEED (COMBINED)
+async function searchTMDBFeed(url: string): Promise<any[]> {
+  const baseUrl = "https://api.themoviedb.org/3/";
+
+  const img = (
+    p: string | null | undefined,
+    size: "original" | "w780" = "original"
+  ) => (p ? `https://media.themoviedb.org/t/p/${size}${p}` : null);
+
+  const getMovieRuntimeSeconds = (movie: any) => {
+    const r = movie?.runtime;
+    return typeof r === "number" ? r * 60 : null;
+  };
+
+  const getTvRuntimeSeconds = (tv: any) => {
+    // episode_run_time is an array of minutes
+    const fromArray =
+      Array.isArray(tv?.episode_run_time) && tv.episode_run_time.length
+        ? tv.episode_run_time[0]
+        : null;
+    const lastEp = tv?.last_episode_to_air?.runtime ?? null;
+    const nextEp = tv?.next_episode_to_air?.runtime ?? null;
+
+    const minutes =
+      typeof fromArray === "number"
+        ? fromArray
+        : typeof lastEp === "number"
+        ? lastEp
+        : typeof nextEp === "number"
+        ? nextEp
+        : null;
+    return typeof minutes === "number" ? minutes * 60 : null;
+  };
+
+  try {
+    const response = await axios.get(`${baseUrl}${url}`, {
+      params: {
+        api_key: process.env.TMDB_APIKEY,
+        language: "en-US",
+      },
+    });
+
+    const responseData = await Promise.all(
+      response.data.results.map(async (content: any) => {
+        try {
+          let contentType;
+
+          if (url.includes("movie")) {
+            contentType = "movie";
+
+            const fullDataResponse = await axios.get(
+              `${baseUrl}movie/${content.id}`,
+              {
+                params: {
+                  api_key: process.env.TMDB_APIKEY,
+                  append_to_response: "credits",
+                },
+              }
+            );
+
+            const data = fullDataResponse.data;
+
+            // skip items with no overview
+            const description = data?.overview || content?.overview || "";
+            if (!description.trim()) return null;
+
+            const studios = (data.production_companies ?? []).map((s: any) => ({
+              id: s.id,
+              name: s.name,
+              originCountry: s.origin_country,
+            }));
+            const ContentStudio = studios.map((studio: any) => ({ studio }));
+
+            const ContentGenre = (data.genres ?? []).map((g: any) => ({
+              genre: {
+                id: g.id,
+                name: g.name,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+            }));
+
+            const cast = (data.credits?.cast ?? []).slice(0, 15);
+            const ContentActor = cast.map((a: any) => ({
+              name: a.name,
+              img: img(a.profile_path, "original"),
+            }));
+
+            return {
+              landscapeUrl: img(content.backdrop_path, "original"),
+              posterUrl: img(content.poster_path, "w780"),
+              title: data.title,
+              tmdbid: content.id,
+              date: data.release_date ? new Date(data.release_date) : null,
+              duration: getMovieRuntimeSeconds(data), // can be null
+              rating: Math.round((content.vote_average || 0) * 10) / 10,
+              description,
+              ContentStudio,
+              ContentGenre,
+              ContentActor,
+              category: contentType,
+            };
+          }
+
+          if (url.includes("tv")) {
+            const AnimeGenreId = 16;
+            const AnimeCountry = "JP";
+            const isAnime =
+              Array.isArray(content.origin_country) &&
+              content.origin_country.includes(AnimeCountry) &&
+              Array.isArray(content.genre_ids) &&
+              content.genre_ids.includes(AnimeGenreId);
+
+            contentType = isAnime ? "anime" : "tv";
+
+            const fullDataResponse = await axios.get(
+              `${baseUrl}tv/${content.id}`,
+              {
+                params: {
+                  api_key: process.env.TMDB_APIKEY,
+                  append_to_response: "credits",
+                },
+              }
+            );
+
+            const data = fullDataResponse.data;
+
+            const genres = data.genres ?? [];
+            if (!genres.length) return null;
+
+            const hasNewsGenre = genres.some((g: any) => {
+              const n = (g.name || "").toLowerCase();
+              return (
+                n === "news" ||
+                n === "talk" ||
+                n === "documentary" ||
+                n === "soap" ||
+                n === "reality"
+              );
+            });
+            if (hasNewsGenre) return null;
+
+            const description = data?.overview || content?.overview || "";
+            if (!description.trim()) return null;
+
+            const studios = (data.production_companies ?? []).map((s: any) => ({
+              id: s.id,
+              name: s.name,
+              originCountry: s.origin_country,
+            }));
+            const ContentStudio = studios.map((studio: any) => ({ studio }));
+
+            const ContentGenre = genres.map((g: any) => ({
+              genre: {
+                id: g.id,
+                name: g.name,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+            }));
+
+            const cast = (data.credits?.cast ?? []).slice(0, 15);
+            const ContentActor = cast.map((a: any) => ({
+              name: a.name,
+              img: img(a.profile_path, "original"),
+            }));
+
+            return {
+              landscapeUrl: img(content.backdrop_path, "original"),
+              posterUrl: img(content.poster_path, "w780"),
+              title: data.name,
+              tmdbid: content.id,
+              date: data.first_air_date ? new Date(data.first_air_date) : null,
+              // SAFE: no direct .runtime access on possibly null objects
+              duration: getTvRuntimeSeconds(data), // can be null
+              rating: Math.round((content.vote_average || 0) * 10) / 10,
+              description,
+              ContentStudio,
+              ContentGenre,
+              ContentActor,
+              category: contentType,
+            };
+          }
+
+          return null;
+        } catch (error) {
+          console.error("Error fetching full TMDB data:", content.id, error);
+          return null;
+        }
+      })
+    );
+
+    return responseData.filter((data: any) => data !== null);
+  } catch (error) {
+    console.error("Error fetching TMDb search data:", error);
+    return [];
+  }
+}
+
+// SHUFFLE ARRAY
+function shuffleArray(array: any[]): any[] {
+  const interleavedArray: any[] = [];
+  const halfLength = Math.ceil(array.length / 2);
+
+  for (let i = 0; i < halfLength; i++) {
+    if (i < array.length) {
+      interleavedArray.push(array[i]);
+    }
+    if (i + halfLength < array.length) {
+      interleavedArray.push(array[i + halfLength]);
+    }
+  }
+
+  return interleavedArray;
+}
+
 // GET HOME FEED (COMBINED)
 export async function getHomeFeed(): Promise<any | { error: string }> {
   try {
@@ -39,220 +255,6 @@ export async function getHomeFeed(): Promise<any | { error: string }> {
     console.error("Error fetching home feed:", error);
     return { error: "Error al obtener el feed de inicio" };
   }
-}
-
-// SEARCH TMDB FEED (COMBINED)
-async function searchTMDBFeed(url: string): Promise<any[]> {
-  const baseUrl = "https://api.themoviedb.org/3/";
-  try {
-    const response = await axios.get(`${baseUrl}${url}`, {
-      params: {
-        api_key: process.env.TMDB_APIKEY,
-        language: "en-US",
-      },
-    });
-
-    const responseData = await Promise.all(
-      response.data.results.map(async (content: any) => {
-        try {
-          let contentType;
-          if (url.includes("movie")) {
-            contentType = "movie";
-            const fullDataResponse = await axios.get(
-              `${baseUrl}movie/${content.id}`,
-              {
-                params: {
-                  api_key: process.env.TMDB_APIKEY,
-                  append_to_response: "credits",
-                },
-              }
-            );
-
-            if (content.overview.length === 0) {
-              return null;
-            }
-
-            const studios = fullDataResponse.data.production_companies.map(
-              (studio: any) => ({
-                id: studio.id,
-                name: studio.name,
-                originCountry: studio.origin_country,
-              })
-            );
-
-            const ContentStudio = studios.map((studio: any) => ({
-              studio,
-            }));
-
-            const ContentGenre = fullDataResponse.data.genres.map(
-              (genre: any) => ({
-                genre: {
-                  id: genre.id,
-                  name: genre.name,
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                },
-              })
-            );
-
-            const cast = fullDataResponse.data.credits.cast.slice(0, 15);
-
-            const contentActors = cast.map((actor: any) => ({
-              name: actor.name,
-              img: actor.profile_path
-                ? "https://media.themoviedb.org/t/p/original" +
-                  actor.profile_path
-                : null,
-            }));
-
-            const actors = contentActors.map((actor: any) => ({
-              name: actor.name,
-              img: actor.img,
-            }));
-
-            return {
-              landscapeUrl:
-                "https://media.themoviedb.org/t/p/original" +
-                content.backdrop_path,
-              posterUrl:
-                "https://media.themoviedb.org/t/p/w780" + content.poster_path,
-              title: fullDataResponse.data.title,
-              tmdbid: content.id,
-              date: new Date(fullDataResponse.data.release_date),
-              duration: fullDataResponse.data.runtime * 60,
-              rating: Math.round(content.vote_average * 10) / 10,
-              description: content.overview,
-              ContentStudio,
-              ContentGenre,
-              ContentActor: actors,
-              category: contentType,
-            };
-          } else if (url.includes("tv")) {
-            const AnimeGenreId = 16;
-            const AnimeCountry = "JP";
-            const isAnime =
-              content.origin_country &&
-              content.origin_country.includes(AnimeCountry) &&
-              content.genre_ids &&
-              content.genre_ids.includes(AnimeGenreId);
-
-            contentType = isAnime ? "anime" : "tv";
-            const fullDataResponse = await axios.get(
-              `${baseUrl}tv/${content.id}`,
-              {
-                params: {
-                  api_key: process.env.TMDB_APIKEY,
-                  append_to_response: "credits",
-                },
-              }
-            );
-
-            if (fullDataResponse.data.genres.length === 0) {
-              return null;
-            }
-
-            const hasNewsGenre = fullDataResponse.data.genres.some(
-              (genre: any) =>
-                genre.name.toLowerCase() === "news" ||
-                genre.name.toLowerCase() === "talk" ||
-                genre.name.toLowerCase() === "documentary" ||
-                genre.name.toLowerCase() === "soap" ||
-                genre.name.toLowerCase() === "reality"
-            );
-
-            if (hasNewsGenre) {
-              return null;
-            }
-
-            const studios = fullDataResponse.data.production_companies.map(
-              (studio: any) => ({
-                id: studio.id,
-                name: studio.name,
-                originCountry: studio.origin_country,
-              })
-            );
-
-            const ContentStudio = studios.map((studio: any) => ({
-              studio,
-            }));
-
-            const ContentGenre = fullDataResponse.data.genres.map(
-              (genre: any) => ({
-                genre: {
-                  id: genre.id,
-                  name: genre.name,
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                },
-              })
-            );
-
-            const cast = fullDataResponse.data.credits.cast.slice(0, 15);
-
-            const contentActors = cast.map((actor: any) => ({
-              name: actor.name,
-              img: actor.profile_path
-                ? "https://media.themoviedb.org/t/p/original" +
-                  actor.profile_path
-                : null,
-            }));
-
-            const actors = contentActors.map((actor: any) => ({
-              name: actor.name,
-              img: actor.img,
-            }));
-
-            return {
-              landscapeUrl:
-                "https://media.themoviedb.org/t/p/original" +
-                content.backdrop_path,
-              posterUrl:
-                "https://media.themoviedb.org/t/p/w780" + content.poster_path,
-              title: fullDataResponse.data.name,
-              tmdbid: content.id,
-              date: new Date(fullDataResponse.data.first_air_date),
-              duration:
-                fullDataResponse.data.episode_run_time * 60 ||
-                fullDataResponse.data.last_episode_to_air.runtime * 60,
-              rating: Math.round(content.vote_average * 10) / 10,
-              description: content.overview,
-              ContentStudio,
-              ContentGenre,
-              ContentActor: actors,
-              category: contentType,
-            };
-          } else {
-            return null;
-          }
-        } catch (error) {
-          console.error("Error fetching full TMDB data:", content.id, error);
-          return null;
-        }
-      })
-    );
-
-    return responseData.filter((data: any) => data !== null);
-  } catch (error) {
-    console.error("Error fetching TMDb search data:", error);
-    return [];
-  }
-}
-
-// SHUFFLE ARRAY
-function shuffleArray(array: any[]): any[] {
-  const interleavedArray: any[] = [];
-  const halfLength = Math.ceil(array.length / 2);
-
-  for (let i = 0; i < halfLength; i++) {
-    if (i < array.length) {
-      interleavedArray.push(array[i]);
-    }
-    if (i + halfLength < array.length) {
-      interleavedArray.push(array[i + halfLength]);
-    }
-  }
-
-  return interleavedArray;
 }
 
 // HANDLE SEARCH

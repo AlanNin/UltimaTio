@@ -105,43 +105,41 @@ export async function createProfile(
 }
 
 // DELETE PROFILE
-export async function deleteProfile(profile_id: any): Promise<any | null> {
+export async function deleteProfile(
+  profile_id: string
+): Promise<{ ok: boolean; error?: string; message?: string }> {
   try {
     const user_id = await getUserFromAuth();
 
-    // FIND PROFILE
+    // FIND PROFILE (only select what we need)
     const profile = await prisma.profile.findUnique({
-      where: {
-        id: profile_id,
-      },
-      select: {
-        user_id: true,
-      },
+      where: { id: profile_id },
+      select: { user_id: true },
     });
 
-    // VALIDATE PROFILE AND USER
     if (!profile) {
-      return "Profile not found";
+      return { ok: false, error: "Profile not found" };
     }
     if (profile.user_id !== user_id) {
-      return "Unauthorized: Profile does not belong to this user";
+      return {
+        ok: false,
+        error: "Unauthorized: Profile does not belong to this user",
+      };
     }
 
-    // DELETE PROFILE PREFERENCES ASSOCIATED WITH THE PROFILE
-    await prisma.profileSettings.deleteMany({
-      where: { profile_id },
+    // DELETE SETTINGS + PROFILE atomically
+    await prisma.$transaction(async (tx) => {
+      await tx.library.deleteMany({ where: { profile_id } });
+      await tx.profileSettings.deleteMany({ where: { profile_id } });
+      await tx.profile.delete({ where: { id: profile_id } });
     });
 
-    // DELETE PROFILE
-    await prisma.profile.delete({
-      where: {
-        id: profile_id,
-      },
-    });
-
-    return "Profile deleted successfully";
-  } catch (error) {
-    return error;
+    return { ok: true, message: "Profile deleted successfully" };
+  } catch (err) {
+    console.error(err);
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    // Return a plain object (serializable)
+    return { ok: false, error: msg };
   }
 }
 

@@ -16,9 +16,9 @@ export default {
         robotocon: ["Roboto-Condensed", "sans-serif"],
       },
       backgroundImage: {
-        "login-background": "url('/public_assets/LoginBackground.jpg')",
-        "signup-background-mobile": "url('/public_assets/SignupBackgroundMobile.jpg')",
-        "signup-background-desktop": "url('/public_assets/SignupBackgroundDesktop.jpg')",
+        "signin-background": "url('/backgrounds/signin.jpg')",
+        "signup-background": "url('/backgrounds/signup.jpg')",
+        "signup-background-mobile": "url('/backgrounds/signup-mobile.jpg')",
       },
     },
   },

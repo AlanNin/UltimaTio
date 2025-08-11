@@ -1,12 +1,12 @@
 "use client";
 import useMediaQuery from "~/hooks/useMediaQuery";
-import HomeCarousel from "./_home-components/carousel";
-import Section from "./_shared/section/section";
 import { getHomeFeed } from "~/server/queries/tmdb.queries";
 import { useEffect, useState } from "react";
 import { Loading } from "~/utils/loading/loading";
 import { getProfileHistory } from "~/server/queries/contentProfile.queries";
 import { useSelector } from "react-redux";
+import HomeCarousel from "~/components/carousel";
+import Section from "~/components/section/section";
 
 type Feed = {
   history?: any[];
@@ -56,8 +56,8 @@ const Home = () => {
   return (
     <section
       id="home"
-      className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto ${
-        isAboveMediumScreens ? "pt-14 pb-10" : "pt-11 pb-16"
+      className={`w-full h-full min-h-screen relative ${
+        isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
       }`}
     >
       {isLoading ? (
@@ -71,7 +71,11 @@ const Home = () => {
       ) : (
         <>
           <HomeCarousel content={feed.trending} />
-          <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
+          <div
+            className={`max-w-[1920px] m-auto ${
+              isAboveMediumScreens ? "pt-10" : "pt-6"
+            }`}
+          >
             {feed.history && feed.history.length > 0 && (
               <Section
                 text="Continue Watching"
