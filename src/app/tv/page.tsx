@@ -1,9 +1,9 @@
 "use client";
 import useMediaQuery from "~/hooks/useMediaQuery";
-import Section from "../_shared/section/section";
 import { getFeedTV } from "~/server/queries/tv/tmdb.queries";
 import { useEffect, useState } from "react";
 import { Loading } from "~/utils/loading/loading";
+import Section from "~/components/section/section";
 
 type Feed = {
   airingTodayTV: any[];
