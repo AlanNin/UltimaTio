@@ -402,7 +402,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                 <>
                   {content?.ContentGenre?.map((genre: any, _index: number) => (
                     <span
-                      key={genre.id}
+                      key={genre.genre.id}
                       className="bg-[rgba(191,191,191,0.15)] rounded-xl py-1 px-2 font-light text-xs cursor-pointer"
                     >
                       {genre &&
@@ -422,7 +422,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   {content?.ContentStudio?.map(
                     (studio: any, _index: number) => (
                       <span
-                        key={studio.id}
+                        key={studio.studio.id}
                         className="bg-[rgba(191,191,191,0.15)] rounded-xl py-1 px-2 font-light text-xs cursor-pointer"
                       >
                         {studio &&

@@ -1,3 +1,4 @@
+// store.ts
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import userReducer from "./user-slice";
 import profileReducer from "./profile-slice";
@@ -12,7 +13,7 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
+import storage from "./persistStorage";
 
 const persistConfig = {
   key: "root",
@@ -38,3 +39,5 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

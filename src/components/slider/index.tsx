@@ -12,6 +12,44 @@ type Props = {
   watchHistory?: boolean;
 };
 
+const LeftArrow = ({ onClick }: { onClick?: () => void }) => {
+  const isAboveTabletScreens = useMediaQuery("(min-width: 680px)");
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Previous"
+      className={`absolute cursor-pointer left-0 bottom-0 top-0 ${
+        isAboveTabletScreens ? "p-2.5" : "p-0.5"
+      } flex justify-center items-center bg-[rgba(219,219,219,0.08)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
+    >
+      <ChevronLeftIcon
+        className={`text-white ${isAboveTabletScreens ? "h-6 w-6" : "h-5 w-5"}`}
+        strokeWidth={2.5}
+      />
+    </button>
+  );
+};
+
+const RightArrow = ({ onClick }: { onClick?: () => void }) => {
+  const isAboveTabletScreens = useMediaQuery("(min-width: 680px)");
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Next"
+      className={`absolute cursor-pointer right-0 bottom-0 top-0 ${
+        isAboveTabletScreens ? "p-2.5" : "p-0.5"
+      } flex justify-center items-center bg-[rgba(219,219,219,0.08)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
+    >
+      <ChevronRightIcon
+        className={`text-white ${isAboveTabletScreens ? "h-6 w-6" : "h-5 w-5"}`}
+        strokeWidth={2.5}
+      />
+    </button>
+  );
+};
+
 const Slider: React.FC<Props> = ({ content: initialContent, watchHistory }) => {
   const [content, setContent] = useState(initialContent);
   const isAboveTabletScreens = useMediaQuery("(min-width: 680px)");
@@ -72,36 +110,10 @@ const Slider: React.FC<Props> = ({ content: initialContent, watchHistory }) => {
         swipeable={true}
         minimumTouchDrag={10}
         arrows={true}
-        partialVisbile
+        partialVisible={true}
         ssr={true}
-        customLeftArrow={
-          <div
-            className={`absolute cursor-pointer left-0 bottom-0 top-0 ${
-              isAboveTabletScreens ? "p-2.5" : "p-0.5"
-            } flex justify-center items-center bg-[rgba(219,219,219,0.08)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
-          >
-            <ChevronLeftIcon
-              className={`cursor-pointer text-white ${
-                isAboveTabletScreens ? "h-6 w-6" : "h-5 w-5"
-              }`}
-              strokeWidth={2.5}
-            />
-          </div>
-        }
-        customRightArrow={
-          <div
-            className={`absolute cursor-pointer right-0 bottom-0 top-0 ${
-              isAboveTabletScreens ? "p-2.5" : "p-0.5"
-            }  flex justify-center items-center bg-[rgba(219,219,219,0.08)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
-          >
-            <ChevronRightIcon
-              className={`cursor-pointer text-white ${
-                isAboveTabletScreens ? "h-6 w-6" : "h-5 w-5"
-              }`}
-              strokeWidth={2.5}
-            />
-          </div>
-        }
+        customLeftArrow={<LeftArrow />}
+        customRightArrow={<RightArrow />}
       >
         {filteredContent.map((content: any, index: number) => (
           <SliderCard

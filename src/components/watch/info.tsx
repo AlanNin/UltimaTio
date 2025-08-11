@@ -127,7 +127,7 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
           >
             {content?.ContentGenre?.map((genre: any, _index: number) => (
               <span
-                key={genre.id}
+                key={genre.genre.id}
                 className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0 px-2 font-light text-xs cursor-pointer w-fit h-fit text-nowrap"
               >
                 {genre &&
@@ -150,7 +150,7 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
           >
             {content?.ContentStudio?.map((studio: any, _index: number) => (
               <span
-                key={studio.id}
+                key={studio.studio.id}
                 className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0 px-2 font-light text-xs cursor-pointer w-fit h-fit text-nowrap"
               >
                 {studio &&

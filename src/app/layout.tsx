@@ -6,7 +6,6 @@ import TopNavbar from "~/components/layout/top-navbar";
 import WhoIsWatching from "~/components/profile/whos-watching";
 import ProfileCheckerProvider from "~/providers/profile-checker";
 import ReactQueryProvider from "~/providers/react-query";
-import { QueryClient } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export const metadata = {
@@ -20,14 +19,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 15,
-      },
-    },
-  });
-
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className={`${GeistSans.className} app`}>
