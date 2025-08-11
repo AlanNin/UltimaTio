@@ -10,6 +10,7 @@ type Props = {
   episode: number;
   currentEpisode: number;
   profileContent: any;
+  airDate: string;
 };
 
 const EpisodeBox: React.FC<Props> = ({
@@ -19,6 +20,7 @@ const EpisodeBox: React.FC<Props> = ({
   episode,
   currentEpisode,
   profileContent,
+  airDate,
 }) => {
   const router = useRouter();
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
@@ -40,6 +42,10 @@ const EpisodeBox: React.FC<Props> = ({
     (pc: any) =>
       parseInt(pc.episode) === episode && parseInt(pc.season) === currentSeason
   );
+
+  if (new Date(airDate) > new Date()) {
+    return null;
+  }
 
   return (
     <div

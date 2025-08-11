@@ -87,7 +87,7 @@ const determineSrc = (
         src = `https://vidsrc.xyz/embed/movie?tmdb=${tmdbid}&ds_lang=en`;
       }
       break;
-    case "tv":
+    default:
       if (provider === "VidLink") {
         src = `https://vidlink.pro/tv/${tmdbid}/${season}/${episode}?startAt=${startAt}&primaryColor=a35fe8&secondaryColor=a35fe8&iconColor=eefdec&icons=default&player=jw&title=true&poster=true&autoplay=false&nextbutton=false`;
       }

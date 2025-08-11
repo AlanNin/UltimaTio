@@ -15,7 +15,11 @@ const SeasonCard: React.FC<Props> = ({
   handleChangeSeason,
   index,
 }) => {
-  if (season.season.episode_count === 0) {
+  if (
+    season.season.episode_count === 0 ||
+    new Date(season.season.airDate) > new Date() ||
+    season.season.air_date === null
+  ) {
     return null;
   }
 

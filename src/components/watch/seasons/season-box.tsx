@@ -7,6 +7,7 @@ type Props = {
   category: string;
   currentSeason: number;
   season: any;
+  airDate: string;
 };
 
 const SeasonBox: React.FC<Props> = ({
@@ -14,6 +15,7 @@ const SeasonBox: React.FC<Props> = ({
   category,
   currentSeason,
   season,
+  airDate,
 }) => {
   const router = useRouter();
   const posterUrl =
@@ -22,7 +24,7 @@ const SeasonBox: React.FC<Props> = ({
   const isCurrentSeason = season.season_number === currentSeason;
   const firstEpisodeSeason = season?.episodes[0]?.episodeNumber;
 
-  if (season.air_date === null) {
+  if (new Date(airDate) > new Date() || season.air_date === null) {
     return null;
   }
 

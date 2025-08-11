@@ -6,15 +6,17 @@ import { getCurrentProfile } from ".././authMiddleware";
 // GET FEED (TV)
 export async function getFeedTV(): Promise<any | { error: string }> {
   try {
-    const airingTodayTV = await searchTMDBFeedTV(
-      "tv/airing_today?language=en-US"
-    );
-
-    const onTheAirTV = await searchTMDBFeedTV("tv/on_the_air?language=en-US");
-
-    const popularTV = await searchTMDBFeedTV("tv/popular?language=en-US");
-
-    const topRatedTV = await searchTMDBFeedTV("tv/top_rated?language=en-US");
+    const [
+      airingTodayTV,
+      onTheAirTV,
+      popularTV,
+      topRatedTV,
+    ] = await Promise.all([
+      searchTMDBFeedTV("tv/airing_today?language=en-US"),
+      searchTMDBFeedTV("tv/on_the_air?language=en-US"),
+      searchTMDBFeedTV("tv/popular?language=en-US"),
+      searchTMDBFeedTV("tv/top_rated?language=en-US"),
+    ]);
 
     return { airingTodayTV, onTheAirTV, popularTV, topRatedTV };
   } catch (error) {

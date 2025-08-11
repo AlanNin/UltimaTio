@@ -36,6 +36,7 @@ const Seasons: React.FC<Props> = ({
             category={category}
             currentSeason={currentSeason!}
             season={season.season}
+            airDate={season.airDate}
           />
         ))}
       </div>

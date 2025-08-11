@@ -38,6 +38,7 @@ const Episodes: React.FC<Props> = ({
             episode={episode.episodeNumber}
             currentEpisode={currentEpisode}
             profileContent={profileContent}
+            airDate={episode.airDate}
           />
         )
       )}
