@@ -68,7 +68,7 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
         </div>
       </div>
       <h1 className="text-sm font-light text-[#c2c2c2] h-full flex max-h-[100px] overflow-y-auto ">
-        {episode.overview}
+        {episode.overview ?? "No description available"}
       </h1>
       {episode?.watchProgress > 0 && (
         <div className="h-4 w-full rounded-md bg-[rgba(255,255,255,0.35)]">

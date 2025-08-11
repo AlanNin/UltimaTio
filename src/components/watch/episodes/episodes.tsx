@@ -9,7 +9,6 @@ type Props = {
   category: string;
   currentSeason: number;
   currentEpisode: number;
-  saveProfileProgress: any;
   profileContent: any;
 };
 
@@ -19,7 +18,6 @@ const Episodes: React.FC<Props> = ({
   category,
   currentSeason,
   currentEpisode,
-  saveProfileProgress,
   profileContent,
 }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
@@ -39,7 +37,6 @@ const Episodes: React.FC<Props> = ({
             currentSeason={currentSeason}
             episode={episode.episodeNumber}
             currentEpisode={currentEpisode}
-            saveProfileProgress={saveProfileProgress}
             profileContent={profileContent}
           />
         )

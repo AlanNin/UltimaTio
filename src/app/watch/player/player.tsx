@@ -1,12 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
 import useMediaQuery from "~/hooks/use-media-query";
 import ExternalPlayer from "./external-player";
-import { useSelector } from "react-redux";
-import {
-  getProfileContentProgress,
-  saveProfileContentProgress,
-} from "~/server/queries/contentProfile.queries";
+import { Provider } from "../page";
 
 type Props = {
   title: any;
@@ -18,6 +13,7 @@ type Props = {
   currentProvider: any;
   currentTimeRef: any;
   contentDurationRef: any;
+  startAt: number;
 };
 
 const Player: React.FC<Props> = ({
@@ -28,38 +24,9 @@ const Player: React.FC<Props> = ({
   currentProvider,
   currentTimeRef,
   contentDurationRef,
+  startAt,
 }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
-  const { currentProfile } = useSelector((state: any) => state.profile);
-  const [watchProgress, setWatchProgress] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // FETCH PROFILE CONTENT PROGRESS
-  useEffect(() => {
-    setIsLoading(true);
-    setWatchProgress(0);
-    if (currentProfile === null) {
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchProfileContentProgress = async () => {
-      try {
-        const response = await getProfileContentProgress(
-          Number(tmdbid) || 0,
-          category || "",
-          Number(season) || 0,
-          Number(episode) || 0
-        );
-        setWatchProgress(response.watchProgress);
-      } catch (error) {
-        //
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchProfileContentProgress();
-  }, [season, episode, currentProvider, tmdbid]);
 
   // manage current time
   const handleCurrentTimeUpdate = (time: any) => {
@@ -70,29 +37,6 @@ const Player: React.FC<Props> = ({
   const handleDurationUpdate = (duration: any) => {
     contentDurationRef.current = duration;
   };
-
-  // save profile progress before unload
-  useEffect(() => {
-    if (currentProfile === null || currentTimeRef.current === 0) {
-      return;
-    }
-    const handleBeforeUnload = async () => {
-      saveProfileContentProgress(
-        Number(tmdbid) || 0,
-        category!,
-        currentTimeRef.current,
-        contentDurationRef.current,
-        Number(season) || 0,
-        Number(episode) || 0
-      );
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
 
   return (
     <div
@@ -107,8 +51,14 @@ const Player: React.FC<Props> = ({
       }}
     >
       <ExternalPlayer
-        src={determineSrc(tmdbid, category, season, episode, currentProvider)}
-        provider={currentProvider}
+        src={determineSrc(
+          tmdbid,
+          category,
+          season,
+          episode,
+          currentProvider,
+          startAt
+        )}
         handleCurrentTimeUpdate={handleCurrentTimeUpdate}
         handleDurationUpdate={handleDurationUpdate}
       />
@@ -123,26 +73,28 @@ const determineSrc = (
   category: any,
   season: any,
   episode: any,
-  provider: any
+  provider: Provider,
+  startAt: number
 ) => {
   let src = "";
-  if (category === "movie") {
-    if (provider === "VidSrcPro") {
-      src = `https://vidsrc.xyz/embed/movie?tmdb=${tmdbid}&ds_lang=en`;
-    } else if (provider === "Smashy") {
-      src = `https://player.smashy.stream/movie/${tmdbid}`;
-    } else if (provider === "Internal Player (Beta)") {
-      src = "";
-    }
-  } else {
-    if (provider === "VidSrcPro") {
-      src = `https://vidsrc.xyz/embed/tv?tmdb=${tmdbid}&season=${season}&episode=${episode}&ds_lang=en`;
-    } else if (provider === "Smashy") {
-      src = `https://player.smashy.stream/tv/${tmdbid}?s=${season}&e=${episode}`;
-    } else if (provider === "Internal Player (Beta)") {
-      src = "";
-    }
-  }
 
+  switch (category) {
+    case "movie":
+      if (provider === "VidLink") {
+        src = `https://vidlink.pro/movie/${tmdbid}?startAt=${startAt}&primaryColor=a35fe8&secondaryColor=a35fe8&iconColor=eefdec&icons=default&player=jw&title=true&poster=true&autoplay=false&nextbutton=false`;
+      }
+      if (provider === "VidSrcPro") {
+        src = `https://vidsrc.xyz/embed/movie?tmdb=${tmdbid}&ds_lang=en`;
+      }
+      break;
+    case "tv":
+      if (provider === "VidLink") {
+        src = `https://vidlink.pro/tv/${tmdbid}/${season}/${episode}?startAt=${startAt}&primaryColor=a35fe8&secondaryColor=a35fe8&iconColor=eefdec&icons=default&player=jw&title=true&poster=true&autoplay=false&nextbutton=false`;
+      }
+      if (provider === "VidSrcPro") {
+        src = `https://vidsrc.xyz/embed/tv?tmdb=${tmdbid}&season=${season}&episode=${episode}&ds_lang=en`;
+      }
+      break;
+  }
   return src;
 };

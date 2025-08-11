@@ -7,7 +7,6 @@ type Props = {
   category: string;
   currentSeason: number;
   season: any;
-  saveProfileProgress: any;
 };
 
 const SeasonBox: React.FC<Props> = ({
@@ -15,7 +14,6 @@ const SeasonBox: React.FC<Props> = ({
   category,
   currentSeason,
   season,
-  saveProfileProgress,
 }) => {
   const router = useRouter();
   const posterUrl =
@@ -32,11 +30,9 @@ const SeasonBox: React.FC<Props> = ({
     <div
       className="relative overflow-clip cursor-pointer min-w-32 w-32 h-16 p-0 flex justify-center items-center text-center font-light text-[14px] border border-[rgba(255,255,255,0.1)]"
       onClick={() => {
-        saveProfileProgress(() => {
-          router.push(
-            `/watch?tmdbid=${tmdbid}&category=${category}&season=${season.season_number}&episode=${firstEpisodeSeason}`
-          );
-        });
+        router.push(
+          `/watch?tmdbid=${tmdbid}&category=${category}&season=${season.season_number}&episode=${firstEpisodeSeason}`
+        );
       }}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}

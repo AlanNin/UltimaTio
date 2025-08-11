@@ -11,11 +11,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import useMediaQuery from "~/hooks/use-media-query";
 
-type Props = {
-  saveProfileProgress: any;
-};
-
-const TopNav: React.FC<Props> = ({ saveProfileProgress }) => {
+const TopNav: React.FC = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   const { currentProfile } = useSelector((state: any) => state.profile);
   const router = useRouter();
@@ -32,9 +28,7 @@ const TopNav: React.FC<Props> = ({ saveProfileProgress }) => {
         color="white"
         className="cursor-pointer p-1.5 hover:bg-[rgba(255,255,255,0.1)] rounded-full transition-colors duration-400 hover:fill-[rgba(255,255,255,0.8)]"
         onClick={() => {
-          saveProfileProgress(() => {
-            router.push("/");
-          });
+          router.push("/");
         }}
       />
       <QueueListIcon

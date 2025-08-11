@@ -7,35 +7,44 @@ type Props = {
   content: any;
   season?: any;
   episode?: any;
-  saveProfileProgress: any;
 };
 
-const Info: React.FC<Props> = ({
-  content,
-  season,
-  episode,
-  saveProfileProgress,
-}) => {
+const Info: React.FC<Props> = ({ content, season, episode }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   const poster = content.posterUrl;
   const title = content.title;
   const category = content.category;
 
+  const sNum = Number(season);
+  const eNum = Number(episode);
+
+  const seasonObj =
+    content.seasons?.find(
+      (s: any) =>
+        (s.season?.season_number ?? s.season_number ?? s.number) === sNum
+    ) ?? content.seasons?.[sNum - 1];
+
+  const episodeObj =
+    seasonObj?.season?.episodes?.find(
+      (ep: any) => (ep.episode_number ?? ep.number) === eNum
+    ) ?? seasonObj?.season?.episodes?.[eNum - 1];
+
   const description =
     content.category === "movie"
-      ? content.description
-      : content.seasons[season - 1].season.episodes[episode - 1].overview;
+      ? content.description ?? ""
+      : episodeObj?.overview ??
+        seasonObj?.season?.overview ??
+        content.description ??
+        null;
 
   const rating =
     content.category === "movie"
-      ? content.rating
-      : content.seasons[season - 1].season.episodes[episode - 1].rating;
+      ? content.rating ?? null
+      : episodeObj?.rating ?? seasonObj?.season?.rating ?? null;
 
   const router = useRouter();
   const handleNavigateToContent = () => {
-    saveProfileProgress(() => {
-      router.push(`${content.category}/${content.tmdbid}`);
-    });
+    router.push(`${content.category}/${content.tmdbid}`);
   };
 
   return (
@@ -102,7 +111,7 @@ const Info: React.FC<Props> = ({
         >
           <span className="font-light text-xs text-[#adadad]"> Rating: </span>
           <span className="font-light text-xs text-[#cfcfcf]">
-            {rating} on TMDB
+            {rating ? `${rating} on TMDB` : "No rating available"}
           </span>
         </div>
         <div

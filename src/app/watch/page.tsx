@@ -1,49 +1,45 @@
 "use client";
 import useMediaQuery from "~/hooks/use-media-query";
-import { useState, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Loading } from "~/utils/loading/loading";
 import Player from "./player/player";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getContentMovie } from "~/server/queries/movie/tmdb.queries";
 import { getContentTV } from "~/server/queries/tv/tmdb.queries";
 import { getContentAnime } from "~/server/queries/anime/tmdb.queries";
-import { useSelector } from "react-redux";
-import { saveProfileContentProgress } from "~/server/queries/contentProfile.queries";
 import TopNav from "~/components/watch/top-nav";
-import Providers from "~/components/watch/providers/providers";
 import Episodes from "~/components/watch/episodes/episodes";
 import Seasons from "~/components/watch/seasons/seasons";
 import Info from "~/components/watch/info";
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { saveProfileContentProgress } from "~/server/queries/contentProfile.queries";
 import { getQueryClient } from "~/hooks/get-query-client";
 
-const Watch = () => {
+export type Provider = "VidLink" | "VidSrcPro";
+
+export default function WatchScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
   const router = useRouter();
-  const { currentProfile } = useSelector((state: any) => state.profile);
-  const providers = ["VidSrcPro", "Smashy"];
-  const [currentProvider, setCurrentProvider] = useState<string>(providers[0]!);
+  const providers = ["VidLink", "VidSrcPro"] as Provider[];
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const category = searchParams.get("category");
   const tmdbidParam = searchParams.get("tmdbid");
   const seasonParam = searchParams.get("season");
   const episodeParam = searchParams.get("episode");
-  const currentTimeRef = useRef<any>();
-  const contentDurationRef = useRef<any>();
+  const currentTimeRef = useRef<number | null>();
+  const contentDurationRef = useRef<number | null>();
+  const { currentProfile } = useSelector((state: any) => state.profile);
   const queryClient = getQueryClient();
 
-  if (!tmdbidParam) {
-    router.push("/");
-    return;
-  }
-
-  const { data: contentData, isLoading: isContentLoading } = useQuery({
+  const { data: contentData, isLoading: isContentLoading, isError } = useQuery({
     queryKey: [
       "watch-content",
-      tmdbidParam,
+      Number(tmdbidParam),
       category,
-      seasonParam,
-      episodeParam,
+      Number(seasonParam),
+      Number(episodeParam),
     ],
     queryFn: () => {
       if (category === "movie") {
@@ -57,31 +53,86 @@ const Watch = () => {
     },
   });
 
-  const saveProfileProgress = (callback: () => void) => {
-    try {
-      if (currentProfile && currentTimeRef.current > 0) {
-        saveProfileContentProgress(
-          Number(tmdbidParam)!,
-          String(category)!,
-          Number(currentTimeRef.current),
-          Number(contentDurationRef.current),
-          Number(seasonParam)!,
-          Number(episodeParam)!
-        );
+  const startAt = useMemo(() => {
+    if (!contentData?.profileContent) return 0;
 
-        queryClient.invalidateQueries({
-          queryKey: [
-            "watch-history",
-            currentProfile ? currentProfile.id : undefined,
-          ],
-        });
-      }
-    } catch (error) {
-      console.error("Error saving profile content progress:", error);
-    } finally {
-      callback();
-    }
-  };
+    return computeStartAt(contentData, category, seasonParam, episodeParam);
+  }, [category, seasonParam, episodeParam, !!contentData?.profileContent]);
+
+  const flushProgress = useCallback(() => {
+    if (!currentProfile) return;
+    const t = Number(currentTimeRef.current) || 0;
+    const d = Number(contentDurationRef.current) || 0;
+    if (t <= 0) return;
+
+    saveProfileContentProgress(
+      Number(tmdbidParam) || 0,
+      String(category),
+      t,
+      d,
+      Number(seasonParam) || 0,
+      Number(episodeParam) || 0
+    );
+
+    queryClient.invalidateQueries({
+      queryKey: ["watch-history", currentProfile?.id],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [
+        "watch-content",
+        Number(tmdbidParam),
+        category,
+        Number(seasonParam),
+        Number(episodeParam),
+      ],
+    });
+  }, [
+    currentProfile,
+    tmdbidParam,
+    category,
+    seasonParam,
+    episodeParam,
+    queryClient,
+  ]);
+
+  useEffect(() => {
+    const onHide = () => flushProgress();
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushProgress();
+    };
+
+    window.addEventListener("beforeunload", onHide);
+    window.addEventListener("pagehide", onHide);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.removeEventListener("beforeunload", onHide);
+      window.removeEventListener("pagehide", onHide);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [flushProgress]);
+
+  useEffect(() => {
+    return () => {
+      flushProgress();
+    };
+  }, [pathname, searchParams.toString(), flushProgress]);
+
+  useEffect(() => {
+    return () => {
+      flushProgress();
+    };
+  }, [flushProgress]);
+
+  if (!tmdbidParam) {
+    router.push("/");
+    return;
+  }
+
+  if (isError) {
+    router.push("/");
+    return;
+  }
 
   return (
     <section
@@ -96,7 +147,7 @@ const Watch = () => {
         </div>
       ) : (
         <div className="h-full w-full flex flex-col items-center">
-          <TopNav saveProfileProgress={saveProfileProgress} />
+          <TopNav />
           <Player
             title={contentData.title}
             tmdbid={Number(tmdbidParam)}
@@ -104,46 +155,80 @@ const Watch = () => {
             season={Number(seasonParam)}
             episode={Number(episodeParam)}
             year={String(new Date(contentData.date).getFullYear())}
-            currentProvider={currentProvider}
+            currentProvider={providers[0]}
             currentTimeRef={currentTimeRef}
             contentDurationRef={contentDurationRef}
+            startAt={startAt}
           />
-          <Providers
-            providers={providers}
-            currentProvider={currentProvider}
-            setCurrentProvider={setCurrentProvider}
-            saveProfileProgress={saveProfileProgress}
-          />
-          {(category === "tv" || category === "anime") && (
-            <div className="w-full flex flex-col gap-4">
-              <Episodes
-                content={contentData}
-                tmdbid={Number(tmdbidParam)!}
-                category={category}
-                currentSeason={Number(seasonParam)!}
-                currentEpisode={Number(episodeParam)!}
-                saveProfileProgress={saveProfileProgress}
-                profileContent={contentData.profileContent}
-              />
-              <Seasons
-                content={contentData}
-                tmdbid={Number(tmdbidParam)!}
-                category={category}
-                currentSeason={Number(seasonParam)!}
-                saveProfileProgress={saveProfileProgress}
-              />
-            </div>
-          )}
+
+          <div className="mt-4 w-full">
+            {(category === "tv" || category === "anime") && (
+              <div className="w-full flex flex-col gap-4">
+                <Episodes
+                  content={contentData}
+                  tmdbid={Number(tmdbidParam)!}
+                  category={category}
+                  currentSeason={Number(seasonParam)!}
+                  currentEpisode={Number(episodeParam)!}
+                  profileContent={contentData.profileContent}
+                />
+                <Seasons
+                  content={contentData}
+                  tmdbid={Number(tmdbidParam)!}
+                  category={category}
+                  currentSeason={Number(seasonParam)!}
+                />
+              </div>
+            )}
+          </div>
           <Info
             content={contentData!}
             season={Number(seasonParam)}
             episode={Number(episodeParam)}
-            saveProfileProgress={saveProfileProgress}
           />
         </div>
       )}
     </section>
   );
-};
+}
 
-export default Watch;
+function computeStartAt(
+  contentData: any,
+  category: string | null,
+  seasonParam: string | null,
+  episodeParam: string | null
+) {
+  const isTV = category === "tv" || category === "anime";
+  const seasonNum = Number(seasonParam);
+  const episodeNum = Number(episodeParam);
+
+  let start = 0;
+  let duration = 0;
+
+  if (!contentData?.profileContent) return start;
+
+  if (isTV) {
+    const pc = contentData.profileContent.find(
+      (p: any) =>
+        Number(p.season) === seasonNum && Number(p.episode) === episodeNum
+    );
+    if (pc) {
+      start = Number(pc.watchProgress) || 0;
+      duration = duration || Number(pc.duration) || 0;
+    }
+  } else {
+    const pc =
+      contentData.profileContent.find(
+        (p: any) => p.season == null && p.episode == null
+      ) || contentData.profileContent[0];
+    if (pc) {
+      start = Number(pc.watchProgress) || 0;
+      duration = duration || Number(pc.duration) || 0;
+    }
+  }
+
+  if (!Number.isFinite(start) || start < 0) start = 0;
+  if (!Number.isFinite(duration) || duration < 0) duration = 0;
+  if (duration > 0 && start >= duration) start = Math.max(0, duration - 2);
+  return start;
+}

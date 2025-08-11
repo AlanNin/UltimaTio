@@ -43,7 +43,7 @@ const Providers: React.FC<Props> = ({
       </p>
 
       <div
-        className={`flex overflow-x-auto gap-3 mb-[-16px] pb-3 ${
+        className={`flex overflow-x-auto gap-3 pb-3 ${
           isAboveMediumScreens ? "basis-[65%]" : "basis-[45%]"
         }`}
       >

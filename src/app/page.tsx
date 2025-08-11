@@ -53,7 +53,7 @@ export default function HomeScreen() {
               isAboveMediumScreens ? "pt-10" : "pt-6"
             }`}
           >
-            {watchHistoryData && (
+            {currentProfile && watchHistoryData && (
               <Section
                 key={`wh-${watchHistoryVersion}`}
                 text="Continue Watching"

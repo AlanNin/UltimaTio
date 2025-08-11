@@ -9,7 +9,6 @@ type Props = {
   currentSeason: number;
   episode: number;
   currentEpisode: number;
-  saveProfileProgress: any;
   profileContent: any;
 };
 
@@ -19,7 +18,6 @@ const EpisodeBox: React.FC<Props> = ({
   currentSeason,
   episode,
   currentEpisode,
-  saveProfileProgress,
   profileContent,
 }) => {
   const router = useRouter();
@@ -53,11 +51,9 @@ const EpisodeBox: React.FC<Props> = ({
       ${isCurrentEpisodeWatched && "bg-[rgba(213,95,222,0.14)]"}
       `}
       onClick={() => {
-        saveProfileProgress(() => {
-          router.push(
-            `/watch?tmdbid=${tmdbid}&category=${category}&season=${currentSeason}&episode=${episode}`
-          );
-        });
+        router.push(
+          `/watch?tmdbid=${tmdbid}&category=${category}&season=${currentSeason}&episode=${episode}`
+        );
       }}
     >
       {episode}
