@@ -220,19 +220,23 @@ function shuffleArray(array: any[]): any[] {
 // GET HOME FEED (COMBINED)
 export async function getHomeFeed(): Promise<any | { error: string }> {
   try {
-    const trendingMovies = await searchTMDBFeed(
-      "trending/movie/week?language=en-US"
-    );
-    const popularMovies = await searchTMDBFeed("movie/popular?language=en-US");
-    const topRatedMovies = await searchTMDBFeed(
-      "movie/top_rated?language=en-US"
-    );
-    const upcomingMovies = await searchTMDBFeed(
-      "movie/upcoming?language=en-US"
-    );
-    const trendingTV = await searchTMDBFeed("trending/tv/week?language=en-US");
-    const popularTV = await searchTMDBFeed("tv/popular?language=en-US");
-    const topRatedTV = await searchTMDBFeed("tv/top_rated?language=en-US");
+    const [
+      trendingMovies,
+      popularMovies,
+      topRatedMovies,
+      upcomingMovies,
+      trendingTV,
+      popularTV,
+      topRatedTV,
+    ] = await Promise.all([
+      searchTMDBFeed("trending/movie/week?language=en-US"),
+      searchTMDBFeed("movie/popular?language=en-US"),
+      searchTMDBFeed("movie/top_rated?language=en-US"),
+      searchTMDBFeed("movie/upcoming?language=en-US"),
+      searchTMDBFeed("trending/tv/week?language=en-US"),
+      searchTMDBFeed("tv/popular?language=en-US"),
+      searchTMDBFeed("tv/top_rated?language=en-US"),
+    ]);
 
     const homeFeed = {
       trending: shuffleArray([
