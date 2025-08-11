@@ -346,7 +346,7 @@ const SignUp = () => {
             </h1>
 
             <div
-              className="bg-[#ebf7ff] w-full py-1.5 flex justify-center rounded cursor-pointer"
+              className="bg-[#ebf7ff] w-full py-1.5 flex justify-center rounded cursor-pointer select-none"
               onClick={signUpWithGoogle}
             >
               <img alt="Google" src={GoogleIcon.src} className="h-5 w-5" />

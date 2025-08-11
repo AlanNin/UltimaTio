@@ -53,14 +53,16 @@ export default function HomeScreen() {
               isAboveMediumScreens ? "pt-10" : "pt-6"
             }`}
           >
-            {currentProfile && watchHistoryData && (
-              <Section
-                key={`wh-${watchHistoryVersion}`}
-                text="Continue Watching"
-                content={watchHistoryData}
-                watchHistory={true}
-              />
-            )}
+            {currentProfile &&
+              watchHistoryData &&
+              watchHistoryData.length > 0 && (
+                <Section
+                  key={`wh-${watchHistoryVersion}`}
+                  text="Continue Watching"
+                  content={watchHistoryData}
+                  watchHistory={true}
+                />
+              )}
             <Section text="Popular" content={feedData.popular} />
             <Section text="Top Rated" content={feedData.topRated} />
             <Section text="Upcoming" content={feedData.upcoming} />

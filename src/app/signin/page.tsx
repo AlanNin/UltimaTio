@@ -87,7 +87,7 @@ const LogIn = () => {
   };
 
   // HANDLE SIGN UP WITH GOOGLE
-  const signUpWithGoogle = async () => {
+  const signInWithGoogle = async () => {
     dispatch(loginStart());
 
     try {
@@ -216,8 +216,8 @@ const LogIn = () => {
         </div>
 
         <div
-          className="bg-[#ebf7ff] w-full py-1.5 flex justify-center rounded cursor-pointer max-w-[400px]"
-          onClick={signUpWithGoogle}
+          className="bg-[#ebf7ff] w-full py-1.5 flex justify-center rounded cursor-pointer max-w-[400px] select-none"
+          onClick={signInWithGoogle}
         >
           <img alt="Google" src={GoogleIcon.src} className="h-5 w-5" />
         </div>
