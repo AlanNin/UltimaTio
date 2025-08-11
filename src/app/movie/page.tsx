@@ -1,42 +1,18 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { getFeedMovie } from "~/server/queries/movie/tmdb.queries";
-import { useEffect, useState } from "react";
 import { Loading } from "~/utils/loading/loading";
 import Section from "~/components/section/section";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
-type Feed = {
-  trendingMovies: any[];
-  popularMovies: any[];
-  topRatedMovies: any[];
-  upcomingMovies: any[];
-};
-
-const Home = () => {
+export default function MovieScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [feed, setFeed] = useState<Feed>({
-    trendingMovies: [],
-    popularMovies: [],
-    topRatedMovies: [],
-    upcomingMovies: [],
+  const { data: feedData, isLoading: isFeedLoading } = useSuspenseQuery({
+    queryKey: ["movie-feed"],
+    queryFn: () => getFeedMovie(),
+    staleTime: 1000 * 60 * 15,
   });
-
-  useEffect(() => {
-    const fetchFeed = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getFeedMovie();
-        setFeed(response);
-      } catch (error) {
-        console.error("Error fetching home feed:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchFeed();
-  }, []);
 
   return (
     <section
@@ -45,7 +21,7 @@ const Home = () => {
         isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
       }`}
     >
-      {isLoading ? (
+      {isFeedLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
             isAboveMediumScreens ? "my-[-56px]" : "my-[-44px]"
@@ -56,23 +32,21 @@ const Home = () => {
       ) : (
         <>
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
-            {feed.trendingMovies.length > 0 && (
-              <Section text="Trending" content={feed.trendingMovies} />
+            {feedData.trendingMovies && feedData.trendingMovies.length > 0 && (
+              <Section text="Trending" content={feedData.trendingMovies} />
             )}
-            {feed.popularMovies.length > 0 && (
-              <Section text="Popular" content={feed.popularMovies} />
+            {feedData.popularMovies && feedData.popularMovies.length > 0 && (
+              <Section text="Popular" content={feedData.popularMovies} />
             )}
-            {feed.topRatedMovies.length > 0 && (
-              <Section text="Top Rated" content={feed.topRatedMovies} />
+            {feedData.topRatedMovies && feedData.topRatedMovies.length > 0 && (
+              <Section text="Top Rated" content={feedData.topRatedMovies} />
             )}
-            {feed.upcomingMovies.length > 0 && (
-              <Section text="Upcoming" content={feed.upcomingMovies} />
+            {feedData.upcomingMovies && feedData.upcomingMovies.length > 0 && (
+              <Section text="Upcoming" content={feedData.upcomingMovies} />
             )}
           </div>
         </>
       )}
     </section>
   );
-};
-
-export default Home;
+}

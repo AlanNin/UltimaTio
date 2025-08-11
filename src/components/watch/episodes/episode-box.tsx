@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React from "react";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 
 type Props = {
   tmdbid: number;

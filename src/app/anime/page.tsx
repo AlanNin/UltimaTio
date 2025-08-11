@@ -1,42 +1,18 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { getFeedAnime } from "~/server/queries/anime/tmdb.queries";
-import { useEffect, useState } from "react";
 import { Loading } from "~/utils/loading/loading";
 import Section from "~/components/section/section";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
-type Feed = {
-  airingTodayAnime: any[];
-  onTheAirAnime: any[];
-  popularAnime: any[];
-  topRatedAnime: any[];
-};
-
-const Home = () => {
+export default function AnimeScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [feed, setFeed] = useState<Feed>({
-    airingTodayAnime: [],
-    onTheAirAnime: [],
-    popularAnime: [],
-    topRatedAnime: [],
+  const { data: feedData, isLoading: isFeedLoading } = useSuspenseQuery({
+    queryKey: ["anime-feed"],
+    queryFn: () => getFeedAnime(),
+    staleTime: 1000 * 60 * 15,
   });
-
-  useEffect(() => {
-    const fetchFeed = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getFeedAnime();
-        setFeed(response);
-      } catch (error) {
-        console.error("Error fetching home feed:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchFeed();
-  }, []);
 
   return (
     <section
@@ -45,7 +21,7 @@ const Home = () => {
         isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
       }`}
     >
-      {isLoading ? (
+      {isFeedLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
             isAboveMediumScreens ? "my-[-56px]" : "my-[-44px]"
@@ -56,23 +32,25 @@ const Home = () => {
       ) : (
         <>
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
-            {feed.airingTodayAnime.length > 0 && (
-              <Section text="Airing Today" content={feed.airingTodayAnime} />
+            {feedData.airingTodayAnime &&
+              feedData.airingTodayAnime.length > 0 && (
+                <Section
+                  text="Airing Today"
+                  content={feedData.airingTodayAnime}
+                />
+              )}
+            {feedData.onTheAirAnime && feedData.onTheAirAnime.length > 0 && (
+              <Section text="On The Air" content={feedData.onTheAirAnime} />
             )}
-            {feed.onTheAirAnime.length > 0 && (
-              <Section text="On The Air" content={feed.onTheAirAnime} />
+            {feedData.popularAnime && feedData.popularAnime.length > 0 && (
+              <Section text="Popular" content={feedData.popularAnime} />
             )}
-            {feed.popularAnime.length > 0 && (
-              <Section text="Popular" content={feed.popularAnime} />
-            )}
-            {feed.topRatedAnime.length > 0 && (
-              <Section text="Top Rated" content={feed.topRatedAnime} />
+            {feedData.topRatedAnime && feedData.topRatedAnime.length > 0 && (
+              <Section text="Top Rated" content={feedData.topRatedAnime} />
             )}
           </div>
         </>
       )}
     </section>
   );
-};
-
-export default Home;
+}

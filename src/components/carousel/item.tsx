@@ -1,5 +1,5 @@
 import React from "react";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { Reveal } from "~/utils/framer-motion/reveal";
 import TMDBIcon from "~/assets/icons/tmdb.png";
 import { PlayIcon } from "@heroicons/react/24/outline";

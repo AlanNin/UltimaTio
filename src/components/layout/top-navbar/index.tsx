@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import {
   AdjustmentsHorizontalIcon,
@@ -13,12 +12,12 @@ import Link from "next/link";
 import Logo from "~/assets/icons/ultimatio-lighter.png";
 import Item from "./item";
 import Image from "next/image";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import MobileMenu from "./menu/mobilemenu";
 import DesktopMenu from "./menu/desktopmenu";
 import { cn } from "~/utils/cn";
 
-const TopNavbar = () => {
+export default function TopNavbar() {
   const flexBetween = "flex items-center justify-between";
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)"); // HIDE NAVBAR
   const desktopMenuRef = useRef<HTMLDivElement>(null);
@@ -339,6 +338,4 @@ const TopNavbar = () => {
       )}
     </nav>
   );
-};
-
-export default TopNavbar;
+}

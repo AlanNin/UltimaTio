@@ -1,5 +1,5 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -17,6 +17,7 @@ import {
   addOrRemoveContentFromLibrary,
   getLibraryForContent,
 } from "~/server/queries/contentLibrary.queries";
+import { useQuery } from "@tanstack/react-query";
 
 type Props = {
   content: any;
@@ -113,65 +114,53 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
   });
 
   // LIBRARIES
-  const [isLoadingLibraries, setIsLoadingLibraries] = useState(true);
-
-  const [libraries, setLibraries] = useState([
+  const DEFAULT_LIBRARIES = [
     { name: "Following", added: false },
     { name: "Plan To Watch", added: false },
     { name: "On Hold", added: false },
     { name: "Completed", added: false },
-  ]);
+  ];
 
-  useEffect(() => {
-    const handleGetLibraryForContent = async () => {
-      try {
-        setIsLoadingLibraries(true);
-        const response = await getLibraryForContent(
-          content.tmdb_id,
-          content.category
-        );
-        if (response && response.length > 0) {
-          const updatedLibraries = libraries.map((library) => ({
-            ...library,
-            added: response.some((item: any) => item.name === library.name),
-          }));
-          setLibraries(updatedLibraries);
-        } else {
-          const updatedLibraries = libraries.map((library) => ({
-            ...library,
-            added: false,
-          }));
-          setLibraries(updatedLibraries);
-        }
-      } catch (error) {
-        console.error("Error fetching library content:", error);
-      } finally {
-        setIsLoadingLibraries(false);
-      }
-    };
+  function mapToLibraries(
+    resp: any[] | undefined
+  ): { name: string; added: boolean }[] {
+    if (!resp || resp.length === 0)
+      return DEFAULT_LIBRARIES.map((l) => ({ ...l }));
 
-    handleGetLibraryForContent();
-  }, [content.tmdb_id, content.category]);
+    return DEFAULT_LIBRARIES.map((lib) => ({
+      ...lib,
+      added: resp.some((item: any) => item?.name === lib.name),
+    }));
+  }
+
+  const {
+    data: libraries = DEFAULT_LIBRARIES,
+    isLoading: isLoadingLibraries,
+    isRefetching: isRefetchingLibraries,
+    refetch: refetchLibraries,
+  } = useQuery({
+    queryKey: ["libraries-for-content", content.category, content.tmdb_id],
+    queryFn: async () => {
+      const res = await getLibraryForContent(content.tmdb_id, content.category);
+      return res as any[];
+    },
+    select: (resp) => mapToLibraries(resp),
+    gcTime: 1000 * 60 * 30,
+    placeholderData: (prev) => prev,
+    refetchOnWindowFocus: false,
+  });
 
   const handleAddToLibrary = async (library_name: string) => {
     try {
-      setIsLoadingLibraries(true);
       await addOrRemoveContentFromLibrary(
         content.tmdb_id,
         content.category,
         library_name
       );
 
-      const updatedLibraries = libraries.map((library) =>
-        library.name === library_name
-          ? { ...library, added: !library.added }
-          : library
-      );
-      setLibraries(updatedLibraries);
+      refetchLibraries();
     } catch (error) {
       console.error("Error adding/removing content:", error);
-    } finally {
-      setIsLoadingLibraries(false);
     }
   };
 
@@ -484,7 +473,9 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   {openLibraryModal && (
                     <AddLibraryModule
                       ref={libraryModalRef}
-                      isLoadingLibraries={isLoadingLibraries}
+                      isLoadingLibraries={
+                        isLoadingLibraries || isRefetchingLibraries
+                      }
                       libraries={libraries}
                       handleAddToLibrary={handleAddToLibrary}
                     />

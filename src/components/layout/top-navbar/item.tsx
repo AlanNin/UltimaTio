@@ -1,39 +1,27 @@
 "use client";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
-type Props = {
-  name: string;
-  route: string;
-};
+type Props = { name: string; route: string };
 
 function Item({ name, route }: Props) {
-  let location = usePathname();
+  const pathname = (usePathname() ?? "").toLowerCase();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!location) {
-      location = window.location.pathname;
-    }
-  }, []);
+  const href = route.startsWith("/")
+    ? route.toLowerCase()
+    : `/${route.toLowerCase()}`;
+  const isActive = (pathname === "/" && href === "/") || pathname === href;
 
-  const lowerCasePage = route.toLowerCase().replace(/ /g, "");
+  const handleClick = () => {
+    if (!isActive) router.push(href);
+  };
 
   return (
     <p
-      onClick={() => {
-        if (location === `/${lowerCasePage}`) {
-          return;
-        }
-        router.push(`/${lowerCasePage}`);
-      }}
+      onClick={handleClick}
       className={`${
-        (location === "/" && name === "Home") ||
-        location === `/${lowerCasePage}`
-          ? "text-[#a35fe8]"
-          : "duration-300 hover:text-[#858383]"
-      } text-base whitespace-nowrap cursor-pointer transition-property:text `}
+        isActive ? "text-[#a35fe8]" : "duration-300 hover:text-[#858383]"
+      } text-base whitespace-nowrap cursor-pointer transition-property:text`}
     >
       {name}
     </p>

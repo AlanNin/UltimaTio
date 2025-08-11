@@ -1,39 +1,27 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { handleSearch } from "~/server/queries/tmdb.queries";
-import { useEffect, useState } from "react";
 import { Loading } from "~/utils/loading/loading";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaceFrownIcon } from "@heroicons/react/24/outline";
 import SearchCard from "~/components/search/card";
+import { useQuery } from "@tanstack/react-query";
 
 const Search = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [content, setContent] = useState<any>();
   const searchParams = useSearchParams();
   const query = searchParams.get("query");
   const router = useRouter();
 
-  useEffect(() => {
-    if (query) {
-      const fetchSearch = async () => {
-        setIsLoading(true);
-        try {
-          const response = await handleSearch(query!);
-          setContent(response);
-        } catch (error) {
-          console.error("Error fetching search:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchSearch();
-    } else {
-      router.push("/");
-    }
-  }, [query]);
+  if (!query) {
+    router.push("/");
+    return;
+  }
+
+  const { data: contentData, isLoading: isContentLoading } = useQuery({
+    queryKey: ["search", query],
+    queryFn: () => handleSearch(query!),
+  });
 
   return (
     <section
@@ -42,7 +30,7 @@ const Search = () => {
         isAboveMediumScreens ? "pt-16 pb-10" : "pt-11 pb-24"
       }`}
     >
-      {isLoading ? (
+      {isContentLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
             isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
@@ -52,7 +40,7 @@ const Search = () => {
         </div>
       ) : (
         <>
-          {content.length > 0 ? (
+          {contentData.length > 0 ? (
             <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
               <h1
                 className={`font-medium text-center ${
@@ -63,7 +51,7 @@ const Search = () => {
                 <span className="text-[#a35fe8]">{query}</span>
               </h1>
               <div className="w-full h-full px-4 flex flex-wrap gap-4 justify-center items-center">
-                {content.map((content: any) => (
+                {contentData.map((content: any) => (
                   <SearchCard key={content.id} content={content} />
                 ))}
               </div>

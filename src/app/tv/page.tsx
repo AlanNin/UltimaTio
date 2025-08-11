@@ -1,42 +1,18 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { getFeedTV } from "~/server/queries/tv/tmdb.queries";
-import { useEffect, useState } from "react";
 import { Loading } from "~/utils/loading/loading";
 import Section from "~/components/section/section";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
-type Feed = {
-  airingTodayTV: any[];
-  onTheAirTV: any[];
-  popularTV: any[];
-  topRatedTV: any[];
-};
-
-const Home = () => {
+export default function TVShowsScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [feed, setFeed] = useState<Feed>({
-    airingTodayTV: [],
-    onTheAirTV: [],
-    popularTV: [],
-    topRatedTV: [],
+  const { data: feedData, isLoading: isFeedLoading } = useSuspenseQuery({
+    queryKey: ["tv-feed"],
+    queryFn: () => getFeedTV(),
+    staleTime: 1000 * 60 * 15,
   });
-
-  useEffect(() => {
-    const fetchFeed = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getFeedTV();
-        setFeed(response);
-      } catch (error) {
-        console.error("Error fetching home feed:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchFeed();
-  }, []);
 
   return (
     <section
@@ -45,7 +21,7 @@ const Home = () => {
         isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
       }`}
     >
-      {isLoading ? (
+      {isFeedLoading ? (
         <div
           className={`flex w-full h-screen items-center justify-center ${
             isAboveMediumScreens ? "my-[-56px]" : "my-[-44px]"
@@ -56,23 +32,21 @@ const Home = () => {
       ) : (
         <>
           <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
-            {feed.airingTodayTV.length > 0 && (
-              <Section text="Airing Today" content={feed.airingTodayTV} />
+            {feedData.airingTodayTV && feedData.airingTodayTV.length > 0 && (
+              <Section text="Airing Today" content={feedData.airingTodayTV} />
             )}
-            {feed.onTheAirTV.length > 0 && (
-              <Section text="On The Air" content={feed.onTheAirTV} />
+            {feedData.onTheAirTV && feedData.onTheAirTV.length > 0 && (
+              <Section text="On The Air" content={feedData.onTheAirTV} />
             )}
-            {feed.popularTV.length > 0 && (
-              <Section text="Popular" content={feed.popularTV} />
+            {feedData.popularTV && feedData.popularTV.length > 0 && (
+              <Section text="Popular" content={feedData.popularTV} />
             )}
-            {feed.topRatedTV.length > 0 && (
-              <Section text="Top Rated" content={feed.topRatedTV} />
+            {feedData.topRatedTV && feedData.topRatedTV.length > 0 && (
+              <Section text="Top Rated" content={feedData.topRatedTV} />
             )}
           </div>
         </>
       )}
     </section>
   );
-};
-
-export default Home;
+}

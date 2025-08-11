@@ -1,6 +1,6 @@
 "use client";
 
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import MobileSettings from "./_mobile";
 import DesktopSettings from "./_desktop";
 

@@ -1,11 +1,12 @@
 import "~/styles/globals.css";
 import ReduxProvider from "../providers/redux/redux-provider";
 import { GeistSans } from "geist/font/sans";
-import ReactQueryProvider from "~/providers/react-query";
 import Footer from "~/components/layout/footer";
 import TopNavbar from "~/components/layout/top-navbar";
 import WhoIsWatching from "~/components/profile/whos-watching";
 import ProfileCheckerProvider from "~/providers/profile-checker";
+import ReactQueryProvider from "~/providers/react-query";
+import { QueryClient } from "@tanstack/react-query";
 
 export const metadata = {
   title: "UltimaTio",
@@ -13,24 +14,32 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.svg", type: "image/svg+xml" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 15,
+      },
+    },
+  });
+
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className={`${GeistSans.className} app`}>
-        <ReactQueryProvider>
-          <ReduxProvider>
+        <ReduxProvider>
+          <ReactQueryProvider>
             <ProfileCheckerProvider>
               <WhoIsWatching />
               <TopNavbar />
               {children}
               <Footer />
             </ProfileCheckerProvider>
-          </ReduxProvider>
-        </ReactQueryProvider>
+          </ReactQueryProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import {
   BackspaceIcon,
   Bars3BottomLeftIcon,
@@ -8,16 +8,17 @@ import {
   PlayIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { cn } from "~/utils/cn";
 
 type Props = {
   content: any;
-  history?: boolean;
+  watchHistory?: boolean;
   handleRemoveResumeWatching: (id: string) => void;
 };
 
 const SliderCard: React.FC<Props> = ({
   content,
-  history,
+  watchHistory,
   handleRemoveResumeWatching,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -25,7 +26,7 @@ const SliderCard: React.FC<Props> = ({
   const router = useRouter();
   const isAboveSmallTablet = useMediaQuery("(min-width: 650px)");
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
-  const watchPercentage = history
+  const watchPercentage = watchHistory
     ? Math.floor((content.watchProgress / content.duration) * 100)
     : null;
 
@@ -80,14 +81,15 @@ const SliderCard: React.FC<Props> = ({
             onClick={handleNavigate}
           />
 
-          {history && (
+          {watchHistory && (
             <>
               {isAboveMediumScreens && (
                 <>
                   <XMarkIcon
-                    className={`absolute top-2.5 right-2.5 p-1 w-6 h-6 cursor-pointer  text-white bg-[rgba(0,0,0,0.6)] rounded-full transition-all duration-300 ${
+                    className={cn(
+                      "absolute top-2.5 right-2.5 p-1 w-6 h-6 cursor-pointer  text-white bg-[rgba(0,0,0,0.6)] hover:bg-red-500/60 rounded-full transition-all duration-300",
                       isHovered ? "opacity-100" : "opacity-0"
-                    }`}
+                    )}
                     strokeWidth={2}
                     onClick={() =>
                       isAboveSmallTablet &&
@@ -97,15 +99,13 @@ const SliderCard: React.FC<Props> = ({
                   <PlayIcon
                     strokeWidth={0.8}
                     height={75}
-                    className={`absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 cursor-pointer m-0 rounded-full transition-all duration-300 border-2 fill-[rgba(240,240,240,0.8)]
-                ${
-                  isAboveSmallTablet ? "py-5 pl-5 pr-4" : "py-2.5 pl-2.5 pr-1.5"
-                }
-                 ${
-                   !isHovered
-                     ? "text-[rgba(240,240,240,0.8)] bg-transparent border-white"
-                     : "text-[rgba(240,240,240,0.8)] bg-[rgba(124,38,212,0.8)] border-[rgba(124,38,212,0.8)]"
-                 }`}
+                    className={cn(
+                      "absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 cursor-pointer m-0 rounded-full transition-all duration-300 border-2 fill-[rgba(240,240,240,0.8)] hover:bg-[rgba(124,38,212,0.8)] hover:border-[rgba(124,38,212,0.8)]",
+                      isAboveSmallTablet
+                        ? "py-5 pl-5 pr-4"
+                        : "py-2.5 pl-2.5 pr-1.5",
+                      isHovered ? "opacity-100" : "opacity-0"
+                    )}
                     onClick={handleNavigateWatch}
                   />
                 </>
@@ -149,7 +149,7 @@ const SliderCard: React.FC<Props> = ({
             </div>
           )}
         </div>
-        {!isAboveMediumScreens && history && (
+        {!isAboveMediumScreens && watchHistory && (
           <div className="relative h-max w-full bg-[rgba(255,255,255,0.05)] rounded-b-md p-1">
             <EllipsisHorizontalIcon
               strokeWidth={1.8}

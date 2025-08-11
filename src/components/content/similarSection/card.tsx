@@ -1,5 +1,5 @@
 import React from "react";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 

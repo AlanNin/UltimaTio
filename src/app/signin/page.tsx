@@ -1,7 +1,7 @@
 "use client";
 import LogoL from "~/assets/icons/ultimatio-lighter.png";
 import GoogleIcon from "~/assets/icons/google.png";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import Link from "next/link";
 import {
   ChevronRightIcon,

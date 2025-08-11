@@ -6,7 +6,7 @@ import {
 } from "~/providers/redux/profile-slice";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import Cookies from "js-cookie";
 import CardProfile from "../profile-card";
 import CreateProfile from "../create-profile";

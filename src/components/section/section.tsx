@@ -1,13 +1,13 @@
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import Slider from "../slider";
 
 type Props = {
   text: string;
   content: any;
-  history?: boolean;
+  watchHistory?: boolean;
 };
 
-const Section: React.FC<Props> = ({ text, content, history }) => {
+const Section: React.FC<Props> = ({ text, content, watchHistory }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
   return (
@@ -24,7 +24,7 @@ const Section: React.FC<Props> = ({ text, content, history }) => {
         {text}
       </h1>
       <div className="w-full">
-        <Slider content={content} history={history} />
+        <Slider content={content} watchHistory={watchHistory} />
       </div>
     </div>
   );

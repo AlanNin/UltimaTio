@@ -1,42 +1,31 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { useParams } from "next/navigation";
 import { getContentAnime } from "~/server/queries/anime/tmdb.queries";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loading } from "~/utils/loading/loading";
 import TopSection from "~/components/content/topSection";
 import CastSection from "~/components/content/castSection";
 import SeasonAndEpisodeSection from "~/components/content/season&EpisodeSection";
 import SimilarSection from "~/components/content/similarSection";
+import { useQuery } from "@tanstack/react-query";
 
 const Content = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
   const isAboveMobileScreens = useMediaQuery("(min-width: 770px)");
   const { tmdbid } = useParams();
-  const [content, setContent] = useState<any>({});
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  useEffect(() => {
-    if (!tmdbid || isNaN(Number(tmdbid))) {
-      router.push("/anime");
-      return;
-    }
-    const fetchContent = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getContentAnime(parseInt(tmdbid as string, 10));
-        setContent(response);
-      } catch (error) {
-        console.error("Error getting content -->:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  if (!tmdbid || isNaN(Number(tmdbid))) {
+    router.push("/anime");
+    return;
+  }
 
-    fetchContent();
-  }, [tmdbid]);
+  const { data: contentData, isLoading: isContentLoading } = useQuery({
+    queryKey: ["content-anime", tmdbid],
+    queryFn: () => getContentAnime(parseInt(tmdbid as string, 10)),
+    staleTime: 1000 * 60 * 15,
+  });
 
   return (
     <>
@@ -46,7 +35,7 @@ const Content = () => {
           isAboveMediumScreens ? "pt-16 pb-10" : "pt-11 pb-24"
         }`}
       >
-        {isLoading ? (
+        {isContentLoading ? (
           <div
             className={`flex w-full h-screen items-center justify-center ${
               isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
@@ -56,16 +45,16 @@ const Content = () => {
           </div>
         ) : (
           <>
-            <TopSection content={content} isLoading={isLoading} />
+            <TopSection content={contentData} isLoading={isContentLoading} />
             <div className={`${isAboveMobileScreens ? "px-8" : "px-4"}`}>
-              <CastSection cast={content.ContentActor} />
-              {content?.seasons && content?.seasons?.length > 0 && (
+              <CastSection cast={contentData.ContentActor} />
+              {contentData?.seasons && contentData?.seasons?.length > 0 && (
                 <SeasonAndEpisodeSection
-                  content={content}
-                  isLoading={isLoading}
+                  content={contentData}
+                  isLoading={isContentLoading}
                 />
               )}
-              <SimilarSection content={content.similarContent} />
+              <SimilarSection content={contentData.similarContent} />
             </div>
           </>
         )}

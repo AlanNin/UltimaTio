@@ -1,5 +1,5 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { useState, useRef, useEffect } from "react";
 import { Loading } from "~/utils/loading/loading";
 import Player from "./player/player";

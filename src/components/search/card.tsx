@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import TMDBIcon from "~/assets/icons/tmdb.png";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 
 type Props = {
   content: any;

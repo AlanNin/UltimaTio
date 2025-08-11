@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import EpisodeBox from "./episode-box";
 
 type Props = {

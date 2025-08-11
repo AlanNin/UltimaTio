@@ -1,7 +1,7 @@
 "use client";
 import React, { forwardRef, useEffect, useState } from "react";
 import Loading from "react-loading";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 
 type Props = {
   isLoadingLibraries: boolean;
@@ -60,7 +60,9 @@ const AddLibraryModule = forwardRef<HTMLDivElement, Props>(
                     onClick={() => handleAddToLibrary(library.name)}
                   >
                     {library.added && <span>✔</span>}
-                    <span className="text-md font-bold">{library.name}</span>
+                    <span className="text-md font-bold select-none">
+                      {library.name}
+                    </span>
                   </div>
                 ))
               )}

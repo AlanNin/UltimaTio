@@ -1,4 +1,4 @@
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import PFPsModule from "../change-pfp/PFPsModule";

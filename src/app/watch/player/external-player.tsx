@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 
 type Props = {
   src: any;

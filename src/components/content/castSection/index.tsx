@@ -1,5 +1,5 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import CastItem from "./item";
 
 type Props = {

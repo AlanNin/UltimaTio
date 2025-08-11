@@ -1,4 +1,4 @@
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import { useState } from "react";
 import Carousel, { DotProps } from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";

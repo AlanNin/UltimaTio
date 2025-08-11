@@ -1,5 +1,5 @@
 "use client";
-import useMediaQuery from "~/hooks/useMediaQuery";
+import useMediaQuery from "~/hooks/use-media-query";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -9,10 +9,10 @@ import { hideResumeWatching } from "~/server/queries/contentProfile.queries";
 
 type Props = {
   content: any;
-  history?: boolean;
+  watchHistory?: boolean;
 };
 
-const Slider: React.FC<Props> = ({ content: initialContent, history }) => {
+const Slider: React.FC<Props> = ({ content: initialContent, watchHistory }) => {
   const [content, setContent] = useState(initialContent);
   const isAboveTabletScreens = useMediaQuery("(min-width: 680px)");
 
@@ -107,7 +107,7 @@ const Slider: React.FC<Props> = ({ content: initialContent, history }) => {
           <SliderCard
             key={index}
             content={content}
-            history={history}
+            watchHistory={watchHistory}
             handleRemoveResumeWatching={handleRemoveResumeWatching}
           />
         ))}
