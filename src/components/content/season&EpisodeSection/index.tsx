@@ -1,8 +1,9 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import SeasonCard from "./seasonCard";
 import EpisodeCard from "./episodeCard";
 import { parseAsInteger, useQueryState } from "nuqs";
+import { useSmoothHorizontalWheelScroll } from "~/hooks/useSmoothHScroll";
 
 type Props = {
   content: any;
@@ -37,16 +38,21 @@ const SeasonAndEpisodeSection: React.FC<Props> = ({ content, isLoading }) => {
     setSelectedSeasonNumber(num);
   };
 
+  const scrollRef = useSmoothHorizontalWheelScroll<HTMLDivElement>();
+
   if (isLoading) return null;
 
   return (
     <div className="flex flex-col w-full h-max mt-6 gap-2">
-      <div className="flex overflow-x-auto gap-5 pb-4">
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto gap-5 pb-4 overscroll-x-contain"
+      >
         {seasons.map((season: any, index: number) => (
           <SeasonCard
             key={season?.season_number ?? index}
             season={season}
-            selectedSeason={selectedSeasonObj}
+            selectedSeason={selectedSeasonObj.season}
             handleChangeSeason={handleChangeSeason}
             index={index}
           />
@@ -57,7 +63,7 @@ const SeasonAndEpisodeSection: React.FC<Props> = ({ content, isLoading }) => {
         {episodesList.map((episode: any, index: number) => (
           <EpisodeCard
             key={episode?.id ?? episode?.episodeNumber ?? index}
-            selectedSeason={selectedSeasonObj}
+            selectedSeason={selectedSeasonObj.season}
             episode={episode}
             content={content}
           />

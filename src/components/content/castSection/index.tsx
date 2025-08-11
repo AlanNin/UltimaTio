@@ -1,6 +1,7 @@
 "use client";
 import useMediaQuery from "~/hooks/use-media-query";
 import CastItem from "./item";
+import { useSmoothHorizontalWheelScroll } from "~/hooks/useSmoothHScroll";
 
 type Props = {
   cast: any;
@@ -8,6 +9,7 @@ type Props = {
 
 const CastSection: React.FC<Props> = ({ cast }) => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
+  const scrollRef = useSmoothHorizontalWheelScroll<HTMLDivElement>();
 
   return (
     <>
@@ -16,7 +18,10 @@ const CastSection: React.FC<Props> = ({ cast }) => {
           isAboveMediumScreens && "mt-4"
         }`}
       >
-        <div className="flex overflow-x-auto w-full gap-6 pb-4">
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto overscroll-x-contain w-full gap-6 pb-4"
+        >
           {cast?.map((actor: any, index: number) => (
             <CastItem key={index} cast={actor} />
           ))}

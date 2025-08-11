@@ -45,11 +45,13 @@ const TopNav: React.FC = () => {
       </Link>
 
       {currentProfile ? (
-        <img
-          src={currentProfile.imgUrl}
-          className="rounded-full object-cover h-[26px] w-[26px] cursor-pointer ml-1.5"
-          onClick={handleChangeProfile}
-        />
+        <div className="p-1.5 flex items-center justify-center rounded-full hover:bg-[rgba(255,255,255,0.1)] cursor-pointer">
+          <img
+            src={currentProfile.imgUrl}
+            className="rounded-full object-cover size-[26px]"
+            onClick={handleChangeProfile}
+          />
+        </div>
       ) : (
         <Link href="/signin">
           <UserCircleIcon
