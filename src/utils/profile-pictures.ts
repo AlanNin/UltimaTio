@@ -17,10 +17,19 @@ const TVShowsProfileImages = [
   "https://i.pinimg.com/564x/82/c7/01/82c7013be0f27b8b25effea94f481ad9.jpg",
 ];
 
-const AnimeProfileImages = [
+const AnimeDonghuaProfileImages = [
   "https://i.pinimg.com/564x/e3/99/3e/e3993e452c225b5809c9304ff9b525e3.jpg",
   "https://i.pinimg.com/736x/81/36/8d/81368dc5ddc862148b55d7bbecdeb363.jpg",
   "https://i.pinimg.com/564x/47/66/fb/4766fbaa4a132ce1d9c2f9b99a7c8dbd.jpg",
+  "https://i.pinimg.com/736x/f5/8b/af/f58baf7ecef02fa6a9ad5541ea6c8578.jpg",
+  "https://i.pinimg.com/736x/90/40/45/90404502ded7caf5ac5e621ebd828b34.jpg",
+  "https://i.pinimg.com/736x/99/12/66/991266422b4f9b3102dac6f8abecee9e.jpg",
+  "https://i.pinimg.com/736x/79/9a/e0/799ae0fa6cac8704ceefc78ac99f472b.jpg",
+  "https://i.pinimg.com/736x/8d/03/74/8d03740d8abc36ea71cf00135b79914f.jpg",
+  "https://i.pinimg.com/736x/37/ad/da/37addae3cfa02a274bcdf649af3e2e39.jpg",
+  "https://i.pinimg.com/736x/59/eb/02/59eb0230feba25e36d526fff81e6c130.jpg",
+  "https://i.pinimg.com/736x/86/be/6b/86be6b43618775104bc689ebeca3d718.jpg",
+  "https://i.pinimg.com/736x/e0/36/80/e03680980045dd0443b21e1d360251c7.jpg",
 ];
 
 const CartoonProfileImages = [
@@ -34,7 +43,7 @@ const KShowsProfileImages = [
 const AllProfileImages = [
   ...MoviesProfileImages,
   ...TVShowsProfileImages,
-  ...AnimeProfileImages,
+  ...AnimeDonghuaProfileImages,
   ...CartoonProfileImages,
   ...KShowsProfileImages,
 ];
@@ -48,7 +57,7 @@ export const getAllProfilePictures = () => {
   return {
     MoviesProfileImages,
     TVShowsProfileImages,
-    AnimeProfileImages,
+    AnimeDonghuaProfileImages,
     CartoonProfileImages,
     KShowsProfileImages,
     AllProfileImages,

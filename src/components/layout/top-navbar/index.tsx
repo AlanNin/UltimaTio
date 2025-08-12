@@ -7,7 +7,7 @@ import {
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import Link from "next/link";
-import Logo from "~/assets/icons/ultimatio-lighter.png";
+import Logo from "~/assets/icons/ultimatio-logo.png";
 import Item from "./item";
 import useMediaQuery from "~/hooks/use-media-query";
 import MobileMenu from "./menu/mobilemenu";
@@ -61,6 +61,26 @@ export default function TopNavbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // HANDLE CLICK DESKTOP MENU
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (
+        desktopMenuRef.current &&
+        !desktopMenuRef.current.contains(event.target) &&
+        desktopMenuButtonRef.current &&
+        !desktopMenuButtonRef.current.contains(event.target)
+      ) {
+        setIsDesktopMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [desktopMenuRef, desktopMenuButtonRef]);
 
   // HANDLE CLICK OUTSIDE SEARCH
   useEffect(() => {
@@ -171,11 +191,11 @@ export default function TopNavbar() {
     <nav
       className={cn(
         "bg-[#0F0F0F] fixed top-0 z-30 w-full left-0 right-0 mx-auto transition-colors border-b duration-300 border-transparent",
-        !isTopOfPage && "shadow-md border-white/5"
+        !isTopOfPage && "shadow-lg border-white/5"
       )}
     >
       <div
-        className={`max-w-[1920px] m-auto gap-10 py-4 relative ${flexBetween}
+        className={`max-w-[1920px] m-auto gap-x-8 py-4 relative ${flexBetween}
         ${isAboveMediumScreens ? "px-10" : "px-4"}`}
       >
         {/* LEFT SIDE */}
@@ -183,7 +203,7 @@ export default function TopNavbar() {
           <img
             alt="logo"
             src={Logo.src}
-            className="h-[25px] w-auto cursor-pointer"
+            className="h-5 sm:h-6 w-auto cursor-pointer"
           />
         </Link>
         {isAboveMediumScreens ? (
@@ -191,7 +211,7 @@ export default function TopNavbar() {
             {/* DESKTOP */}
             <div className={`${flexBetween} w-full items-center`}>
               {/* INNER LEFT SIDE */}
-              <div className={`${flexBetween} gap-8 text-sm mt-1`}>
+              <div className={`${flexBetween} gap-x-8 text-sm mt-1`}>
                 <Item name="Home" route="/" />
                 <Item name="Movies" route="movie" />
                 <Item name="TV Shows" route="tv" />

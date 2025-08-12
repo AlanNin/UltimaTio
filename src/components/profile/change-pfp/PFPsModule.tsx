@@ -11,7 +11,7 @@ type Props = {
   images: {
     MoviesProfileImages: Array<string>;
     TVShowsProfileImages: Array<string>;
-    AnimeProfileImages: Array<string>;
+    AnimeDonghuaProfileImages: Array<string>;
     CartoonProfileImages: Array<string>;
     KShowsProfileImages: Array<string>;
   };
@@ -124,7 +124,9 @@ const PFPsModule: React.FC<Props> = ({
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <h1 className="font-normal text-4xl font-robotocon">Anime</h1>
+              <h1 className="font-normal text-4xl font-robotocon">
+                Anime & Donghua
+              </h1>
               <div
                 className={`${
                   isAboveLargeScreens ? "w-[1280px]" : "w-[680px]"
@@ -138,7 +140,7 @@ const PFPsModule: React.FC<Props> = ({
                   partialVisible={false}
                   ssr={true}
                 >
-                  {images.AnimeProfileImages.map(
+                  {images.AnimeDonghuaProfileImages.map(
                     (image: any, index: number) => (
                       <CardProfile
                         key={index}
@@ -251,16 +253,18 @@ const PFPsModule: React.FC<Props> = ({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <h1 className="font-normal text-lg ml-4">Anime</h1>
+              <h1 className="font-normal text-lg ml-4">Anime & Donghua</h1>
               <div className="px-4 flex overflow-x-auto gap-4 no-scrollbar">
-                {images.AnimeProfileImages.map((image: any, index: number) => (
-                  <CardProfile
-                    key={index}
-                    image={image}
-                    selectedImage={selectedImage}
-                    handleSelectProfilePicture={handleSelectProfilePicture}
-                  />
-                ))}
+                {images.AnimeDonghuaProfileImages.map(
+                  (image: any, index: number) => (
+                    <CardProfile
+                      key={index}
+                      image={image}
+                      selectedImage={selectedImage}
+                      handleSelectProfilePicture={handleSelectProfilePicture}
+                    />
+                  )
+                )}
               </div>
             </div>
 

@@ -1,5 +1,5 @@
 "use client";
-import LogoL from "~/assets/icons/ultimatio-lighter.png";
+import Logo from "~/assets/icons/ultimatio-logo.png";
 import GoogleIcon from "~/assets/icons/google.png";
 import useMediaQuery from "~/hooks/use-media-query";
 import Link from "next/link";
@@ -130,13 +130,13 @@ const LogIn = () => {
       <Link href="/">
         <img
           alt="logo"
-          src={LogoL.src}
+          src={Logo.src}
           className={`fixed ${
             isAboveMediumScreens
-              ? "top-10 left-10 h-14 w-auto"
+              ? "top-10 left-10 h-10 w-auto"
               : `${
                   isSmallTablet
-                    ? "top-8 left-6 h-12 w-auto"
+                    ? "top-8 left-6 h-8 w-auto"
                     : "top-5 left-4 h-6 w-auto"
                 }`
           }`}

@@ -162,7 +162,7 @@ export default function Search({
 
     return (
       <Icon
-        className="h-4 w-auto stroke-current cursor-pointer select-none"
+        className="h-5 w-auto stroke-current cursor-pointer select-none"
         color={
           isSearching || location.toLocaleLowerCase().includes("/search")
             ? "#a35fe8"

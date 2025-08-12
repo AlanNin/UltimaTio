@@ -27,7 +27,7 @@ const WhoIsWatching = () => {
   type ProfilePictures = {
     MoviesProfileImages: string[];
     TVShowsProfileImages: string[];
-    AnimeProfileImages: string[];
+    AnimeDonghuaProfileImages: string[];
     CartoonProfileImages: string[];
     KShowsProfileImages: string[];
     AllProfileImages: string[];

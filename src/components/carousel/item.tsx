@@ -3,7 +3,6 @@ import useMediaQuery from "~/hooks/use-media-query";
 import { Reveal } from "~/utils/framer-motion/reveal";
 import TMDBIcon from "~/assets/icons/tmdb.png";
 import { PlayIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
 import { cn } from "~/utils/cn";
 import Link from "next/link";
 
@@ -17,7 +16,6 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
   const isAboveSemiMediumScreens = useMediaQuery("(min-width: 900px)");
   const isAboveMediumScreens = useMediaQuery("(min-width: 1180px)");
   const landscapeMobile = content.landscapeUrl.replace("original", "w780");
-  const router = useRouter();
 
   const handleGetNavigateHref = () => {
     if (content.category === "movie") {
@@ -41,18 +39,13 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
   };
 
   return (
-    <div className="flex h-full w-full justify-center items-center overflow-hidden max-h-[675px]">
+    <div className="flex h-full w-full justify-center items-center overflow-hidden max-h-[calc(100vh-250px)]">
       <div className="relative w-full h-full flex">
         <img
           src={isAboveSmallTablet ? content?.landscapeUrl : landscapeMobile}
           alt="Content Image"
           loading="lazy"
-          className={`object-cover w-full h-full`}
-          style={{
-            backgroundPosition: "center",
-            userSelect: "none",
-            pointerEvents: "none",
-          }}
+          className="object-cover object-[50%_20%] w-full h-full"
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent via-50% to-transparent pointer-events-none" />
