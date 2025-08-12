@@ -1,9 +1,9 @@
 "use client";
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo } from "react";
 import SeasonCard from "./seasonCard";
 import EpisodeCard from "./episodeCard";
 import { parseAsInteger, useQueryState } from "nuqs";
-import { useSmoothHorizontalWheelScroll } from "~/hooks/useSmoothHScroll";
+import { useSmoothHorizontalWheelScroll } from "~/hooks/use-smooth-h-scroll";
 
 type Props = {
   content: any;

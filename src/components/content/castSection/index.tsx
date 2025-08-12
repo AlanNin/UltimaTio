@@ -1,7 +1,7 @@
 "use client";
 import useMediaQuery from "~/hooks/use-media-query";
 import CastItem from "./item";
-import { useSmoothHorizontalWheelScroll } from "~/hooks/useSmoothHScroll";
+import { useSmoothHorizontalWheelScroll } from "~/hooks/use-smooth-h-scroll";
 
 type Props = {
   cast: any;

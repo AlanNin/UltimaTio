@@ -3,10 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import {
   AdjustmentsHorizontalIcon,
   UserCircleIcon,
-  MagnifyingGlassIcon,
-  SquaresPlusIcon,
 } from "@heroicons/react/24/outline";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import Logo from "~/assets/icons/ultimatio-lighter.png";
@@ -15,10 +13,15 @@ import useMediaQuery from "~/hooks/use-media-query";
 import MobileMenu from "./menu/mobilemenu";
 import DesktopMenu from "./menu/desktopmenu";
 import { cn } from "~/utils/cn";
+import { ListVideoIcon } from "lucide-react";
+import Search from "./search/search";
+import useDebounce from "~/hooks/use-debounce";
+import { handleSearch } from "~/server/queries/tmdb.queries";
+import { useQuery } from "@tanstack/react-query";
 
 export default function TopNavbar() {
   const flexBetween = "flex items-center justify-between";
-  const isAboveMediumScreens = useMediaQuery("(min-width: 900px)"); // HIDE NAVBAR
+  const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
   const desktopMenuRef = useRef<HTMLDivElement>(null);
   const desktopMenuButtonRef = useRef<any>(null);
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState<boolean>(false);
@@ -27,26 +30,25 @@ export default function TopNavbar() {
   const location = usePathname();
   const [isTopOfPage, setIsTopOfPage] = useState<boolean>(true);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const searchRef = useRef<HTMLInputElement>(null);
-  const mobielRef = useRef<any>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearchResultsModalOpen, setIsSearchResultsModalOpen] = useState<
+    boolean
+  >(false);
+  const searchContainerRef = useRef<HTMLInputElement>(null);
+  const mobileSearchContainerRef = useRef<any>(null);
+  const mobileSearchIconRef = useRef<any>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
-  const router = useRouter();
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  // INPUTS
-  interface Inputs {
-    search: string;
-  }
-
-  const [inputs, setInputs] = useState<Inputs>({
-    search: "",
+  const {
+    data: searchContentData,
+    isLoading: isSearchContentLoading,
+  } = useQuery({
+    queryKey: ["search", debouncedSearchQuery],
+    queryFn: () => handleSearch(debouncedSearchQuery),
+    enabled: debouncedSearchQuery.length > 0,
   });
-
-  const handleChange = (e: any) => {
-    setInputs((prev) => {
-      return { ...prev, [e.target.name]: e.target.value };
-    });
-  };
 
   // MANAGE SCROLLING
   useEffect(() => {
@@ -60,73 +62,100 @@ export default function TopNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // HANDLE CLICK OUTSIDE
+  // HANDLE CLICK OUTSIDE SEARCH
   useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      const isClickOnButton =
-        desktopMenuButtonRef.current &&
-        desktopMenuButtonRef.current.contains(event.target);
+    if (!isSearching) return;
+
+    const handlePointerDown = (e: Event) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+
+      const clickedInsideDesktop = !!searchContainerRef.current?.contains(
+        target
+      );
+
+      const clickedInsideMobileIcon = !!mobileSearchIconRef?.current?.contains(
+        target
+      );
+
+      const clickedInsideMobileDropDown = !!mobileSearchContainerRef.current?.contains(
+        target
+      );
+
       if (
-        desktopMenuRef.current &&
-        !desktopMenuRef.current.contains(event.target) &&
-        !isClickOnButton
+        !clickedInsideDesktop &&
+        !clickedInsideMobileDropDown &&
+        !clickedInsideMobileIcon
       ) {
-        setIsDesktopMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: any) => {
-      const isClickOnSearch =
-        searchRef.current && searchRef.current.contains(event.target);
-      const isClickOnAnother =
-        mobielRef.current && mobielRef.current.contains(event.target);
-
-      if (searchRef.current && !isClickOnSearch && !isClickOnAnother) {
         setIsSearching(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    const supportsPointer =
+      typeof window !== "undefined" && "PointerEvent" in window;
+
+    if (supportsPointer) {
+      document.addEventListener("pointerdown", handlePointerDown, {
+        passive: true,
+      });
+    } else {
+      document.addEventListener("mousedown", handlePointerDown, {
+        passive: true,
+      } as AddEventListenerOptions);
+      document.addEventListener("touchstart", handlePointerDown, {
+        passive: true,
+      } as AddEventListenerOptions);
+    }
+
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      if (supportsPointer) {
+        document.removeEventListener("pointerdown", handlePointerDown);
+      } else {
+        document.removeEventListener("mousedown", handlePointerDown);
+        document.removeEventListener("touchstart", handlePointerDown);
+      }
     };
-  }, []);
+  }, [isSearching]);
 
-  // HANDLE SEARCH
-  const handleSearch = () => {
-    if (inputs.search.length > 0) {
-      router.push(`/search?query=${inputs.search}`);
-      setIsSearching(false);
+  // MANAGE OPEN SEARCH RESULTS MODAL
+  useEffect(() => {
+    if (searchQuery.length === 0) {
+      setIsSearchResultsModalOpen(false);
+      return;
+    }
+
+    if (searchQuery.length > 0) {
+      setIsSearchResultsModalOpen(true);
+      return;
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (!isSearching) {
+      setIsSearchResultsModalOpen(false);
+    }
+    if (isSearching && searchQuery.length > 0) {
+      if (isAboveMediumScreens) {
+        setTimeout(() => {
+          setIsSearchResultsModalOpen(true);
+        }, 225);
+      } else {
+        setIsSearchResultsModalOpen(true);
+      }
+    }
+  }, [isSearching]);
+
+  useEffect(() => {
+    if (isSearching && !isAboveMediumScreens) {
+      document.body.style.overflow = "hidden";
     } else {
-      setIsSearching(!isSearching);
-    }
-  };
-
-  // TOGGLE SEARCH
-  const toggleSearch = () => {
-    if (isSearching) {
-      handleSearch();
-    } else {
-      setIsSearching(!isSearching);
-    }
-  };
-
-  const clearSearch = (type: string) => {
-    setInputs({ ...inputs, search: "" });
-    if (type === "desktop" && searchInputRef.current) {
-      searchInputRef.current.focus();
+      document.body.style.overflow = "auto";
     }
 
-    if (type === "mobile" && mobileSearchInputRef.current) {
-      mobileSearchInputRef.current.focus();
-    }
-  };
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isSearching]);
 
   // HIDE ON
   if (
@@ -170,60 +199,26 @@ export default function TopNavbar() {
               </div>
               {/* INNER RIGHT SIDE */}
               <div className={`${flexBetween} gap-6 relative`}>
-                <div
-                  className={`flex border-[2px] rounded transition-width duration-300 overflow-hidden gap-0 ${
-                    isSearching
-                      ? "w-[275px] border-[#757575] py-1"
-                      : "w-7 border-transparent"
-                  }`}
-                  ref={searchRef}
-                >
-                  <MagnifyingGlassIcon
-                    className={`h-6 w-6 stroke-current cursor-pointer ${
-                      isSearching && "mx-2"
-                    }`}
-                    color={
-                      location.toLocaleLowerCase().includes("/search")
-                        ? "#a35fe8"
-                        : "white"
-                    }
-                    strokeWidth={1.5}
-                    onClick={toggleSearch}
-                  />
-                  {isSearching && (
-                    <>
-                      <input
-                        className="text-white w-full whitespace-nowrap bg-transparent text-sm placeholder:text-[#858383] outline-none"
-                        name="search"
-                        value={inputs.search}
-                        placeholder="Titles, actors or genres..."
-                        autoFocus
-                        autoComplete="off"
-                        ref={searchInputRef}
-                        onChange={(e) => {
-                          handleChange(e);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && handleSearch) {
-                            handleSearch();
-                          }
-                        }}
-                      />
-                      <button
-                        className={`text-[#a3a3a3] focus:outline-none px-2 ${
-                          inputs.search.length > 0 ? "opacity-100" : "opacity-0"
-                        }`}
-                        onClick={() => clearSearch("desktop")}
-                      >
-                        x
-                      </button>
-                    </>
-                  )}
-                </div>
+                <Search
+                  mode="desktop"
+                  isSearching={isSearching}
+                  setIsSearching={setIsSearching}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  searchContainerRef={searchContainerRef}
+                  mobileSearchIconRef={mobileSearchIconRef}
+                  mobileSearchContainerRef={mobileSearchContainerRef}
+                  searchInputRef={searchInputRef}
+                  mobileSearchInputRef={mobileSearchInputRef}
+                  isSearchResultsModalOpen={isSearchResultsModalOpen}
+                  setIsSearchResultsModalOpen={setIsSearchResultsModalOpen}
+                  searchContentData={searchContentData}
+                  isSearchContentLoading={isSearchContentLoading}
+                />
 
                 {!currentProfile && (
                   <AdjustmentsHorizontalIcon
-                    className="h-7 w-7 stroke-current cursor-pointer rounded-2xl p-1 transition duration-150 text-white hover:bg-[rgba(255,255,255,0.1)]"
+                    className="h-7 w-7 stroke-current cursor-pointer rounded-2xl p-1 transition duration-150 text-white hover:bg-[rgba(255,255,255,0.08)]"
                     strokeWidth={1.5}
                     ref={desktopMenuButtonRef}
                     onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
@@ -231,8 +226,8 @@ export default function TopNavbar() {
                 )}
                 {currentProfile ? (
                   <>
-                    <SquaresPlusIcon
-                      className="w-[34px] h-[34px] text-white cursor-pointer ml-[-6.5px] rounded-2xl p-1.5 transition duration-300 hover:bg-[rgba(255,255,255,0.08)]"
+                    <ListVideoIcon
+                      className="size-8 text-white cursor-pointer ml-[-6.5px] rounded-2xl p-1 transition duration-300 hover:bg-[rgba(255,255,255,0.08)]"
                       strokeWidth={1.5}
                     />
                     <img
@@ -256,22 +251,27 @@ export default function TopNavbar() {
         ) : (
           <div className="flex gap-6 items-center">
             {/* RIGHT SIDE MOBILE */}
-            <MagnifyingGlassIcon
-              className="h-5 w-auto stroke-current cursor-pointer"
-              color={
-                isSearching || location.toLocaleLowerCase().includes("/search")
-                  ? "#a35fe8"
-                  : "white"
-              }
-              strokeWidth={1}
-              onClick={() => setIsSearching(!isSearching)}
-              ref={mobielRef}
+            <Search
+              mode="mobile"
+              isSearching={isSearching}
+              setIsSearching={setIsSearching}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchContainerRef={searchContainerRef}
+              mobileSearchContainerRef={mobileSearchContainerRef}
+              mobileSearchIconRef={mobileSearchIconRef}
+              searchInputRef={searchInputRef}
+              mobileSearchInputRef={mobileSearchInputRef}
+              isSearchResultsModalOpen={isSearchResultsModalOpen}
+              setIsSearchResultsModalOpen={setIsSearchResultsModalOpen}
+              searchContentData={searchContentData}
+              isSearchContentLoading={isSearchContentLoading}
             />
             {currentProfile ? (
               <>
-                <SquaresPlusIcon
-                  className="w-5 h-5 text-white cursor-pointer ml-[-6px]"
-                  strokeWidth={0.8}
+                <ListVideoIcon
+                  className="w-5 h-5 text-white cursor-pointer"
+                  strokeWidth={1}
                 />
                 <img
                   src={currentProfile.imgUrl}
@@ -304,49 +304,22 @@ export default function TopNavbar() {
       </div>
 
       {isSearching && !isAboveMediumScreens && (
-        <div
-          className={`fixed z-30 flex top-[40px] w-full bg-[#0F0F0F] duration-300 items-center justify-center overflow-hidden h-max p-4 px-6`}
-          ref={searchRef}
-        >
-          <div className="relative flex w-full">
-            <input
-              className="text-white w-full whitespace-nowrap text-sm placeholder:text-[#858383] outline-none bg-[rgba(48,48,48,0.3)] rounded-md py-2 px-4 pr-8"
-              name="search"
-              value={inputs.search}
-              placeholder="Titles, actors or genres..."
-              autoFocus
-              autoComplete="off"
-              ref={mobileSearchInputRef}
-              onChange={(e) => {
-                handleChange(e);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && handleSearch) {
-                  handleSearch();
-                }
-              }}
-            />
-            <button
-              className={`text-[#858585] focus:outline-none absolute right-0 top-[50%] translate-y-[-50%] p-3 ${
-                inputs.search.length > 0 ? "opacity-100" : "opacity-0"
-              }`}
-              onClick={() => clearSearch("mobile")}
-            >
-              x
-            </button>
-          </div>
-
-          <MagnifyingGlassIcon
-            className="h-6 w-auto stroke-current cursor-pointer ml-3"
-            color={
-              location.toLocaleLowerCase().includes("/search")
-                ? "#a35fe8"
-                : "white"
-            }
-            strokeWidth={1}
-            onClick={handleSearch}
-          />
-        </div>
+        <Search
+          mode="mobiledropwdown"
+          isSearching={isSearching}
+          setIsSearching={setIsSearching}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchContainerRef={searchContainerRef}
+          mobileSearchContainerRef={mobileSearchContainerRef}
+          mobileSearchIconRef={mobileSearchIconRef}
+          searchInputRef={searchInputRef}
+          mobileSearchInputRef={mobileSearchInputRef}
+          isSearchResultsModalOpen={isSearchResultsModalOpen}
+          setIsSearchResultsModalOpen={setIsSearchResultsModalOpen}
+          searchContentData={searchContentData}
+          isSearchContentLoading={isSearchContentLoading}
+        />
       )}
     </nav>
   );
