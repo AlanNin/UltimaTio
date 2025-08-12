@@ -387,7 +387,7 @@ const SignUp = () => {
 
             <h1 className="font-light text-sm mt-4 mb-2">
               <span className="text-[#b8b8b8]"> Already have an account? </span>{" "}
-              <Link href="/signin">Sign in</Link>
+              <Link href="/signin">Sign In</Link>
             </h1>
           </>
         )}

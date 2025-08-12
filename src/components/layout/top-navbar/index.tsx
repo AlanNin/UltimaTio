@@ -254,7 +254,7 @@ export default function TopNavbar() {
                     href="/signin"
                     className="text-white px-5 py-1.5 rounded-md w-max mx-auto transition duration-500 p-2 bg-[#6C0386] hover:bg-[#510266]"
                   >
-                    Sign in
+                    Sign In
                   </Link>
                 )}
               </div>
