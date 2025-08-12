@@ -1,8 +1,8 @@
 "use server";
 import prisma from "../prisma-client";
 import bcrypt from "bcrypt";
-import { getRandomProfilePicture } from "./profile.queries";
 import jwt from "jsonwebtoken";
+import { getRandomProfilePicture } from "~/utils/profile-pictures";
 
 type User = {
   id: string;

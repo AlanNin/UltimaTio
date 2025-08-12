@@ -7,12 +7,14 @@ import TopSection from "~/components/content/topSection";
 import CastSection from "~/components/content/castSection";
 import SimilarSection from "~/components/content/similarSection";
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 
 const Content = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
   const isAboveMobileScreens = useMediaQuery("(min-width: 770px)");
   const { tmdbid } = useParams();
   const router = useRouter();
+  const { currentProfile } = useSelector((state: any) => state.profile);
 
   if (!tmdbid || isNaN(Number(tmdbid))) {
     router.replace("/movie");
@@ -20,7 +22,7 @@ const Content = () => {
   }
 
   const { data: contentData, isLoading: isContentLoading } = useQuery({
-    queryKey: ["content-movie", tmdbid],
+    queryKey: ["content", tmdbid, currentProfile?.id],
     queryFn: () => getContentMovie(parseInt(tmdbid as string, 10)),
     staleTime: 1000 * 60 * 15,
   });

@@ -5,7 +5,7 @@ import {
   selectSuccess,
 } from "~/providers/redux/profile-slice";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useMediaQuery from "~/hooks/use-media-query";
 import Cookies from "js-cookie";
 import CardProfile from "../profile-card";
@@ -14,13 +14,14 @@ import { PencilSquareIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import ManageProfile from "../manage-profile";
 import {
   getUserProfiles,
-  getAllProfilePictures,
   createProfile,
   updateProfile,
   deleteProfile,
 } from "~/server/queries/profile.queries";
 import { Loading } from "~/utils/loading/loading";
 import { cn } from "~/utils/cn";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getAllProfilePictures } from "~/utils/profile-pictures";
 
 const WhoIsWatching = () => {
   type ProfilePictures = {
@@ -49,9 +50,6 @@ const WhoIsWatching = () => {
   const [enterManageProfile, setEnterManageProfile] = useState<boolean>(false);
   const [profileToManage, setProfileToManage] = useState<any>();
 
-  // LOADING
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
   // UPDATE
   const [update, setUpdate] = useState<boolean>(false);
 
@@ -67,41 +65,25 @@ const WhoIsWatching = () => {
     };
   }, [currentUser, currentProfile]);
 
-  // DEFINE PROFILE
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [profilePictures, setProfilePictures] = useState<ProfilePictures>({
-    MoviesProfileImages: [],
-    TVShowsProfileImages: [],
-    AnimeProfileImages: [],
-    CartoonProfileImages: [],
-    KShowsProfileImages: [],
-    AllProfileImages: [],
+  // FETCH PROFILES
+  const {
+    data: profilesData,
+    isLoading: isProfilesLoading,
+    refetch: refetchProfiles,
+  } = useQuery({
+    queryKey: ["user-profiles", currentUser?.id],
+    queryFn: () => getUserProfiles(),
+    enabled: !!currentUser,
   });
 
-  // FETCH PROFILES
-  useEffect(() => {
-    if (currentUser) {
-      setIsLoading(true);
-      const fetchProfiles = async () => {
-        try {
-          const fetchedProfilePictures = await getAllProfilePictures();
-          const fetchedProfiles = await getUserProfiles();
-          setProfilePictures(fetchedProfilePictures);
-          setProfiles(fetchedProfiles);
-        } catch (error) {
-          console.error("Error fetching profiles:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchProfiles();
-    }
-  }, [currentUser, update]);
+  const profilePictures: ProfilePictures = useMemo(() => {
+    return getAllProfilePictures();
+  }, []);
 
   // SELECT PROFILE
   const handleSelectProfile = (profile: any) => {
     try {
-      Cookies.set("currentProfile", profile.id);
+      Cookies.set("currentProfile", profile.id, { expires: 1 });
       dispatch(selectStart());
 
       dispatch(selectSuccess(profile));
@@ -116,15 +98,24 @@ const WhoIsWatching = () => {
     setIsCreatingProfile(!isCreatingProfile);
   };
 
-  const handleCreateProfile = async (name: any, selectedImage: string) => {
-    setIsLoading(true);
-    try {
+  const {
+    mutate: createProfileMutation,
+    isPending: isCreatingProfileMutation,
+  } = useMutation({
+    mutationFn: ({
+      name,
+      selectedImage,
+    }: {
+      name: any;
+      selectedImage: string;
+    }) => createProfile(name, selectedImage),
+    onMutate: () => {
       setIsCreatingProfile(false);
-      await createProfile(name, selectedImage);
-    } catch (error) {
-      //
-    }
-  };
+    },
+    onSuccess: () => {
+      refetchProfiles();
+    },
+  });
 
   // MANAGE (UPDATE, DELETE)
   const toggleManagingProfile = () => {
@@ -132,50 +123,66 @@ const WhoIsWatching = () => {
   };
 
   // MANAGE --> UPDATE
-  const handleUpdateProfile = async (
-    profileId: string,
-    name: any,
-    selectedImage: string
-  ) => {
-    setIsLoading(true);
-    try {
+  const {
+    mutate: updateProfileMutation,
+    isPending: isUpdatingProfileMutation,
+  } = useMutation({
+    mutationFn: ({
+      profileId,
+      name,
+      selectedImage,
+    }: {
+      profileId: string;
+      name: string;
+      selectedImage: string;
+    }) => updateProfile(profileId, name, selectedImage),
+    onMutate: () => {
       setIsManagingProfile(false);
       setEnterManageProfile(false);
-      await updateProfile(profileId, name, selectedImage);
-    } catch (error) {
-      //
-    }
-  };
+    },
+    onSuccess: () => {
+      refetchProfiles();
+    },
+  });
 
   // MANAGE --> DELETE
-  const handleDeleteProfile = async (profileId: string) => {
-    setIsLoading(true);
-    try {
+  const {
+    mutate: deleteProfileMutation,
+    isPending: isDeletingProfileMutation,
+  } = useMutation({
+    mutationFn: ({ profileId }: { profileId: string }) =>
+      deleteProfile(profileId),
+    onMutate: () => {
       setIsManagingProfile(false);
       setEnterManageProfile(false);
-      await deleteProfile(profileId);
-    } catch (error) {
-      //
-    }
-  };
+    },
+    onSuccess: () => {
+      refetchProfiles();
+    },
+  });
+
+  const isLoading = [
+    isProfilesLoading,
+    isCreatingProfileMutation,
+    isUpdatingProfileMutation,
+    isDeletingProfileMutation,
+  ].some(Boolean);
 
   return (
     <>
       {!currentUser || (currentUser && currentProfile) ? null : (
         <div className={`fixed inset-0 h-full w-full bg-[#0F0F0F] z-40`}>
           {isLoading && (
-            <div
-              className={`fixed flex w-full h-screen items-center justify-center z-20 ${
-                profiles.length > 0 ? "bg-[rgba(0,0,0,0.7)]" : "bg-[#0F0F0F]"
-              } `}
-            >
+            <div className="fixed flex w-full h-screen items-center justify-center z-20 bg-[#0F0F0F]">
               <Loading type="spin" color="#ffffff" />
             </div>
           )}
           <>
             {isCreatingProfile && (
               <CreateProfile
-                handleCreateProfile={handleCreateProfile}
+                handleCreateProfile={(name, selectedImage) =>
+                  createProfileMutation({ name, selectedImage })
+                }
                 setIsCreatingProfile={setIsCreatingProfile}
                 profilePictures={profilePictures}
                 setUpdate={setUpdate}
@@ -185,14 +192,18 @@ const WhoIsWatching = () => {
 
             {enterManageProfile && (
               <ManageProfile
-                handleUpdateProfile={handleUpdateProfile}
-                handleDeleteProfile={handleDeleteProfile}
+                handleUpdateProfile={(profileId, name, selectedImage) =>
+                  updateProfileMutation({ profileId, name, selectedImage })
+                }
+                handleDeleteProfile={(profileId) =>
+                  deleteProfileMutation({ profileId })
+                }
                 setEnterManageProfile={setEnterManageProfile}
                 profileToManage={profileToManage}
                 profilePictures={profilePictures}
                 setUpdate={setUpdate}
                 update={update}
-                canDeleteProfiles={profiles.length > 1}
+                canDeleteProfiles={profilesData.length > 1}
               />
             )}
 
@@ -211,8 +222,8 @@ const WhoIsWatching = () => {
 
               <div className={`px-10 ${!isAboveSmallTablet && ""}`}>
                 <div className="flex flex-wrap items-center justify-center gap-8 gap-x-10">
-                  {Array.isArray(profiles) &&
-                    profiles.map((profile: any) => (
+                  {Array.isArray(profilesData) &&
+                    profilesData.map((profile: any) => (
                       <CardProfile
                         key={profile.id}
                         profile={profile}
@@ -223,7 +234,7 @@ const WhoIsWatching = () => {
                         setProfileToManage={setProfileToManage}
                       />
                     ))}
-                  {Array.isArray(profiles) && profiles.length < 6 && (
+                  {Array.isArray(profilesData) && profilesData.length < 6 && (
                     <CardProfile
                       toggleCreatingProfile={toggleCreatingProfile}
                       isCreating={true}

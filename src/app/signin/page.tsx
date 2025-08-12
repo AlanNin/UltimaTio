@@ -10,18 +10,19 @@ import {
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import {
-  loginStart,
-  loginFailure,
-  loginSuccess,
-} from "~/providers/redux/user-slice";
 import Cookies from "js-cookie";
 import { SignInAccount, SignInWithGoogle } from "~/server/queries/auth.queries";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithPopup } from "firebase/auth";
 import { GoogleProvider, auth } from "~/firebase/config";
 import { Loader2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
+import {
+  loginFailure,
+  loginStart,
+  loginSuccess,
+} from "~/providers/redux/user-slice";
 
 const LogIn = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 800px)");
@@ -29,6 +30,7 @@ const LogIn = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect_fallback = searchParams.get("redirect_fallback");
+  const dispatch = useDispatch();
 
   interface Inputs {
     email?: string;
@@ -39,11 +41,9 @@ const LogIn = () => {
     email: undefined,
     password: undefined,
   });
-  const [loginStarted, setLoginStarted] = useState<boolean>(false);
   const [isWrongCredentials, setIsWrongCredentials] = useState<boolean>(false);
   const [isLoginError, setIsLoginError] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const dispatch = useDispatch();
 
   const handleChange = (e: any) => {
     setInputs((prev) => {
@@ -51,70 +51,73 @@ const LogIn = () => {
     });
   };
 
-  const handleLogin = async () => {
-    if (
-      inputs.email !== undefined &&
-      inputs.email.length > 0 &&
-      inputs.password !== undefined
-    ) {
-      try {
-        setLoginStarted(true);
-        dispatch(loginStart());
-        const response = await SignInAccount(
-          inputs.email.trim(),
-          inputs.password
-        );
-
-        if (response.success === true) {
-          dispatch(loginSuccess(response.response));
-          Cookies.set("access_token", response.token!, { expires: 365 });
-          if (redirect_fallback) {
-            router.replace(redirect_fallback);
-          } else {
-            router.replace("/");
-          }
-          setLoginStarted(false);
+  const {
+    mutate: loginMutation,
+    isPending: isLoginMutationPending,
+  } = useMutation({
+    mutationFn: ({ email, password }: { email: any; password: string }) =>
+      SignInAccount(email.trim(), password),
+    onMutate: () => {
+      dispatch(loginStart());
+    },
+    onSuccess: (data) => {
+      if (data.success === true) {
+        Cookies.set("access_token", data.token!, { expires: 365 });
+        dispatch(loginSuccess(data.response));
+        if (redirect_fallback) {
+          router.replace(redirect_fallback);
         } else {
-          setIsWrongCredentials(true);
-          dispatch(loginFailure());
-          setLoginStarted(false);
+          router.replace("/");
         }
-      } catch (error) {
-        setIsLoginError(true);
-        setLoginStarted(false);
+      } else {
+        setIsWrongCredentials(true);
       }
-    }
-  };
+    },
+    onError: () => {
+      dispatch(loginFailure());
+      setIsLoginError(true);
+    },
+  });
 
-  // HANDLE SIGN UP WITH GOOGLE
-  const signInWithGoogle = async () => {
-    dispatch(loginStart());
-
-    try {
-      const result = await signInWithPopup(auth, GoogleProvider);
-
-      const { success, response, token } = await SignInWithGoogle(
-        result.user.email!
-      );
-
-      if (!success) {
-        dispatch(loginFailure());
-        return;
-      }
-
+  const {
+    mutate: loginGoogleMutation,
+    isPending: isLoginGoogleMutationPending,
+  } = useMutation({
+    mutationFn: () => signInWithPopup(auth, GoogleProvider),
+    onMutate: () => {
+      dispatch(loginStart());
+    },
+    onSuccess: async (data) => {
+      const { response, token } = await SignInWithGoogle(data.user.email!);
       if (token) {
-        dispatch(loginSuccess(response));
         Cookies.set("access_token", token, { expires: 365 });
-
+        dispatch(loginSuccess(response));
         if (redirect_fallback) {
           router.replace(redirect_fallback);
         } else {
           router.replace("/");
         }
       }
-    } catch (error) {
+    },
+    onError: () => {
+      setIsLoginError(true);
       dispatch(loginFailure());
+    },
+  });
+
+  const handleLogin = async () => {
+    if (
+      inputs.email !== undefined &&
+      inputs.email.length > 0 &&
+      inputs.password !== undefined
+    ) {
+      loginMutation({ email: inputs.email, password: inputs.password });
     }
+  };
+
+  // HANDLE SIGN UP WITH GOOGLE
+  const signInWithGoogle = () => {
+    loginGoogleMutation();
   };
 
   return (
@@ -250,7 +253,7 @@ const LogIn = () => {
           )}
 
         <div className="mt-1">
-          {loginStarted ? (
+          {isLoginMutationPending || isLoginGoogleMutationPending ? (
             <div className="border-transparent p-4 bg-[rgba(158,16,90,0.5)]  rounded-3xl">
               <Loader2 className="h-7 w-7 text-white animate-spin cursor-progress " />
             </div>

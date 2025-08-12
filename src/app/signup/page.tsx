@@ -18,17 +18,18 @@ import {
   SignUpWithGoogle,
   validateEmail,
 } from "~/server/queries/auth.queries";
+import { signInWithPopup } from "firebase/auth";
+import { auth, GoogleProvider } from "~/firebase/config";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { Loader2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import {
   loginFailure,
   loginStart,
   loginSuccess,
 } from "~/providers/redux/user-slice";
-import { signInWithPopup } from "firebase/auth";
-import { auth, GoogleProvider } from "~/firebase/config";
-import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-import { Loader2 } from "lucide-react";
 
 const SignUp = () => {
   const isAboveLargeScreens = useMediaQuery("(min-width: 1280px)");
@@ -43,6 +44,7 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(
     false
   );
+  const dispatch = useDispatch();
 
   interface Inputs {
     email?: string;
@@ -56,6 +58,66 @@ const SignUp = () => {
     checkbox: false,
     password: undefined,
     confirmpassword: undefined,
+  });
+
+  const {
+    mutate: validateEmailMutation,
+    isPending: isValidateEmailMutationPending,
+  } = useMutation({
+    mutationFn: ({ email }: { email: string }) => validateEmail(email.trim()),
+    onSuccess: (data) => {
+      if (data.success === true) {
+        handleNextStep();
+      } else {
+        setIsEmailTaken(true);
+      }
+    },
+  });
+
+  const {
+    mutate: signUpMutation,
+    isPending: isSignUpMutationPending,
+  } = useMutation({
+    mutationFn: ({
+      email,
+      password,
+      confirmPassword,
+      checkbox,
+    }: {
+      email: string;
+      password: string;
+      confirmPassword: string;
+      checkbox: boolean;
+    }) => SignUpAccount(email.trim(), password, confirmPassword, checkbox),
+    onSuccess: (data) => {
+      if (data.success === true) {
+        handleNextStep();
+      } else {
+        setIsErrorCreatingAcc(true);
+      }
+    },
+  });
+
+  const {
+    mutate: signUpGoogleMutation,
+    isPending: isSignUpGoogleMutationPending,
+  } = useMutation({
+    mutationFn: () => signInWithPopup(auth, GoogleProvider),
+    onMutate: () => {
+      dispatch(loginStart());
+    },
+    onSuccess: async (data) => {
+      const { response, token } = await SignUpWithGoogle(data.user.email!);
+
+      if (token) {
+        Cookies.set("access_token", token, { expires: 365 });
+        dispatch(loginSuccess(response));
+        router.replace("/");
+      }
+    },
+    onError: () => {
+      dispatch(loginFailure());
+    },
   });
 
   const handleChange = (e: any) => {
@@ -102,27 +164,12 @@ const SignUp = () => {
     });
   };
 
-  const [handlingFirstStep, setHandlingFirstStep] = useState<boolean>(false);
   const handleFirstStep = async () => {
     if (inputs.email !== undefined && inputs.email.length > 0) {
-      try {
-        setHandlingFirstStep(true);
-        const response = await validateEmail(inputs.email);
-        if (response.success === true) {
-          handleNextStep();
-          setHandlingFirstStep(false);
-        } else {
-          setIsEmailTaken(true);
-          setHandlingFirstStep(false);
-        }
-      } catch (error) {
-        setHandlingFirstStep(false);
-        console.error("Error al validar el correo electrónico:", error);
-      }
+      validateEmailMutation({ email: inputs.email });
     }
   };
 
-  const [handlingSecondStep, setHandlingSecondStep] = useState<boolean>(false);
   const handleSecondStep = async () => {
     if (
       inputs.email !== undefined &&
@@ -135,60 +182,21 @@ const SignUp = () => {
       isPasswordValid &&
       isEmailValid
     ) {
-      try {
-        setHandlingSecondStep(true);
-        const response = await SignUpAccount(
-          inputs.email,
-          inputs.password,
-          inputs.confirmpassword,
-          inputs.checkbox
-        );
-
-        if (response.success === true) {
-          handleNextStep();
-          setHandlingSecondStep(false);
-        } else {
-          setIsErrorCreatingAcc(true);
-          setHandlingSecondStep(false);
-        }
-      } catch (error) {
-        console.error("Error al validar el correo electrónico:", error);
-        setHandlingSecondStep(false);
-      }
+      signUpMutation({
+        email: inputs.email,
+        password: inputs.password,
+        confirmPassword: inputs.confirmpassword,
+        checkbox: inputs.checkbox,
+      });
     }
   };
-
-  // DEFINE REDUX
-  const dispatch = useDispatch();
 
   // DEFINE ROUTER
   const router = useRouter();
 
   // HANDLE SIGN UP WITH GOOGLE
-  const signUpWithGoogle = async () => {
-    dispatch(loginStart());
-
-    try {
-      const result = await signInWithPopup(auth, GoogleProvider);
-
-      const { success, response, token } = await SignUpWithGoogle(
-        result.user.email!
-      );
-
-      if (!success) {
-        dispatch(loginFailure());
-        return;
-      }
-
-      if (token) {
-        dispatch(loginSuccess(response));
-        Cookies.set("access_token", token, { expires: 365 });
-        router.replace("/");
-      }
-    } catch (error) {
-      console.error("Error in signUpWithGoogle:", error);
-      dispatch(loginFailure());
-    }
+  const signUpWithGoogle = () => {
+    signUpGoogleMutation();
   };
 
   return (
@@ -353,7 +361,8 @@ const SignUp = () => {
             </div>
 
             <div className="mt-8">
-              {handlingFirstStep ? (
+              {isValidateEmailMutationPending ||
+              isSignUpGoogleMutationPending ? (
                 <div className="border-transparent p-4 bg-[rgba(158,16,90,0.5)]  rounded-3xl">
                   <Loader2 className="h-7 w-7 text-white animate-spin cursor-progress " />
                 </div>
@@ -571,7 +580,7 @@ const SignUp = () => {
             </div>
 
             <div className="mt-5">
-              {handlingSecondStep ? (
+              {isSignUpMutationPending ? (
                 <div className="border-transparent p-4 bg-[rgba(158,16,90,0.5)]  rounded-3xl">
                   <Loader2 className="h-7 w-7 text-white animate-spin cursor-progress " />
                 </div>

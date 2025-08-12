@@ -26,10 +26,9 @@ export default function HomeScreen() {
   } = useQuery({
     queryKey: ["watch-history", currentProfile ? currentProfile.id : undefined],
     queryFn: () => getProfileHistory(),
-    enabled: !!currentProfile,
   });
 
-  const isLoading = isFeedLoading || isWatchHistoryLoading;
+  const isLoading = [isFeedLoading, isWatchHistoryLoading].some(Boolean);
 
   return (
     <section id="home">

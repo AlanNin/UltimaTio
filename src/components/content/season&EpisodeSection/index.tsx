@@ -46,7 +46,7 @@ const SeasonAndEpisodeSection: React.FC<Props> = ({ content, isLoading }) => {
     <div className="flex flex-col w-full h-max mt-6 gap-2">
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto gap-5 pb-4 overscroll-x-contain"
+        className="w-max max-w-full flex overflow-x-auto gap-5 pb-4 overscroll-x-contain"
       >
         {seasons.map((season: any, index: number) => (
           <SeasonCard

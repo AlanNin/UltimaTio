@@ -20,7 +20,7 @@ const CastSection: React.FC<Props> = ({ cast }) => {
       >
         <div
           ref={scrollRef}
-          className="flex overflow-x-auto overscroll-x-contain w-full gap-6 pb-4"
+          className="w-max max-w-full flex overflow-x-auto overscroll-x-contain gap-6 pb-4"
         >
           {cast?.map((actor: any, index: number) => (
             <CastItem key={index} cast={actor} />

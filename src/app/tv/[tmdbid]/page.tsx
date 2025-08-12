@@ -9,12 +9,14 @@ import SeasonAndEpisodeSection from "~/components/content/season&EpisodeSection"
 import SimilarSection from "~/components/content/similarSection";
 import { useQuery } from "@tanstack/react-query";
 import { getContentTV } from "~/server/queries/tv/tmdb.queries";
+import { useSelector } from "react-redux";
 
 const Content = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
   const isAboveMobileScreens = useMediaQuery("(min-width: 770px)");
   const { tmdbid } = useParams();
   const router = useRouter();
+  const { currentProfile } = useSelector((state: any) => state.profile);
 
   if (!tmdbid || isNaN(Number(tmdbid))) {
     router.replace("/tv");
@@ -22,7 +24,7 @@ const Content = () => {
   }
 
   const { data: contentData, isLoading: isContentLoading } = useQuery({
-    queryKey: ["content-tv", tmdbid],
+    queryKey: ["content", tmdbid, currentProfile?.id],
     queryFn: () => getContentTV(parseInt(tmdbid as string, 10)),
     staleTime: 1000 * 60 * 15,
   });

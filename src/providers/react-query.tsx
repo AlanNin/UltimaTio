@@ -50,7 +50,6 @@ export default function ReactQueryProvider({
       );
     }
 
-    // Fire-and-forget; don’t block render
     Promise.all(tasks).catch(() => {});
   }, [queryClient, currentProfileId]);
 

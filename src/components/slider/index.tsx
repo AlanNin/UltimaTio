@@ -6,6 +6,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import SliderCard from "./item";
 import { useState } from "react";
 import { hideResumeWatching } from "~/server/queries/contentProfile.queries";
+import { useMutation } from "@tanstack/react-query";
 
 type Props = {
   content: any;
@@ -52,20 +53,17 @@ const RightArrow = ({ onClick }: { onClick?: () => void }) => {
 
 const Slider: React.FC<Props> = ({ content: initialContent, watchHistory }) => {
   const [content, setContent] = useState(initialContent);
-  const isAboveTabletScreens = useMediaQuery("(min-width: 680px)");
 
-  const handleRemoveResumeWatching = async (id: string) => {
-    try {
-      const response = await hideResumeWatching(id);
-      if (response.success === true) {
+  const { mutate: hideResumeWatchingMutation } = useMutation({
+    mutationFn: ({ id }: { id: string }) => hideResumeWatching(id),
+    onSuccess: (data, variables) => {
+      if (data.success === true) {
         setContent((prevContent: any) =>
-          prevContent.filter((item: any) => item.id !== id)
+          prevContent.filter((item: any) => item.id !== variables.id)
         );
       }
-    } catch (error) {
-      throw error;
-    }
-  };
+    },
+  });
 
   const filteredContent = content.filter(
     (item: any) => !item.posterUrl.includes("w780null")
@@ -120,7 +118,9 @@ const Slider: React.FC<Props> = ({ content: initialContent, watchHistory }) => {
             key={index}
             content={content}
             watchHistory={watchHistory}
-            handleRemoveResumeWatching={handleRemoveResumeWatching}
+            handleRemoveResumeWatching={(id) =>
+              hideResumeWatchingMutation({ id })
+            }
           />
         ))}
       </Carousel>

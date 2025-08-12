@@ -24,7 +24,7 @@ const SeasonCard: React.FC<Props> = ({
 
   return (
     <div
-      className={`relative cursor-pointer h-max w-max py-1 px-2 rounded-md transition-colors duration-300 ${
+      className={`relative cursor-pointer h-max w-max py-1.5 px-3 rounded-md transition-colors duration-300 ${
         selectedSeason.name === season.season.name
           ? "bg-[rgba(181,181,181,0.3)]"
           : "hover:bg-[rgba(181,181,181,0.2)]"

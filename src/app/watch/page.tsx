@@ -33,7 +33,12 @@ export default function WatchScreen() {
   const { currentProfile } = useSelector((state: any) => state.profile);
   const queryClient = getQueryClient();
 
-  const { data: contentData, isLoading: isContentLoading, isError } = useQuery({
+  const {
+    data: contentData,
+    isLoading: isContentLoading,
+    isError,
+    refetch: refetchContent,
+  } = useQuery({
     queryKey: [
       "watch-content",
       Number(tmdbidParam),
@@ -80,17 +85,12 @@ export default function WatchScreen() {
       Number(episodeParam) || 0
     );
 
+    refetchContent();
     queryClient.invalidateQueries({
       queryKey: ["watch-history", currentProfile?.id],
     });
     queryClient.invalidateQueries({
-      queryKey: [
-        "watch-content",
-        Number(tmdbidParam),
-        category,
-        Number(seasonParam),
-        Number(episodeParam),
-      ],
+      queryKey: ["content", tmdbidParam, currentProfile?.id],
     });
   }, [
     currentProfile,

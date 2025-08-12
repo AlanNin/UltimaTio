@@ -16,9 +16,10 @@ import {
   addOrRemoveContentFromLibrary,
   getLibraryForContent,
 } from "~/server/queries/contentLibrary.queries";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { cn } from "~/utils/cn";
+import { useSelector } from "react-redux";
 
 type Props = {
   content: any;
@@ -30,6 +31,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
   const [showMore, setShowMore] = useState(false);
   const [likeStatus, setLikeStatus] = useState(content?.likeStatus || 0);
   const [openLibraryModal, setOpenLibraryModal] = useState(false);
+  const { currentProfile } = useSelector((state: any) => state.profile);
 
   const watchPercentage =
     content?.profileContent?.[0]?.watchProgress &&
@@ -65,23 +67,34 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
     return `/watch?${params.toString()}`;
   };
 
-  const handleResumeWatching = () => {
-    const isAMovie = content.category === "movie";
-  };
+  const { mutate: likeOrDislikeMutation } = useMutation({
+    mutationFn: ({
+      tmdbid,
+      category,
+      status,
+    }: {
+      tmdbid: number;
+      category: string;
+      status: number;
+    }) => handleLikeOrDislike(tmdbid, category, status),
+    onSuccess: (data) => {
+      if (data.success) {
+        setLikeStatus(data.likeStatus);
+      } else {
+        setLikeStatus((prev: number) => !prev);
+        throw data.message;
+      }
+    },
+  });
 
   const handleLikeOrDislikeButton = async (status: number) => {
     try {
       setLikeStatus(status === likeStatus ? 0 : status);
-      const response = await handleLikeOrDislike(
-        content.tmdbid,
-        content.category,
-        status
-      );
-      if (response.success) {
-        setLikeStatus(response.likeStatus);
-      } else {
-        throw response.message;
-      }
+      likeOrDislikeMutation({
+        tmdbid: content.tmdbid,
+        category: content.category,
+        status: status,
+      });
     } catch (error) {
       throw error;
     }
@@ -361,21 +374,23 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                 />
                 <h1 className="text-sm text-[#ebebeb]"> Watch Party </h1>
               </button>
-              <div className="flex bg-[rgba(181,181,181,0.2)] gap-2.5 items-center rounded-3xl py-2 px-3.5">
-                <HandThumbUpIcon
-                  className="size-5 text-white cursor-pointer"
-                  strokeWidth={1.5}
-                  fill={likeStatus === 1 ? "white" : "transparent"}
-                  onClick={() => handleLikeOrDislikeButton(1)}
-                />
-                <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
-                <HandThumbDownIcon
-                  className="size-5 text-white cursor-pointer"
-                  strokeWidth={1.5}
-                  fill={likeStatus === -1 ? "white" : "transparent"}
-                  onClick={() => handleLikeOrDislikeButton(-1)}
-                />
-              </div>
+              {currentProfile && (
+                <div className="flex bg-[rgba(181,181,181,0.2)] gap-2.5 items-center rounded-3xl py-2 px-3.5">
+                  <HandThumbUpIcon
+                    className="size-5 text-white cursor-pointer"
+                    strokeWidth={1.5}
+                    fill={likeStatus === 1 ? "white" : "transparent"}
+                    onClick={() => handleLikeOrDislikeButton(1)}
+                  />
+                  <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
+                  <HandThumbDownIcon
+                    className="size-5 text-white cursor-pointer"
+                    strokeWidth={1.5}
+                    fill={likeStatus === -1 ? "white" : "transparent"}
+                    onClick={() => handleLikeOrDislikeButton(-1)}
+                  />
+                </div>
+              )}
             </div>
           )}
           {/* DETAILS */}
@@ -502,31 +517,33 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                     Watch Party
                   </h1>
                 </button>
-                <div className="flex bg-[rgba(181,181,181,0.2)] gap-2.5 items-center rounded-3xl py-2 px-3.5">
-                  <HandThumbUpIcon
-                    className={cn(
-                      "size-6 cursor-pointer transitions-colors duration-300",
-                      likeStatus === 1
-                        ? "text-white "
-                        : "text-white/75 hover:text-white"
-                    )}
-                    strokeWidth={1.5}
-                    fill={likeStatus === 1 ? "white" : "transparent"}
-                    onClick={() => handleLikeOrDislikeButton(1)}
-                  />
-                  <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
-                  <HandThumbDownIcon
-                    className={cn(
-                      "size-6 cursor-pointer transitions-colors duration-300",
-                      likeStatus === -1
-                        ? "text-white "
-                        : "text-white/75 hover:text-white"
-                    )}
-                    strokeWidth={1.5}
-                    fill={likeStatus === -1 ? "white" : "transparent"}
-                    onClick={() => handleLikeOrDislikeButton(-1)}
-                  />
-                </div>
+                {currentProfile && (
+                  <div className="flex bg-[rgba(181,181,181,0.2)] gap-2.5 items-center rounded-3xl py-2 px-3.5">
+                    <HandThumbUpIcon
+                      className={cn(
+                        "size-6 cursor-pointer transitions-colors duration-300",
+                        likeStatus === 1
+                          ? "text-white "
+                          : "text-white/75 hover:text-white"
+                      )}
+                      strokeWidth={1.5}
+                      fill={likeStatus === 1 ? "white" : "transparent"}
+                      onClick={() => handleLikeOrDislikeButton(1)}
+                    />
+                    <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
+                    <HandThumbDownIcon
+                      className={cn(
+                        "size-6 cursor-pointer transitions-colors duration-300",
+                        likeStatus === -1
+                          ? "text-white "
+                          : "text-white/75 hover:text-white"
+                      )}
+                      strokeWidth={1.5}
+                      fill={likeStatus === -1 ? "white" : "transparent"}
+                      onClick={() => handleLikeOrDislikeButton(-1)}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
