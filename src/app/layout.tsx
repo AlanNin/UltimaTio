@@ -15,7 +15,7 @@ const metaDataDescription =
 export const metadata: Metadata = {
   title: "UltimaTio",
   icons: [
-    { rel: "icon", url: "/favicon.svg", type: "image/svg+xml" },
+    { rel: "icon", type: "image/x-icon", url: "/favicon.ico" },
     { rel: "apple-touch-icon", sizes: "180x180", url: "/favicon.ico" },
   ],
   description: metaDataDescription,
