@@ -236,14 +236,6 @@ export default function TopNavbar() {
                   isSearchContentLoading={isSearchContentLoading}
                 />
 
-                {!currentProfile && (
-                  <AdjustmentsHorizontalIcon
-                    className="h-7 w-7 stroke-current cursor-pointer rounded-2xl p-1 transition duration-150 text-white hover:bg-[rgba(255,255,255,0.08)]"
-                    strokeWidth={1.5}
-                    ref={desktopMenuButtonRef}
-                    onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
-                  />
-                )}
                 {currentProfile ? (
                   <>
                     <ListVideoIcon
