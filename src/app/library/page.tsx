@@ -51,7 +51,7 @@ export default function LibraryScreen() {
         </div>
       ) : (
         <div className="max-w-[1920px] mx-auto w-full h-full px-4 mb-screen:px-8 flex flex-col gap-y-4">
-          <section className="flex gap-x-6 my-4">
+          <section className="flex gap-x-6 my-4 overflow-x-auto max-sm:pb-2">
             {WATCH_LISTS.map((watchList) => {
               const isActive = currentWatchList === watchList;
               return (
@@ -65,7 +65,7 @@ export default function LibraryScreen() {
                   )}
                   onClick={() => setCurrentWatchList(watchList)}
                 >
-                  <span className="text-sm">{watchList}</span>
+                  <span className="text-sm whitespace-nowrap">{watchList}</span>
                 </button>
               );
             })}
