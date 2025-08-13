@@ -4,7 +4,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { env } from "~/env";
 import { getRandomProfilePicture } from "~/utils/profile-pictures";
-import { SendVerificationEmail } from "../nodemailer/nodemailer";
+import {
+  RecoverPasswordEmail,
+  SendVerificationEmail,
+} from "../nodemailer/nodemailer";
 
 type User = {
   id: string;
@@ -21,7 +24,13 @@ type EmailVerifyPayload = {
   type: "email-verify";
 };
 
-const { EMAIL_VERIFICATION_SECRET = "" } = env;
+type AccountRecoverPayload = {
+  sub: string;
+  email: string;
+  type: "account-recover";
+};
+
+const { EMAIL_VERIFICATION_SECRET = "", RECOVER_ACCOUNT_SECRET = "" } = env;
 
 function createEmailVerifyToken(
   userId: string,
@@ -42,6 +51,26 @@ function verifyEmailVerifyToken(token: string): EmailVerifyPayload {
     EMAIL_VERIFICATION_SECRET
   ) as EmailVerifyPayload & jwt.JwtPayload;
   if (decoded.type !== "email-verify") {
+    throw new Error("Invalid token type");
+  }
+  return decoded;
+}
+
+function createRecoverAccountToken(email: string, expiresIn = "24h") {
+  const payload: AccountRecoverPayload = {
+    sub: email,
+    email,
+    type: "account-recover",
+  };
+  return jwt.sign(payload, RECOVER_ACCOUNT_SECRET, { expiresIn });
+}
+
+function verifyRecoverAccountToken(token: string): AccountRecoverPayload {
+  const decoded = jwt.verify(
+    token,
+    RECOVER_ACCOUNT_SECRET
+  ) as AccountRecoverPayload & jwt.JwtPayload;
+  if (decoded.type !== "account-recover") {
     throw new Error("Invalid token type");
   }
   return decoded;
@@ -322,20 +351,75 @@ export async function validateEmail(
 // VERIFY ACCOUNT
 export async function VerifyAccount(token: string) {
   try {
-    const decoded = jwt.verify(
-      token,
-      EMAIL_VERIFICATION_SECRET
-    ) as EmailVerifyPayload & jwt.JwtPayload;
-    if (decoded.type !== "email-verify") {
-      throw new Error("Invalid token type");
-    }
+    const decoded = verifyEmailVerifyToken(token);
 
-    const user = await prisma.user.update({
+    await prisma.user.update({
       where: {
         email: decoded.email,
       },
       data: {
         emailVerified: true,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in VerifyAccount:", error);
+    throw new Error("An error occurred during verify-account");
+  }
+}
+
+// SENT RECOVER ACCOUNT EMAIL
+export async function SentRecoverAccountEmail(email: string) {
+  try {
+    const token = createRecoverAccountToken(email);
+
+    await RecoverPasswordEmail(token, email);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in VerifyAccount:", error);
+    throw new Error("An error occurred during verify-account");
+  }
+}
+
+// VERIFY RECOVER ACCOUNT TOKEN
+export async function VerifyRecoverAccountToken(token: string) {
+  try {
+    const decoded = verifyRecoverAccountToken(token);
+
+    if (!decoded.email || !decoded.sub || decoded.type !== "account-recover") {
+      throw new Error("Invalid token");
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in VerifyAccount:", error);
+    throw new Error("An error occurred during verify-account");
+  }
+}
+
+// RESET PASSWORD
+export async function ResetPassword(
+  token: string,
+  newPassword: string,
+  confirmNewPassword: string
+) {
+  try {
+    if (newPassword !== confirmNewPassword) {
+      throw new Error("Passwords do not match");
+    }
+
+    const decoded = verifyRecoverAccountToken(token);
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(newPassword, salt);
+
+    await prisma.user.update({
+      where: {
+        email: decoded.email,
+      },
+      data: {
+        password: hash,
       },
     });
 

@@ -217,22 +217,19 @@ const LogIn = () => {
             className={`bg-transparent text-white placeholder:text-[#8a8a8a] text-sm placeholder:text-sm w-full py-2.5 px-4 pr-12 focus:outline-none font-normal
                    `}
           />
-          {inputs.password && inputs.password.length > 0 && (
-            <>
-              {showPassword ? (
-                <EyeSlashIcon
-                  strokeWidth={0.8}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
-                  onClick={() => setShowPassword(false)}
-                />
-              ) : (
-                <EyeIcon
-                  strokeWidth={0.8}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
-                  onClick={() => setShowPassword(true)}
-                />
-              )}
-            </>
+
+          {showPassword ? (
+            <EyeSlashIcon
+              strokeWidth={0.8}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
+              onClick={() => setShowPassword(false)}
+            />
+          ) : (
+            <EyeIcon
+              strokeWidth={0.8}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white h-5 w-5 cursor-pointer"
+              onClick={() => setShowPassword(true)}
+            />
           )}
         </div>
 

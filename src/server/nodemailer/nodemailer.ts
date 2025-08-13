@@ -4,6 +4,7 @@
 import nodemailer from "nodemailer";
 import { env } from "~/env";
 import { TemplateVerificationEmail } from "./templates/email-verification";
+import { TemplateRecoverAccount } from "./templates/email-recover-account";
 
 // types
 export type nodemailerProps = {
@@ -88,46 +89,38 @@ export async function SendVerificationEmail(
   }
 }
 
-// recover password email
-// export async function RecoverPasswordEmail(
-//   data: changePasswordTokenInputData
-// ): Promise<void> {
-//   try {
-//     // validate inputs
-//     if (!data) {
-//       throw new Error("Los campos no pueden estar vacíos");
-//     }
+export async function RecoverPasswordEmail(
+  token: string,
+  to: string
+): Promise<void> {
+  try {
+    // validate inputs
+    if (!token) {
+      throw new Error("Token missing");
+    }
 
-//     // convert expiration time
-//     const expiration_time_text = convertExpirationTime(data.expiration_time);
+    // load the email template
+    const template = TemplateRecoverAccount({
+      recover_url: `${env.APP_ORIGIN}/recover?recover-token=${token}`,
+      expiration_time: 24, // hours
+    });
 
-//     // recovery url (change password)
-//     const recovery_url =
-//       env.NODE_URL + "/auth/recovery?token=" + data.change_password_token;
+    // define mail options
+    const mailOptions = {
+      from: `"UltimaTio - No Reply" <${env.NODEMAILER_EMAIL_USER}>`,
+      to,
+      subject: "Recover Account",
+      html: template,
+    };
 
-//     // load the email template
-//     const template = TemplatePasswordRecovery({
-//       client_full_name: data.client_full_name!,
-//       recovery_url: recovery_url!,
-//       expiration_time: expiration_time_text!,
-//     });
-
-//     // define mail options
-//     const mailOptions = {
-//       from: `"Beauty Depot - Support" <${env.NODEMAILER_EMAIL_USER}>`,
-//       to: data.client_email,
-//       subject: data.subject,
-//       html: template,
-//     };
-
-//     // send email
-//     await transporter.sendMail(mailOptions);
-//   } catch (error) {
-//     // handle error
-//     if (error instanceof Error) {
-//       throw new Error(error.message);
-//     } else {
-//       throw new Error("Ha ocurrido un error desconocido");
-//     }
-//   }
-// }
+    // send email
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    // handle error
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("Ha ocurrido un error desconocido");
+    }
+  }
+}

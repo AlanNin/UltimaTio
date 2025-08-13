@@ -10,7 +10,9 @@ export default function Footer() {
 
   const hidden =
     isAboveMediumScreens ||
-    ["/settings", "/signin", "/signup"].includes(pathname.toLowerCase()) ||
+    ["/settings", "/signin", "/signup", "/recover"].includes(
+      pathname.toLowerCase()
+    ) ||
     pathname.toLowerCase().startsWith("/watch");
 
   if (hidden) return null;

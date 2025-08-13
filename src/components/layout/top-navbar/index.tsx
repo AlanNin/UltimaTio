@@ -179,6 +179,7 @@ export default function TopNavbar() {
     location.toLowerCase() === "/settings" ||
     location.toLowerCase() === "/signin" ||
     location.toLowerCase() === "/signup" ||
+    location.toLowerCase() === "/recover" ||
     location.toLowerCase() === "/watch"
   ) {
     return null;
