@@ -19,7 +19,7 @@ function Item({ name, route }: Props) {
     }
   }, []);
 
-  const lowerCasePage = route.toLowerCase().replace(/ /g, "");
+  const page = route.toLowerCase().replace(/ /g, "");
 
   return (
     <Link
@@ -30,8 +30,7 @@ function Item({ name, route }: Props) {
         <>
           <HomeIcon
             className={`${
-              (location === "/" && name === "Home") ||
-              location === `/${lowerCasePage}`
+              (location === "/" && name === "Home") || location === `/${page}`
                 ? "fill-white"
                 : "fill-none"
             }
@@ -48,9 +47,7 @@ function Item({ name, route }: Props) {
       {name === "Movies" && (
         <>
           <FilmIcon
-            className={`${
-              location === `/${lowerCasePage}` ? "fill-white" : "fill-none"
-            }
+            className={`${location === page ? "fill-white" : "fill-none"}
         text-white h-6 w-auto stroke-current`}
             strokeWidth={1}
           />
@@ -64,9 +61,7 @@ function Item({ name, route }: Props) {
       {name === "TV" && (
         <>
           <TvIcon
-            className={`${
-              location === `/${lowerCasePage}` ? "fill-white" : "fill-none"
-            }
+            className={`${location === page ? "fill-white" : "fill-none"}
         text-white h-6 w-auto stroke-current`}
             strokeWidth={1}
           />
@@ -80,9 +75,7 @@ function Item({ name, route }: Props) {
       {name === "Anime" && (
         <>
           <CurrencyYenIcon
-            className={`${
-              location === `/${lowerCasePage}` ? "fill-white" : "fill-none"
-            }
+            className={`${location === page ? "fill-white" : "fill-none"}
         text-white h-6 w-auto stroke-current`}
             strokeWidth={1}
           />
