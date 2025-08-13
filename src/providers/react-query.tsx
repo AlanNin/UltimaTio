@@ -1,5 +1,5 @@
 "use client";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useSelector } from "react-redux";
@@ -16,41 +16,37 @@ export default function ReactQueryProvider({
 }: {
   children: ReactNode;
 }) {
-  const queryClient = getQueryClient();
+  const queryClient = useMemo(() => getQueryClient(), []);
   const currentProfileId = useSelector(
     (state: any) => state.profile?.currentProfile?.id
   );
 
   useEffect(() => {
-    const tasks: Promise<unknown>[] = [
-      queryClient.prefetchQuery({
-        queryKey: ["home-feed"],
-        queryFn: () => getHomeFeed(),
-      }),
-      queryClient.prefetchQuery({
-        queryKey: ["movie-feed"],
-        queryFn: () => getFeedMovie(),
-      }),
-      queryClient.prefetchQuery({
-        queryKey: ["tv-feed"],
-        queryFn: () => getFeedTV(),
-      }),
-      queryClient.prefetchQuery({
-        queryKey: ["anime-feed"],
-        queryFn: () => getFeedAnime(),
-      }),
-    ];
+    const feeds = [
+      ["home-feed", getHomeFeed],
+      ["movie-feed", getFeedMovie],
+      ["tv-feed", getFeedTV],
+      ["anime-feed", getFeedAnime],
+    ] as const;
 
-    if (currentProfileId) {
-      tasks.push(
+    Promise.all(
+      feeds.map(([key, fn]) =>
         queryClient.prefetchQuery({
-          queryKey: ["watch-history", currentProfileId],
-          queryFn: () => getProfileHistory(),
+          queryKey: [key],
+          queryFn: fn,
+          staleTime: 1000 * 60 * 15,
         })
-      );
-    }
+      )
+    ).catch(() => {});
+  }, [queryClient]);
 
-    Promise.all(tasks).catch(() => {});
+  useEffect(() => {
+    if (!currentProfileId) return;
+
+    queryClient.prefetchQuery({
+      queryKey: ["watch-history", currentProfileId],
+      queryFn: () => getProfileHistory(),
+    });
   }, [queryClient, currentProfileId]);
 
   return (

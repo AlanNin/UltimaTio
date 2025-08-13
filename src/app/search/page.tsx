@@ -4,8 +4,9 @@ import { handleSearch } from "~/server/queries/tmdb.queries";
 import { Loading } from "~/utils/loading/loading";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaceFrownIcon } from "@heroicons/react/24/outline";
-import SearchCard from "~/components/search/card";
+
 import { useQuery } from "@tanstack/react-query";
+import DefaultContentCard from "~/components/default-content-card";
 
 const Search = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
@@ -36,7 +37,7 @@ const Search = () => {
       ) : (
         <div
           className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto flex flex-col ${
-            isAboveMediumScreens ? "p-10 pt-16" : "px-4 pt-14 pb-24"
+            isAboveMediumScreens ? "p-10 pt-[60px]" : "px-4 pt-[69px] pb-24"
           }`}
         >
           {contentData.length > 0 ? (
@@ -55,7 +56,7 @@ const Search = () => {
               </section>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
                 {contentData.map((content: any) => (
-                  <SearchCard key={content.id} content={content} />
+                  <DefaultContentCard key={content.id} content={content} />
                 ))}
               </div>
             </div>

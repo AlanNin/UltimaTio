@@ -20,6 +20,10 @@ export default {
         "signup-background": "url('/backgrounds/signup.jpg')",
         "signup-background-mobile": "url('/backgrounds/signup-mobile.jpg')",
       },
+      screens: {
+        "mb-screen": "770px",
+        "md-screen": "900px",
+      },
     },
   },
   plugins: [],

@@ -16,7 +16,7 @@ import {
   addOrRemoveContentFromLibrary,
   getLibraryForContent,
 } from "~/server/queries/contentLibrary.queries";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { cn } from "~/utils/cn";
 import { useSelector } from "react-redux";
@@ -32,6 +32,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
   const [likeStatus, setLikeStatus] = useState(content?.likeStatus || 0);
   const [openLibraryModal, setOpenLibraryModal] = useState(false);
   const { currentProfile } = useSelector((state: any) => state.profile);
+  const queryClient = useQueryClient();
 
   const watchPercentage =
     content?.profileContent?.[0]?.watchProgress &&
@@ -42,6 +43,8 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             100
         )
       : 0;
+
+  console.log("🚀 ~ TopSection ~ content.tmdbid:", content.tmdbid);
 
   const handleGetWatchHref = (): string => {
     const { tmdbid, category, profileContent } = content ?? {};
@@ -148,9 +151,9 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
     isRefetching: isRefetchingLibraries,
     refetch: refetchLibraries,
   } = useQuery({
-    queryKey: ["libraries-for-content", content.category, content.tmdb_id],
+    queryKey: ["libraries-for-content", content.category, content.tmdbid],
     queryFn: async () => {
-      const res = await getLibraryForContent(content.tmdb_id, content.category);
+      const res = await getLibraryForContent(content.tmdbid, content.category);
       return res as any[];
     },
     select: (resp) => mapToLibraries(resp),
@@ -159,15 +162,32 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
     refetchOnWindowFocus: false,
   });
 
+  const { mutate: addOrRemoveFromLibraryMutation } = useMutation({
+    mutationFn: ({
+      tmdbId,
+      category,
+      libraryName,
+    }: {
+      tmdbId: number;
+      category: string;
+      libraryName: string;
+    }) => addOrRemoveContentFromLibrary(tmdbId, category, libraryName),
+
+    onSuccess: () => {
+      refetchLibraries();
+      queryClient.invalidateQueries({
+        queryKey: ["library"],
+      });
+    },
+  });
+
   const handleAddToLibrary = async (library_name: string) => {
     try {
-      await addOrRemoveContentFromLibrary(
-        content.tmdb_id,
-        content.category,
-        library_name
-      );
-
-      refetchLibraries();
+      addOrRemoveFromLibraryMutation({
+        tmdbId: content.tmdbid,
+        category: content.category,
+        libraryName: library_name,
+      });
     } catch (error) {
       console.error("Error adding/removing content:", error);
     }

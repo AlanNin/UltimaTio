@@ -4,7 +4,7 @@ type Props = {
   content: any;
 };
 
-const SearchCard: React.FC<Props> = ({ content }) => {
+const DefaultContentCard: React.FC<Props> = ({ content }) => {
   const handleGetNavigateHref = () => {
     return `/${content.category}/${content.tmdbid}`;
   };
@@ -41,4 +41,4 @@ const SearchCard: React.FC<Props> = ({ content }) => {
   );
 };
 
-export default SearchCard;
+export default DefaultContentCard;

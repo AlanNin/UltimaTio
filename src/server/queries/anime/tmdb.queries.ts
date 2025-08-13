@@ -2,7 +2,6 @@
 import axios from "axios";
 import { getCurrentProfile } from "../authMiddleware";
 import prisma from "~/server/prisma-client";
-import { profile } from "console";
 
 // GET FEED (ANIME)
 export async function getFeedAnime(): Promise<any | { error: string }> {

@@ -41,11 +41,7 @@ export default function HomeScreen() {
           <Loading type="bars" />
         </div>
       ) : (
-        <div
-          className={`w-full h-full min-h-screen relative ${
-            isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
-          }`}
-        >
+        <div className="w-full h-full min-h-screen relative pt-[60px] pb-10 md-screen:pt-[69px] md-screen:pb-16">
           <HomeCarousel content={feedData.trending} />
           <div
             className={`max-w-[1920px] m-auto ${

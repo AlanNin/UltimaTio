@@ -1,9 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import {
-  AdjustmentsHorizontalIcon,
-  UserCircleIcon,
-} from "@heroicons/react/24/outline";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import Link from "next/link";
@@ -238,10 +235,16 @@ export default function TopNavbar() {
 
                 {currentProfile ? (
                   <>
-                    <ListVideoIcon
-                      className="size-8 text-white cursor-pointer ml-[-6.5px] rounded-2xl p-1 transition duration-300 hover:bg-[rgba(255,255,255,0.08)]"
-                      strokeWidth={1.5}
-                    />
+                    <Link href="/library">
+                      <ListVideoIcon
+                        className={cn(
+                          "size-8 text-white cursor-pointer ml-[-6.5px] rounded-2xl p-1 transition duration-300 hover:bg-[rgba(255,255,255,0.08)]",
+                          location === "/library" && "text-[#a35fe8]"
+                        )}
+                        strokeWidth={1.5}
+                      />
+                    </Link>
+
                     <img
                       src={currentProfile.imgUrl}
                       className="h-9 w-9 rounded-full object-cover cursor-pointer"
@@ -281,10 +284,15 @@ export default function TopNavbar() {
             />
             {currentProfile ? (
               <>
-                <ListVideoIcon
-                  className="w-5 h-5 text-white cursor-pointer"
-                  strokeWidth={1}
-                />
+                <Link href="/library">
+                  <ListVideoIcon
+                    className={cn(
+                      "w-5 h-5 text-white cursor-pointer",
+                      location === "/library" && "text-[#a35fe8]"
+                    )}
+                    strokeWidth={1}
+                  />
+                </Link>
                 <img
                   src={currentProfile.imgUrl}
                   className="rounded-full object-cover h-[26px] w-[26px] cursor-pointer"

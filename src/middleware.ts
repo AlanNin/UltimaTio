@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // protected routes no user
-const NOT_ALLOWED_NO_USER = ["/settings"];
+const NOT_ALLOWED_NO_USER = ["/settings", "library"];
 
 // protected routes user general
 const NOT_ALLOWED_USER = ["/signin", "/signup"];

@@ -1,6 +1,9 @@
 "use server";
 import prisma from "../prisma-client";
+import { getContentAnime } from "./anime/tmdb.queries";
 import { getCurrentProfile } from "./authMiddleware";
+import { getContentMovie } from "./movie/tmdb.queries";
+import { getContentTV } from "./tv/tmdb.queries";
 
 // GET LIBRARY FOR CONTENT
 export async function getLibraryForContent(
@@ -118,4 +121,77 @@ export async function addOrRemoveContentFromLibrary(
   } catch (error) {
     return { success: false, message: "Failed to update library" };
   }
+}
+
+export async function getLibrary(): Promise<any[]> {
+  const profile_id = await getCurrentProfile();
+
+  const profile = await prisma.profile.findUnique({
+    where: { id: profile_id },
+  });
+
+  if (!profile) return [];
+
+  const libraries = await prisma.library.findMany({
+    where: { profile_id },
+    select: {
+      id: true,
+      name: true,
+      library_content: {
+        select: {
+          updated_at: true,
+          content: {
+            select: {
+              tmdb_id: true,
+              category: true,
+            },
+          },
+        },
+        orderBy: { updated_at: "desc" },
+      },
+    },
+  });
+
+  const fetcherByCategory: Record<string, (tmdbId: number) => Promise<any>> = {
+    tv: getContentTV,
+    movie: getContentMovie,
+    anime: getContentAnime,
+  };
+
+  const result = await Promise.all(
+    libraries.map(async (lib) => {
+      const contentArray = await Promise.all(
+        lib.library_content.map(async (lc) => {
+          const { tmdb_id, category } = lc.content;
+          const fetcher = fetcherByCategory[category];
+
+          let details: any = null;
+          if (fetcher) {
+            try {
+              details = await fetcher(tmdb_id);
+            } catch (err) {
+              console.error(
+                `Error obteniendo detalles (${category} - ${tmdb_id}):`,
+                err
+              );
+            }
+          }
+
+          return {
+            tmdb_id,
+            category,
+            ...details,
+          };
+        })
+      );
+
+      return {
+        id: lib.id,
+        name: lib.name,
+        content: contentArray,
+      };
+    })
+  );
+
+  return result;
 }

@@ -1,13 +1,10 @@
 "use client";
-import useMediaQuery from "~/hooks/use-media-query";
 import { getFeedAnime } from "~/server/queries/anime/tmdb.queries";
 import { Loading } from "~/utils/loading/loading";
 import Section from "~/components/section/section";
 import { useQuery } from "@tanstack/react-query";
 
 export default function AnimeScreen() {
-  const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
-
   const { data: feedData, isLoading: isFeedLoading } = useQuery({
     queryKey: ["anime-feed"],
     queryFn: () => getFeedAnime(),
@@ -17,20 +14,12 @@ export default function AnimeScreen() {
   return (
     <section id="home">
       {isFeedLoading ? (
-        <div
-          className={`flex w-full h-screen items-center justify-center ${
-            isAboveMediumScreens ? "my-[-56px]" : "my-[-44px]"
-          } `}
-        >
+        <div className="flex w-full h-screen items-center justify-center my-[-44px] md-screen:my-[-56px]">
           <Loading type="bars" />
         </div>
       ) : (
-        <div
-          className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto ${
-            isAboveMediumScreens ? "pt-16 pb-10" : "pt-14 pb-16"
-          }`}
-        >
-          <div className={`${isAboveMediumScreens ? "pt-10" : "pt-6"}`}>
+        <div className="w-full h-full min-h-screen relative max-w-[1920px] m-auto pt-[60px] pb-10 md-screen:pt-[69px] md-screen:pb-16">
+          <div className="pt-6 md-screen:pt-8">
             {feedData.airingTodayAnime &&
               feedData.airingTodayAnime.length > 0 && (
                 <Section
