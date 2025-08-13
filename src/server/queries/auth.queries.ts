@@ -2,7 +2,9 @@
 import prisma from "../prisma-client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { env } from "~/env";
 import { getRandomProfilePicture } from "~/utils/profile-pictures";
+import { SendVerificationEmail } from "../nodemailer/nodemailer";
 
 type User = {
   id: string;
@@ -12,6 +14,38 @@ type User = {
   created_at: Date;
   updated_at: Date | null;
 };
+
+type EmailVerifyPayload = {
+  sub: string;
+  email: string;
+  type: "email-verify";
+};
+
+const { EMAIL_VERIFICATION_SECRET = "" } = env;
+
+function createEmailVerifyToken(
+  userId: string,
+  email: string,
+  expiresIn = "24h"
+) {
+  const payload: EmailVerifyPayload = {
+    sub: userId,
+    email,
+    type: "email-verify",
+  };
+  return jwt.sign(payload, EMAIL_VERIFICATION_SECRET, { expiresIn });
+}
+
+function verifyEmailVerifyToken(token: string): EmailVerifyPayload {
+  const decoded = jwt.verify(
+    token,
+    EMAIL_VERIFICATION_SECRET
+  ) as EmailVerifyPayload & jwt.JwtPayload;
+  if (decoded.type !== "email-verify") {
+    throw new Error("Invalid token type");
+  }
+  return decoded;
+}
 
 // SIGN UP ACCOUNT
 export async function SignUpAccount(
@@ -52,10 +86,11 @@ export async function SignUpAccount(
   const profilePicture = (await getRandomProfilePicture()) || "";
 
   // CREATE NEW USER
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email: email.toLowerCase(),
       password: hash,
+      emailVerified: false,
       profiles: {
         create: {
           name: "Default",
@@ -80,6 +115,10 @@ export async function SignUpAccount(
     },
     include: { profiles: true, userSettings: true },
   });
+
+  const verificationToken = createEmailVerifyToken(user.id, user.email);
+
+  await SendVerificationEmail(verificationToken, user.email);
 
   return {
     success: true,
@@ -109,12 +148,30 @@ export async function SignInAccount(
 
     // VALIDATIONS
     if (!user) {
-      return { response: "Incorrect credentials. Try Again", success: false };
+      return {
+        response: "Incorrect credentials. Please, try again.",
+        success: false,
+      };
     }
 
     const isCorrect = await bcrypt.compare(password, user.password);
     if (!isCorrect) {
-      return { response: "Incorrect credentials. Try Again", success: false };
+      return {
+        response: "Incorrect credentials. Please, try again.",
+        success: false,
+      };
+    }
+
+    if (!user.emailVerified) {
+      // SEND VERIFICATION EMAIL
+      const verificationToken = createEmailVerifyToken(user.id, user.email);
+      await SendVerificationEmail(verificationToken, user.email);
+
+      return {
+        response:
+          "Account not confirmed. We've sent a verification email to your email address.",
+        success: false,
+      };
     }
 
     // TOKEN
@@ -202,6 +259,7 @@ export async function SignUpWithGoogle(
       data: {
         email: email.toLowerCase(),
         password: "",
+        emailVerified: true,
         profiles: {
           create: {
             name: "Default",
@@ -258,5 +316,32 @@ export async function validateEmail(
     return { success: true };
   } catch (error) {
     throw error;
+  }
+}
+
+// VERIFY ACCOUNT
+export async function VerifyAccount(token: string) {
+  try {
+    const decoded = jwt.verify(
+      token,
+      EMAIL_VERIFICATION_SECRET
+    ) as EmailVerifyPayload & jwt.JwtPayload;
+    if (decoded.type !== "email-verify") {
+      throw new Error("Invalid token type");
+    }
+
+    const user = await prisma.user.update({
+      where: {
+        email: decoded.email,
+      },
+      data: {
+        emailVerified: true,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in VerifyAccount:", error);
+    throw new Error("An error occurred during verify-account");
   }
 }

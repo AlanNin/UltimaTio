@@ -8,6 +8,10 @@ export const env = createEnv({
    */
   server: {
     DATABASE_URL: z.string().url(),
+    EMAIL_VERIFICATION_SECRET: z.string(),
+    NODEMAILER_EMAIL_USER: z.string(),
+    NODEMAILER_EMAIL_PASSWORD: z.string(),
+    APP_ORIGIN: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -45,6 +49,10 @@ export const env = createEnv({
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID:
       process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    EMAIL_VERIFICATION_SECRET: process.env.EMAIL_VERIFICATION_SECRET,
+    NODEMAILER_EMAIL_USER: process.env.NODEMAILER_EMAIL_USER,
+    NODEMAILER_EMAIL_PASSWORD: process.env.NODEMAILER_EMAIL_PASSWORD,
+    APP_ORIGIN: process.env.APP_ORIGIN,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

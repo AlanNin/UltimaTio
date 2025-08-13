@@ -610,8 +610,9 @@ const SignUp = () => {
           <>
             <h1 className="text-2xl pt-10">Congratulations!</h1>
 
-            <h1 className="font-light text-md text-[#a6a6a6] mb-5 text-center">
-              Welcome to UltimaTio, you can now log into you account.
+            <h1 className="font-light text-md text-[#a6a6a6] mb-5 text-center md:max-w-[400px]">
+              Welcome to UltimaTio, we've sent you a verification email. Please
+              check your inbox and click the link to confirm your account.
             </h1>
 
             <Link href="/signin">

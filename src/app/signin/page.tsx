@@ -9,13 +9,17 @@ import {
   EyeSlashIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { SignInAccount, SignInWithGoogle } from "~/server/queries/auth.queries";
+import {
+  SignInAccount,
+  SignInWithGoogle,
+  VerifyAccount,
+} from "~/server/queries/auth.queries";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithPopup } from "firebase/auth";
 import { GoogleProvider, auth } from "~/firebase/config";
-import { Loader2 } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import {
@@ -30,6 +34,7 @@ const LogIn = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect_fallback = searchParams.get("redirect_fallback");
+  const verify_token = searchParams.get("verify-token");
   const dispatch = useDispatch();
 
   interface Inputs {
@@ -41,9 +46,9 @@ const LogIn = () => {
     email: undefined,
     password: undefined,
   });
-  const [isWrongCredentials, setIsWrongCredentials] = useState<boolean>(false);
-  const [isLoginError, setIsLoginError] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [accountVerified, setAccountVerified] = useState<boolean>(false);
 
   const handleChange = (e: any) => {
     setInputs((prev) => {
@@ -58,6 +63,7 @@ const LogIn = () => {
     mutationFn: ({ email, password }: { email: any; password: string }) =>
       SignInAccount(email.trim(), password),
     onMutate: () => {
+      setAccountVerified(false);
       dispatch(loginStart());
     },
     onSuccess: (data) => {
@@ -70,12 +76,11 @@ const LogIn = () => {
           router.replace("/");
         }
       } else {
-        setIsWrongCredentials(true);
+        setErrorMessage(data.response as string);
       }
     },
     onError: () => {
       dispatch(loginFailure());
-      setIsLoginError(true);
     },
   });
 
@@ -85,6 +90,7 @@ const LogIn = () => {
   } = useMutation({
     mutationFn: () => signInWithPopup(auth, GoogleProvider),
     onMutate: () => {
+      setAccountVerified(false);
       dispatch(loginStart());
     },
     onSuccess: async (data) => {
@@ -100,7 +106,6 @@ const LogIn = () => {
       }
     },
     onError: () => {
-      setIsLoginError(true);
       dispatch(loginFailure());
     },
   });
@@ -119,6 +124,21 @@ const LogIn = () => {
   const signInWithGoogle = () => {
     loginGoogleMutation();
   };
+
+  // HANDLE VERIFICATION TOKEN
+  const { mutate: verifyAccountMutation } = useMutation({
+    mutationFn: () => VerifyAccount(String(verify_token)),
+    onSuccess: () => {
+      setAccountVerified(true);
+    },
+  });
+
+  useEffect(() => {
+    if (!verify_token) {
+      return;
+    }
+    verifyAccountMutation();
+  }, [verify_token]);
 
   return (
     <section
@@ -160,8 +180,7 @@ const LogIn = () => {
           placeholder="Email"
           onChange={(e) => {
             handleChange(e);
-            setIsWrongCredentials(false);
-            setIsLoginError(false);
+            setErrorMessage("");
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && handleLogin) {
@@ -188,8 +207,7 @@ const LogIn = () => {
             name="password"
             onChange={(e) => {
               handleChange(e);
-              setIsWrongCredentials(false);
-              setIsLoginError(false);
+              setErrorMessage("");
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && handleLogin) {
@@ -225,17 +243,7 @@ const LogIn = () => {
           <img alt="Google" src={GoogleIcon.src} className="h-5 w-5" />
         </div>
 
-        {isLoginError &&
-          inputs.email !== undefined &&
-          inputs.email.length > 0 &&
-          inputs.password !== undefined &&
-          inputs.password.length > 0 && (
-            <h1 className="font-normal text-sm text-[#F77CFF] mt-[-14px] w-full text-start">
-              Server error
-            </h1>
-          )}
-
-        {isWrongCredentials &&
+        {errorMessage &&
           inputs.email !== undefined &&
           inputs.email.length > 0 &&
           inputs.password !== undefined &&
@@ -247,10 +255,23 @@ const LogIn = () => {
               />
 
               <h1 className="font-normal text-xs text-[#F77CFF]">
-                Wrong Credentials
+                {errorMessage}
               </h1>
             </div>
           )}
+
+        {accountVerified && (
+          <div className="flex mt-[-14px] items-center gap-1.5 w-full">
+            <CheckCircle
+              strokeWidth={1.4}
+              className="text-green-500 h-[16px]"
+            />
+
+            <h1 className="font-normal text-xs text-green-500">
+              Your account has been verified. You can now sign in.
+            </h1>
+          </div>
+        )}
 
         <div className="mt-1">
           {isLoginMutationPending || isLoginGoogleMutationPending ? (

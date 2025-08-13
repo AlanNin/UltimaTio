@@ -2,40 +2,41 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("POSTGRES_URL")
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
 }
 
 // USER MODEL
 model User {
-    id          String  @id @default(uuid())
-    email      String   @unique
-    password   String
-    created_at DateTime @default(now())
-    updated_at DateTime @updatedAt
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password      String
+  emailVerified Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 
-    // REFERENCE WITH USER PREFERENCES
-    userSettings UserSettings?
+  // REFERENCE WITH USER PREFERENCES
+  userSettings UserSettings?
 
-    // REFERENCE WITH PROFILE
-    profiles Profile[]
+  // REFERENCE WITH PROFILE
+  profiles Profile[]
 
-    @@map("users")
+  @@map("users")
 }
 
 // USER SETTINGS MODEL
 model UserSettings {
-  id          String  @id @default(uuid())
-  is_premium  Boolean @default(false)
+  id             String  @id @default(uuid())
+  is_premium     Boolean @default(false)
   receive_emails Boolean @default(false)
 
   // REFERENCE WITH USER
-  user_id String  @unique
-  user User @relation(fields: [user_id], references: [id])
+  user_id String @unique
+  user    User   @relation(fields: [user_id], references: [id])
 
   // CREATED AT & UPDATED AT
   created_at DateTime @default(now())
@@ -56,7 +57,7 @@ model Profile {
 
   // REFERENCE WITH USER MODEL, FK
   user_id String
-  user   User   @relation(fields: [user_id], references: [id])
+  user    User   @relation(fields: [user_id], references: [id])
 
   // REFERENCE WITH PROFILE PREFERENCES
   profileSettings ProfileSettings?
@@ -67,7 +68,7 @@ model Profile {
   // REFERENCE WITH PROFILE CONTENT
   profile_content ProfileContent[]
 
-   // REFERENCE WITH PROFILE LIKES
+  // REFERENCE WITH PROFILE LIKES
   profile_likes ProfileLike[]
 
   @@map("profiles")
@@ -75,16 +76,16 @@ model Profile {
 
 // PROFILE SETTINGS MODEL
 model ProfileSettings {
-  id          String  @id @default(uuid())
-  app_language String?
-  content_language String?
+  id                 String   @id @default(uuid())
+  app_language       String?
+  content_language   String?
   subtitles_language String?
-  auto_play Boolean?
-  content_quality String?
+  auto_play          Boolean?
+  content_quality    String?
 
   // REFERENCE WITH USER
   profile_id String  @unique
-  profile Profile @relation(fields: [profile_id], references: [id])
+  profile    Profile @relation(fields: [profile_id], references: [id])
 
   // CREATED AT & UPDATED AT
   created_at DateTime @default(now())
@@ -93,11 +94,10 @@ model ProfileSettings {
   @@map("profile_settings")
 }
 
-
 // LIBRARY MODEL
 model Library {
-  id              String @id @default(uuid())
-  name           String
+  id   String @id @default(uuid())
+  name String
 
   // CREATED AT & UPDATED AT
   created_at DateTime @default(now())
@@ -108,26 +108,25 @@ model Library {
 
   // REFERENCE WITH USER PROFILE, FK
   profile_id String
-  profile   Profile @relation(fields: [profile_id], references: [id])
+  profile    Profile @relation(fields: [profile_id], references: [id])
 
   @@map("library")
 }
 
 // BRIDGE TABLE CONTENT_LIBRARY
 model ProfileContent {
-  id         String @id @default(uuid())
-  content_id  String
-  profile_id String
-  season Int?
-  episode Int?
+  id            String   @id @default(uuid())
+  content_id    String
+  profile_id    String
+  season        Int?
+  episode       Int?
   watchProgress Decimal
-  duration Decimal
-  showResume Boolean?
+  duration      Decimal
+  showResume    Boolean?
 
   // RELATIONSHIP WITH CONTENT AND GENRE
-  content  Content  @relation(fields: [content_id ], references: [id])
+  content Content @relation(fields: [content_id], references: [id])
   profile Profile @relation(fields: [profile_id], references: [id])
-  
 
   // CREATED AT & UPDATED AT
   created_at DateTime @default(now())
@@ -138,14 +137,14 @@ model ProfileContent {
 
 // PROFILE LIKE MODEL
 model ProfileLike {
-  id         String   @id @default(uuid())
+  id         String @id @default(uuid())
   profile_id String
   content_id String
-  likeStatus Int @default(0)
+  likeStatus Int    @default(0)
 
   // RELATIONSHIPS
-  profile    Profile  @relation(fields: [profile_id], references: [id])
-  content    Content  @relation(fields: [content_id], references: [id])
+  profile Profile @relation(fields: [profile_id], references: [id])
+  content Content @relation(fields: [content_id], references: [id])
 
   // CREATED AT & UPDATED AT
   created_at DateTime @default(now())
@@ -157,11 +156,11 @@ model ProfileLike {
 // BRIDGE TABLE CONTENT_LIBRARY
 model LibraryContent {
   id         String @id @default(uuid())
-  content_id  String
+  content_id String
   library_id String
 
   // RELATIONSHIP WITH CONTENT AND GENRE
-  content  Content  @relation(fields: [content_id ], references: [id])
+  content Content @relation(fields: [content_id], references: [id])
   library Library @relation(fields: [library_id], references: [id])
 
   // CREATED AT & UPDATED AT
@@ -173,9 +172,9 @@ model LibraryContent {
 
 // LIBRARY MODEL
 model Content {
-  id                   String @id @default(uuid())
-  tmdb_id              Int
-  category             String
+  id       String @id @default(uuid())
+  tmdb_id  Int
+  category String
 
   // CREATED AT & UPDATED AT
   created_at DateTime @default(now())
@@ -187,9 +186,8 @@ model Content {
   // REFERENCE WITH PROFILE CONTENT
   profile_content ProfileContent[]
 
- // REFERENCE WITH PROFILE LIKES
+  // REFERENCE WITH PROFILE LIKES
   profile_likes ProfileLike[]
 
   @@map("contents")
 }
-
