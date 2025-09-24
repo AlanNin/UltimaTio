@@ -40,11 +40,9 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
       ? Math.floor(
           (content.profileContent[0].watchProgress /
             content.profileContent[0].duration) *
-            100
+            100,
         )
       : 0;
-
-  console.log("🚀 ~ TopSection ~ content.tmdbid:", content.tmdbid);
 
   const handleGetWatchHref = (): string => {
     const { tmdbid, category, profileContent } = content ?? {};
@@ -134,7 +132,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
   ];
 
   function mapToLibraries(
-    resp: any[] | undefined
+    resp: any[] | undefined,
   ): { name: string; added: boolean }[] {
     if (!resp || resp.length === 0)
       return DEFAULT_LIBRARIES.map((l) => ({ ...l }));
@@ -213,12 +211,13 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
   return (
     <>
       <div
-        className="flex w-full h-full items-center justify-center bg-cover relative"
+        className="relative flex h-full w-full items-center justify-center bg-cover"
         style={{
           backgroundImage: `url(${
-            content!.landscapeUrl.includes("originalnull")
-              ? content!.posterUrl
-              : content!.landscapeUrl
+            content?.landscapeUrl &&
+            content.landscapeUrl.includes("originalnull")
+              ? content.posterUrl
+              : content?.landscapeUrl || content?.posterUrl || ""
           })`,
           backgroundPosition: "center",
           backgroundSize: "cover",
@@ -226,15 +225,15 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
         }}
       >
         <div className="absolute inset-0 bg-[rgba(0,0,0,0.75)] backdrop-blur-lg" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent via-5% to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0F0F0F] via-transparent via-5% to-transparent pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent via-5% to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0F0F0F] via-transparent via-5% to-transparent" />
         <div
-          className={`flex  w-max h-max z-10 ${
-            isAboveMobileScreens ? "py-14 flex-wrap" : "py-10 flex-col"
-          } px-6 gap-10 items-center justify-center`}
+          className={`z-10  flex h-max w-max ${
+            isAboveMobileScreens ? "flex-wrap py-14" : "flex-col py-10"
+          } items-center justify-center gap-10 px-6`}
         >
           <div
-            className={`flex justify-center flex-wrap ${
+            className={`flex flex-wrap justify-center ${
               !isAboveMobileScreens && "text-center"
             }`}
           >
@@ -242,12 +241,12 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             <div
               className={`${
                 !isAboveMobileScreens &&
-                "relative basis-full flex items-center justify-center"
+                "relative flex basis-full items-center justify-center"
               }`}
             >
               <img
                 src={content!.posterUrl}
-                className={`w-[158px] h-[240px] bg-cover drop-shadow-lg rounded-sm`}
+                className={`h-[240px] w-[158px] rounded-sm bg-cover drop-shadow-lg`}
                 style={{
                   background:
                     "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
@@ -255,35 +254,35 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               />
             </div>
             <div
-              className={`flex flex-col gap-1 h-full px-4  ${
+              className={`flex h-full flex-col gap-1 px-4  ${
                 isAboveMobileScreens && "min-w-80"
               }`}
             >
               {isAboveMobileScreens && (
                 <>
-                  <div className="flex gap-2 mb-3">
+                  <div className="mb-3 flex gap-2">
                     <Link
-                      className="text-sm font-light cursor-pointer text-white hover:text-[#b084db] transition-property:text duration-300"
+                      className="transition-property:text cursor-pointer text-sm font-light text-white duration-300 hover:text-[#b084db]"
                       href="/"
                     >
                       Home
                     </Link>
                     <span className="text-sm font-light text-white">•</span>
                     <Link
-                      className="text-sm font-light capitalize cursor-pointer text-white hover:text-[#b084db] transition-property:text duration-500"
+                      className="transition-property:text cursor-pointer text-sm font-light capitalize text-white duration-500 hover:text-[#b084db]"
                       href={`/${content.category}`}
                     >
                       {content.category === "tv" ? "TV" : content.category}
                     </Link>
                     <span className="text-sm font-light text-white">•</span>
-                    <h1 className="text-sm font-light text-[#acabab] capitalize">
+                    <h1 className="text-sm font-light capitalize text-[#acabab]">
                       {content!.title}
                     </h1>
                   </div>
 
                   {/* TITLE */}
                   <h1
-                    className="text-4xl max-w-[550px]"
+                    className="max-w-[550px] text-4xl"
                     style={{
                       textShadow: "0px 10px 20px black",
                       wordWrap: "break-word",
@@ -295,7 +294,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               )}
 
               {/* DESCRIPTION */}
-              <p className="text-sm font-normal text-[#c2c2c2] max-w-[550px] mt-4">
+              <p className="mt-4 max-w-[550px] text-sm font-normal text-[#c2c2c2]">
                 {showMore ? (
                   <>
                     {content &&
@@ -306,7 +305,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                         {content.description.length >
                           (isAboveMobileScreens ? 520 : 150) && (
                           <span
-                            className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0.5 px-2 font-light text-xs cursor-pointer ml-2 my-1"
+                            className="my-1 ml-2 cursor-pointer rounded-xl bg-[rgba(191,191,191,0.15)] px-2 py-0.5 text-xs font-light"
                             style={{ whiteSpace: "nowrap" }}
                             onClick={() => setShowMore(!showMore)}
                           >
@@ -326,13 +325,13 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                         (isAboveMobileScreens ? 520 : 150)
                           ? content.description.slice(
                               0,
-                              isAboveMobileScreens ? 520 : 150
+                              isAboveMobileScreens ? 520 : 150,
                             ) + "..."
                           : content.description}
                         {content.description.length >
                           (isAboveMobileScreens ? 520 : 150) && (
                           <span
-                            className="bg-[rgba(191,191,191,0.15)] rounded-xl py-0.5 px-2 font-light text-xs cursor-pointer ml-2 my-1"
+                            className="my-1 ml-2 cursor-pointer rounded-xl bg-[rgba(191,191,191,0.15)] px-2 py-0.5 text-xs font-light"
                             style={{ whiteSpace: "nowrap" }}
                             onClick={() => setShowMore(!showMore)}
                           >
@@ -350,16 +349,16 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
           </div>
           {/* BUTTONS MOBILE*/}
           {!isAboveMobileScreens && (
-            <div className="flex basis-full flex-wrap gap-3 items-center justify-center">
+            <div className="flex basis-full flex-wrap items-center justify-center gap-3">
               <Link
                 href={handleGetWatchHref()}
-                className="relative flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)] overflow-hidden"
+                className="relative flex cursor-pointer items-center gap-2.5 overflow-hidden rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)]"
               >
                 <PlayIcon
-                  className="size-5 text-white fill-white z-10"
+                  className="z-10 size-5 fill-white text-white"
                   strokeWidth={0.8}
                 />
-                <h1 className="text-sm text-[#ebebeb] z-10">
+                <h1 className="z-10 text-sm text-[#ebebeb]">
                   {content?.profileContent &&
                   content?.profileContent[0]?.watchProgress
                     ? `${
@@ -370,41 +369,41 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                     : "Watch Now"}
                 </h1>
                 <div
-                  className="absolute inset-0 w-full h-full bg-gradient-to-r from-[rgba(135,15,73,0.4)] to-[rgba(124,38,212,0.4)] z-0"
+                  className="absolute inset-0 z-0 h-full w-full bg-gradient-to-r from-[rgba(135,15,73,0.4)] to-[rgba(124,38,212,0.4)]"
                   style={{ width: watchPercentage + "%" }}
                 />
               </Link>
               <div
-                className="flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)]"
+                className="flex cursor-pointer items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)]"
                 onClick={() => setOpenLibraryModal(true)}
               >
                 <SquaresPlusIcon
-                  className="size-5 text-white fill-white"
+                  className="size-5 fill-white text-white"
                   strokeWidth={0.8}
                 />
                 <h1 className="text-sm text-[#ebebeb]"> Add to Library </h1>
               </div>
               <button
-                className="flex gap-2.5 items-center rounded-3xl transition-colors duration-500 py-2 px-3.5 bg-[rgba(131,74,189,0.3)] opacity-50"
+                className="flex items-center gap-2.5 rounded-3xl bg-[rgba(131,74,189,0.3)] px-3.5 py-2 opacity-50 transition-colors duration-500"
                 disabled
               >
                 <UserGroupIcon
-                  className="size-5 text-white fill-white"
+                  className="size-5 fill-white text-white"
                   strokeWidth={0.8}
                 />
                 <h1 className="text-sm text-[#ebebeb]"> Watch Party </h1>
               </button>
               {currentProfile && (
-                <div className="flex bg-[rgba(181,181,181,0.2)] gap-2.5 items-center rounded-3xl py-2 px-3.5">
+                <div className="flex items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2">
                   <HandThumbUpIcon
-                    className="size-5 text-white cursor-pointer"
+                    className="size-5 cursor-pointer text-white"
                     strokeWidth={1.5}
                     fill={likeStatus === 1 ? "white" : "transparent"}
                     onClick={() => handleLikeOrDislikeButton(1)}
                   />
-                  <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
+                  <div className="h-6 w-px bg-[rgba(255,255,255,0.4)]"></div>
                   <HandThumbDownIcon
-                    className="size-5 text-white cursor-pointer"
+                    className="size-5 cursor-pointer text-white"
                     strokeWidth={1.5}
                     fill={likeStatus === -1 ? "white" : "transparent"}
                     onClick={() => handleLikeOrDislikeButton(-1)}
@@ -414,31 +413,31 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             </div>
           )}
           {/* DETAILS */}
-          <div className="bg-[rgba(191,191,191,0.075)] rounded-md p-4 flex flex-col gap-4 w-auto">
-            <h1 className="font-light text-xs flex">
+          <div className="flex w-auto flex-col gap-4 rounded-md bg-[rgba(191,191,191,0.075)] p-4">
+            <h1 className="flex text-xs font-light">
               <p className="font-bold"> Duration: &nbsp;</p>
               {content.duration && content.duration > 0
                 ? formatDuration(content.duration || content.episodeDuration)
                 : "Not Available"}
             </h1>
-            <h1 className="font-light text-xs flex">
+            <h1 className="flex text-xs font-light">
               <p className="font-bold"> Release Year: &nbsp;</p>
               {content.date
                 ? new Date(content.date).getFullYear()
                 : "Not Available"}
             </h1>
-            <h1 className="font-light text-xs flex">
+            <h1 className="flex text-xs font-light">
               <p className="font-bold"> TMDB Rating: &nbsp;</p>
               {content?.rating ? content?.rating.toFixed(1) : "Not Available"}
             </h1>
-            <div className="flex flex-wrap items-center max-w-[300px] gap-1">
-              <h1 className="font-bold text-xs mr-1">Genres: </h1>
+            <div className="flex max-w-[300px] flex-wrap items-center gap-1">
+              <h1 className="mr-1 text-xs font-bold">Genres: </h1>
               {content?.ContentGenre && content?.ContentGenre.length > 0 ? (
                 <>
                   {content?.ContentGenre?.map((genre: any, _index: number) => (
                     <span
                       key={genre.genre.id}
-                      className="bg-[rgba(191,191,191,0.15)] rounded-xl py-1 px-2 font-light text-xs cursor-pointer"
+                      className="cursor-pointer rounded-xl bg-[rgba(191,191,191,0.15)] px-2 py-1 text-xs font-light"
                     >
                       {genre &&
                         genre.genre.name.charAt(0).toUpperCase() +
@@ -450,21 +449,21 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                 <p className="text-xs font-light">Not Available</p>
               )}
             </div>
-            <div className="flex flex-wrap items-center max-w-[300px] gap-1">
-              <h1 className="font-bold text-xs mr-1">Producers: </h1>
+            <div className="flex max-w-[300px] flex-wrap items-center gap-1">
+              <h1 className="mr-1 text-xs font-bold">Producers: </h1>
               {content?.ContentStudio && content?.ContentStudio.length > 0 ? (
                 <>
                   {content?.ContentStudio?.map(
                     (studio: any, _index: number) => (
                       <span
                         key={studio.studio.id}
-                        className="bg-[rgba(191,191,191,0.15)] rounded-xl py-1 px-2 font-light text-xs cursor-pointer"
+                        className="cursor-pointer rounded-xl bg-[rgba(191,191,191,0.15)] px-2 py-1 text-xs font-light"
                       >
                         {studio &&
                           studio.studio.name.charAt(0).toUpperCase() +
                             studio.studio.name?.slice(1)}
                       </span>
-                    )
+                    ),
                   )}
                 </>
               ) : (
@@ -472,18 +471,18 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               )}
             </div>
           </div>
-          <div className="basis-full w-max items-center flex justify-center mt-2">
+          <div className="mt-2 flex w-max basis-full items-center justify-center">
             {isAboveMobileScreens && (
-              <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex flex-wrap items-center gap-4">
                 <Link
                   href={handleGetWatchHref()}
-                  className="relative flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)] overflow-hidden"
+                  className="relative flex cursor-pointer items-center gap-2.5 overflow-hidden rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)]"
                 >
                   <PlayIcon
-                    className="w-[24px] h-[24px] text-white fill-white z-10"
+                    className="z-10 h-[24px] w-[24px] fill-white text-white"
                     strokeWidth={0.8}
                   />
-                  <h1 className="text-md text-[#ebebeb] z-10 select-none">
+                  <h1 className="text-md z-10 select-none text-[#ebebeb]">
                     {content?.profileContent &&
                     content?.profileContent[0]?.watchProgress
                       ? `${
@@ -494,23 +493,23 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                       : "Watch Now"}
                   </h1>
                   <div
-                    className="absolute inset-0 w-full h-full bg-gradient-to-r from-[rgba(135,15,73,0.4)] to-[rgba(124,38,212,0.4)] z-0"
+                    className="absolute inset-0 z-0 h-full w-full bg-gradient-to-r from-[rgba(135,15,73,0.4)] to-[rgba(124,38,212,0.4)]"
                     style={{ width: watchPercentage + "%" }}
                   />
                 </Link>
                 <div className="relative">
                   <div
-                    className={` flex gap-2.5 items-center rounded-3xl cursor-pointer transition-colors duration-500 py-2 px-3.5 bg-[rgba(181,181,181,0.2)] hover:bg-[rgba(181,181,181,0.4)] ${
+                    className={` flex cursor-pointer items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)] ${
                       openLibraryModal && "bg-[rgba(181,181,181,0.4)]"
                     }`}
                     onClick={() => setOpenLibraryModal(!openLibraryModal)}
                     ref={libraryButtonRef}
                   >
                     <SquaresPlusIcon
-                      className="w-[24px] h-[24px] text-white fill-white"
+                      className="h-[24px] w-[24px] fill-white text-white"
                       strokeWidth={0.8}
                     />
-                    <h1 className="text-md text-[#ebebeb] select-none">
+                    <h1 className="text-md select-none text-[#ebebeb]">
                       Add to Library
                     </h1>
                   </div>
@@ -526,37 +525,37 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   )}
                 </div>
                 <button
-                  className="flex gap-2.5 items-center rounded-3xl transition-colors duration-500 py-2 px-3.5 bg-[rgba(131,74,189,0.3)] opacity-50"
+                  className="flex items-center gap-2.5 rounded-3xl bg-[rgba(131,74,189,0.3)] px-3.5 py-2 opacity-50 transition-colors duration-500"
                   disabled
                 >
                   <UserGroupIcon
-                    className="w-[24px] h-[24px] text-white fill-white"
+                    className="h-[24px] w-[24px] fill-white text-white"
                     strokeWidth={0.8}
                   />
-                  <h1 className="text-md text-[#ebebeb] select-none">
+                  <h1 className="text-md select-none text-[#ebebeb]">
                     Watch Party
                   </h1>
                 </button>
                 {currentProfile && (
-                  <div className="flex bg-[rgba(181,181,181,0.2)] gap-2.5 items-center rounded-3xl py-2 px-3.5">
+                  <div className="flex items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2">
                     <HandThumbUpIcon
                       className={cn(
-                        "size-6 cursor-pointer transitions-colors duration-300",
+                        "transitions-colors size-6 cursor-pointer duration-300",
                         likeStatus === 1
                           ? "text-white "
-                          : "text-white/75 hover:text-white"
+                          : "text-white/75 hover:text-white",
                       )}
                       strokeWidth={1.5}
                       fill={likeStatus === 1 ? "white" : "transparent"}
                       onClick={() => handleLikeOrDislikeButton(1)}
                     />
-                    <div className="w-px h-6 bg-[rgba(255,255,255,0.4)]"></div>
+                    <div className="h-6 w-px bg-[rgba(255,255,255,0.4)]"></div>
                     <HandThumbDownIcon
                       className={cn(
-                        "size-6 cursor-pointer transitions-colors duration-300",
+                        "transitions-colors size-6 cursor-pointer duration-300",
                         likeStatus === -1
                           ? "text-white "
-                          : "text-white/75 hover:text-white"
+                          : "text-white/75 hover:text-white",
                       )}
                       strokeWidth={1.5}
                       fill={likeStatus === -1 ? "white" : "transparent"}

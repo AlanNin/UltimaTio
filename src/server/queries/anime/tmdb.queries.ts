@@ -7,17 +7,17 @@ import prisma from "~/server/prisma-client";
 export async function getFeedAnime(): Promise<any | { error: string }> {
   try {
     const airingTodayAnime = await searchTMDBFeedAnime(
-      "tv/airing_today?language=en-US"
+      "tv/airing_today?language=en-US",
     );
 
     const onTheAirAnime = await searchTMDBFeedAnime(
-      "tv/on_the_air?language=en-US"
+      "tv/on_the_air?language=en-US",
     );
 
     const popularAnime = await searchTMDBFeedAnime("tv/popular?language=en-US");
 
     const topRatedAnime = await searchTMDBFeedAnime(
-      "tv/top_rated?language=en-US"
+      "tv/top_rated?language=en-US",
     );
 
     return { airingTodayAnime, onTheAirAnime, popularAnime, topRatedAnime };
@@ -29,7 +29,7 @@ export async function getFeedAnime(): Promise<any | { error: string }> {
 
 // GET CONTENT (ANIME)
 export async function getContentAnime(
-  tmdbid: number
+  tmdbid: number,
 ): Promise<any | { error: string }> {
   try {
     const fullDataResponse = await axios.get(
@@ -39,7 +39,7 @@ export async function getContentAnime(
           api_key: process.env.TMDB_APIKEY,
           append_to_response: "credits",
         },
-      }
+      },
     );
 
     const content = fullDataResponse.data;
@@ -127,7 +127,7 @@ export async function getContentAnime(
             params: {
               api_key: process.env.TMDB_APIKEY,
             },
-          }
+          },
         );
 
         const seasonDetails = seasonDetailsResponse.data;
@@ -142,7 +142,7 @@ export async function getContentAnime(
               const matchedEpisode = profileContent.find(
                 (pc: any) =>
                   pc.episode === episode.episode_number &&
-                  pc.season === season.season_number
+                  pc.season === season.season_number,
               );
               if (matchedEpisode) {
                 episodeWatchProgress = matchedEpisode.watchProgress.toNumber();
@@ -164,7 +164,7 @@ export async function getContentAnime(
               watchProgress: episodeWatchProgress,
               overview: episode.overview,
             };
-          })
+          }),
         );
 
         return {
@@ -173,7 +173,7 @@ export async function getContentAnime(
             episodes,
           },
         };
-      })
+      }),
     );
 
     const sortedSeasons = seasons.sort((a, b) => {
@@ -184,6 +184,19 @@ export async function getContentAnime(
 
     const similarContent = await getSimilarContentAnime(content.id);
 
+    const duration =
+      (Array.isArray(content.episode_run_time) &&
+      content.episode_run_time.length > 0
+        ? content.episode_run_time[0] * 60
+        : null) ||
+      (content.last_episode_to_air?.runtime
+        ? content.last_episode_to_air.runtime * 60
+        : null) ||
+      (content.next_episode_to_air?.runtime
+        ? content.next_episode_to_air.runtime * 60
+        : null) ||
+      0;
+
     return {
       landscapeUrl:
         "https://media.themoviedb.org/t/p/original" + content.backdrop_path,
@@ -191,9 +204,7 @@ export async function getContentAnime(
       title: fullDataResponse.data.name,
       tmdbid: content.id,
       date: new Date(content.first_air_date),
-      duration:
-        content.episode_run_time * 60 ||
-        content.last_episode_to_air.runtime * 60,
+      duration,
       rating: Math.round(content.vote_average * 10) / 10,
       description: content.overview,
       ContentStudio,
@@ -213,7 +224,7 @@ export async function getContentAnime(
 
 // GET SIMILAR CONTENT (TV)
 async function getSimilarContentAnime(
-  tmdbid: number
+  tmdbid: number,
 ): Promise<any | { error: string }> {
   try {
     const original_language = "ja";
@@ -224,7 +235,7 @@ async function getSimilarContentAnime(
         params: {
           api_key: process.env.TMDB_APIKEY,
         },
-      }
+      },
     );
 
     const similarContent = response.data.results
@@ -262,12 +273,12 @@ async function searchTMDBFeedAnime(url: string): Promise<any[] | null> {
             language: "en-US",
             page: page + 1,
           },
-        })
-      )
+        }),
+      ),
     );
 
     const combinedResults = responses.flatMap(
-      (response) => response.data.results
+      (response) => response.data.results,
     );
 
     const responseData = await Promise.all(
@@ -280,13 +291,13 @@ async function searchTMDBFeedAnime(url: string): Promise<any[] | null> {
                 api_key: process.env.TMDB_APIKEY,
                 append_to_response: "credits",
               },
-            }
+            },
           );
 
           const isAnime =
             fullDataResponse.data.origin_country.includes(excludedCountry) &&
             fullDataResponse.data.genres.some(
-              (genre: any) => genre.id === excludedGenreId
+              (genre: any) => genre.id === excludedGenreId,
             );
 
           if (!isAnime) {
@@ -298,7 +309,7 @@ async function searchTMDBFeedAnime(url: string): Promise<any[] | null> {
               id: studio.id,
               name: studio.name,
               originCountry: studio.origin_country,
-            })
+            }),
           );
 
           const ContentStudio = studios.map((studio: any) => ({
@@ -313,7 +324,7 @@ async function searchTMDBFeedAnime(url: string): Promise<any[] | null> {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
               },
-            })
+            }),
           );
 
           const cast = fullDataResponse.data.credits.cast.slice(0, 15);
@@ -351,11 +362,11 @@ async function searchTMDBFeedAnime(url: string): Promise<any[] | null> {
           console.error(
             "Error fetching full TMDB data for anime:",
             content.id,
-            error
+            error,
           );
           return null;
         }
-      })
+      }),
     );
 
     const filteredData = responseData.filter((data: any) => data !== null);

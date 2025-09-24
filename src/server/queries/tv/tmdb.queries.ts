@@ -6,17 +6,13 @@ import { getCurrentProfile } from ".././authMiddleware";
 // GET FEED (TV)
 export async function getFeedTV(): Promise<any | { error: string }> {
   try {
-    const [
-      airingTodayTV,
-      onTheAirTV,
-      popularTV,
-      topRatedTV,
-    ] = await Promise.all([
-      searchTMDBFeedTV("tv/airing_today?language=en-US"),
-      searchTMDBFeedTV("tv/on_the_air?language=en-US"),
-      searchTMDBFeedTV("tv/popular?language=en-US"),
-      searchTMDBFeedTV("tv/top_rated?language=en-US"),
-    ]);
+    const [airingTodayTV, onTheAirTV, popularTV, topRatedTV] =
+      await Promise.all([
+        searchTMDBFeedTV("tv/airing_today?language=en-US"),
+        searchTMDBFeedTV("tv/on_the_air?language=en-US"),
+        searchTMDBFeedTV("tv/popular?language=en-US"),
+        searchTMDBFeedTV("tv/top_rated?language=en-US"),
+      ]);
 
     return { airingTodayTV, onTheAirTV, popularTV, topRatedTV };
   } catch (error) {
@@ -27,7 +23,7 @@ export async function getFeedTV(): Promise<any | { error: string }> {
 
 // GET CONTENT (TV)
 export async function getContentTV(
-  tmdbid: number
+  tmdbid: number,
 ): Promise<any | { error: string }> {
   try {
     const fullDataResponse = await axios.get(
@@ -37,7 +33,7 @@ export async function getContentTV(
           api_key: process.env.TMDB_APIKEY,
           append_to_response: "credits",
         },
-      }
+      },
     );
 
     const content = fullDataResponse.data;
@@ -126,7 +122,7 @@ export async function getContentTV(
             params: {
               api_key: process.env.TMDB_APIKEY,
             },
-          }
+          },
         );
 
         const seasonDetails = seasonDetailsResponse.data;
@@ -141,7 +137,7 @@ export async function getContentTV(
               const matchedEpisode = profileContent.find(
                 (pc: any) =>
                   pc.episode === episode.episode_number &&
-                  pc.season === season.season_number
+                  pc.season === season.season_number,
               );
               if (matchedEpisode) {
                 episodeWatchProgress = matchedEpisode.watchProgress.toNumber();
@@ -163,7 +159,7 @@ export async function getContentTV(
               watchProgress: episodeWatchProgress,
               overview: episode.overview,
             };
-          })
+          }),
         );
 
         return {
@@ -172,7 +168,7 @@ export async function getContentTV(
             episodes,
           },
         };
-      })
+      }),
     );
 
     const sortedSeasons = seasons.sort((a, b) => {
@@ -183,6 +179,19 @@ export async function getContentTV(
 
     const similarContent = await getSimilarContentTV(content.id);
 
+    const duration =
+      (Array.isArray(content.episode_run_time) &&
+      content.episode_run_time.length > 0
+        ? content.episode_run_time[0] * 60
+        : null) ||
+      (content.last_episode_to_air?.runtime
+        ? content.last_episode_to_air.runtime * 60
+        : null) ||
+      (content.next_episode_to_air?.runtime
+        ? content.next_episode_to_air.runtime * 60
+        : null) ||
+      0;
+
     return {
       landscapeUrl:
         "https://media.themoviedb.org/t/p/original" + content.backdrop_path,
@@ -190,9 +199,7 @@ export async function getContentTV(
       title: fullDataResponse.data.name,
       tmdbid: content.id,
       date: new Date(content.first_air_date),
-      duration:
-        content.episode_run_time * 60 ||
-        content.last_episode_to_air.runtime * 60,
+      duration,
       rating: Math.round(content.vote_average * 10) / 10,
       description: content.overview,
       ContentStudio,
@@ -212,7 +219,7 @@ export async function getContentTV(
 
 // GET SIMILAR CONTENT (TV)
 async function getSimilarContentTV(
-  tmdbid: number
+  tmdbid: number,
 ): Promise<any | { error: string }> {
   try {
     const response = await axios.get(
@@ -221,7 +228,7 @@ async function getSimilarContentTV(
         params: {
           api_key: process.env.TMDB_APIKEY,
         },
-      }
+      },
     );
 
     const similarContent = response.data.results.map((content: any) => ({
@@ -262,13 +269,13 @@ async function searchTMDBFeedTV(url: string): Promise<any | null> {
                 api_key: process.env.TMDB_APIKEY,
                 append_to_response: "credits",
               },
-            }
+            },
           );
 
           const isAnime =
             fullDataResponse.data.origin_country.includes(excludedCountry) &&
             fullDataResponse.data.genres.some(
-              (genre: any) => genre.id === excludedGenreId
+              (genre: any) => genre.id === excludedGenreId,
             );
 
           if (isAnime) {
@@ -280,7 +287,7 @@ async function searchTMDBFeedTV(url: string): Promise<any | null> {
               id: studio.id,
               name: studio.name,
               originCountry: studio.origin_country,
-            })
+            }),
           );
 
           const ContentStudio = studios.map((studio: any) => ({
@@ -295,7 +302,7 @@ async function searchTMDBFeedTV(url: string): Promise<any | null> {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
               },
-            })
+            }),
           );
 
           const cast = fullDataResponse.data.credits.cast.slice(0, 15);
@@ -333,11 +340,11 @@ async function searchTMDBFeedTV(url: string): Promise<any | null> {
           console.error(
             "Error fetching full TMDB data for movie:",
             content.id,
-            error
+            error,
           );
           return null;
         }
-      })
+      }),
     );
 
     return responseData.filter((data: any) => data !== null);

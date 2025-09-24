@@ -33,7 +33,7 @@ const Content = () => {
     <section id="content">
       {isContentLoading ? (
         <div
-          className={`flex w-full h-screen items-center justify-center ${
+          className={`flex h-screen w-full items-center justify-center ${
             isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
           } `}
         >
@@ -41,8 +41,8 @@ const Content = () => {
         </div>
       ) : (
         <div
-          className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto overflow-x-clip ${
-            isAboveMediumScreens ? "pt-[60px] pb-10" : " pb-24"
+          className={`relative m-auto h-full min-h-screen w-full max-w-[1920px] overflow-x-clip ${
+            isAboveMediumScreens ? "pb-10 pt-[60px]" : " pb-24"
           }`}
         >
           <TopSection content={contentData} isLoading={isContentLoading} />
