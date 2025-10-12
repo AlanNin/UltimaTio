@@ -18,15 +18,15 @@ export default function ReactQueryProvider({
 }) {
   const queryClient = useMemo(() => getQueryClient(), []);
   const currentProfileId = useSelector(
-    (state: any) => state.profile?.currentProfile?.id
+    (state: any) => state.profile?.currentProfile?.id,
   );
 
   useEffect(() => {
     const feeds = [
-      ["home-feed", getHomeFeed],
-      ["movie-feed", getFeedMovie],
-      ["tv-feed", getFeedTV],
-      ["anime-feed", getFeedAnime],
+      ["home-feed", () => getHomeFeed()],
+      ["movie-feed", () => getFeedMovie()],
+      ["tv-feed", () => getFeedTV()],
+      ["anime-feed", () => getFeedAnime()],
     ] as const;
 
     Promise.all(
@@ -35,8 +35,8 @@ export default function ReactQueryProvider({
           queryKey: [key],
           queryFn: fn,
           staleTime: 1000 * 60 * 15,
-        })
-      )
+        }),
+      ),
     ).catch(() => {});
   }, [queryClient]);
 
