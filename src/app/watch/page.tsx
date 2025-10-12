@@ -66,7 +66,7 @@ export default function WatchScreen() {
       category,
       seasonParam,
       episodeParam,
-      !!currentProfile
+      currentProfile ? true : false,
     );
   }, [category, seasonParam, episodeParam, !!contentData?.profileContent]);
 
@@ -82,7 +82,7 @@ export default function WatchScreen() {
       t,
       d,
       Number(seasonParam) || 0,
-      Number(episodeParam) || 0
+      Number(episodeParam) || 0,
     );
 
     refetchContent();
@@ -143,12 +143,12 @@ export default function WatchScreen() {
   return (
     <section id="home">
       {isContentLoading ? (
-        <div className={`flex w-full h-screen items-center justify-center`}>
+        <div className={`flex h-screen w-full items-center justify-center`}>
           <Loading type="bars" />
         </div>
       ) : (
         <div
-          className={`w-full h-full min-h-screen relative max-w-[854px] m-auto flex flex-col ${
+          className={`relative m-auto flex h-full min-h-screen w-full max-w-[854px] flex-col ${
             isAboveMediumScreens ? "pb-10" : "pb-16"
           }`}
         >
@@ -168,7 +168,7 @@ export default function WatchScreen() {
 
           <div className="mt-4 w-full">
             {(category === "tv" || category === "anime") && (
-              <div className="w-full flex flex-col gap-4">
+              <div className="flex w-full flex-col gap-4">
                 <Episodes
                   content={contentData}
                   tmdbid={Number(tmdbidParam)!}
@@ -202,7 +202,7 @@ function computeStartAt(
   category: string | null,
   seasonParam: string | null,
   episodeParam: string | null,
-  currentProfileExists: boolean
+  currentProfileExists: boolean,
 ) {
   const isTV = category === "tv" || category === "anime";
   const seasonNum = Number(seasonParam);
@@ -244,7 +244,7 @@ function computeStartAt(
   if (isTV) {
     const pc = contentData.profileContent.find(
       (p: any) =>
-        Number(p.season) === seasonNum && Number(p.episode) === episodeNum
+        Number(p.season) === seasonNum && Number(p.episode) === episodeNum,
     );
     if (pc) {
       start = Number(pc.watchProgress) || 0;
@@ -253,7 +253,7 @@ function computeStartAt(
   } else {
     const pc =
       contentData.profileContent.find(
-        (p: any) => p.season == null && p.episode == null
+        (p: any) => p.season == null && p.episode == null,
       ) || contentData.profileContent[0];
     if (pc) {
       start = Number(pc.watchProgress) || 0;

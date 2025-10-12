@@ -78,7 +78,7 @@ const ExternalPlayer: React.FC<Props> = ({
       push(
         Number(time) || 0,
         Number(duration) || lastDurationRef.current,
-        force
+        force,
       );
     };
 
@@ -133,7 +133,7 @@ const ExternalPlayer: React.FC<Props> = ({
             try {
               iframeRef.current?.contentWindow?.postMessage(
                 { type: "PLAYER_COMMAND", command: "play" },
-                "*"
+                "*",
               );
             } catch {}
           }}

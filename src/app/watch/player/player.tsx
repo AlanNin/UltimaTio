@@ -42,8 +42,8 @@ const Player: React.FC<Props> = ({
     <div
       className={`${
         isAboveMediumScreens
-          ? "w-[854px] h-[480px] rounded-md"
-          : "w-full h-auto"
+          ? "h-[480px] w-[854px] rounded-md"
+          : "h-auto w-full"
       }`}
       style={{
         background:
@@ -57,7 +57,7 @@ const Player: React.FC<Props> = ({
           season,
           episode,
           currentProvider,
-          startAt
+          startAt,
         )}
         handleCurrentTimeUpdate={handleCurrentTimeUpdate}
         handleDurationUpdate={handleDurationUpdate}
@@ -74,7 +74,7 @@ const determineSrc = (
   season: any,
   episode: any,
   provider: Provider,
-  startAt: number
+  startAt: number,
 ) => {
   let src = "";
 
