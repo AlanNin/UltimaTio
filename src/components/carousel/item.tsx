@@ -39,29 +39,29 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
   };
 
   return (
-    <div className="flex h-full w-full justify-center items-center overflow-hidden max-h-[calc(100vh-250px)]">
-      <div className="relative w-full h-full flex">
+    <div className="flex h-full max-h-[calc(100vh-175px)] w-full items-center justify-center overflow-hidden 2xl:max-h-[calc(100vh-250px)]">
+      <div className="relative flex h-full w-full">
         <img
           src={isAboveSmallTablet ? content?.landscapeUrl : landscapeMobile}
           alt="Content Image"
           loading="lazy"
-          className="object-cover object-[50%_20%] w-full h-full"
+          className="h-full w-full object-cover object-[50%_20%]"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent via-50% to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0F0F0F] via-transparent via-25% to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0F0F0F] via-transparentvia-70% to-transparent pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-transparent via-50% to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0F0F0F] via-transparent via-25% to-transparent" />
+        <div className="via-transparentvia-70% pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0F0F0F] to-transparent" />
 
         {isCurrent && (
           <>
             {isAboveMediumScreens ? (
               <>
-                <div className="absolute inset-0 w-full flex items-center justify-center">
-                  <div className="max-w-[1920px] w-full p-10">
+                <div className="absolute inset-0 flex w-full items-center justify-center">
+                  <div className="w-full max-w-[1920px] p-10">
                     <Reveal delay={0.25}>
                       <>
                         <div>
-                          <p className="text-md text-[#a7a7a7] font-medium">
+                          <p className="text-sm font-medium text-[#a7a7a7] 2xl:text-base">
                             {content?.ContentGenre.map(
                               (genre: any, index: number) => (
                                 <span key={`desktop-genre-${genre.genre.id}`}>
@@ -76,23 +76,23 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                                   {genre.genre.name.charAt(0).toUpperCase() +
                                     genre.genre.name.slice(1)}
                                 </span>
-                              )
+                              ),
                             )}
                           </p>
                           <div className="flex items-center gap-5">
-                            <p className="text-6xl text-white max-w-[1150px]">
+                            <p className="max-w-[1150px] text-5xl text-white 2xl:text-6xl">
                               {content?.title}
                             </p>
                           </div>
                         </div>
-                        <div className="flex gap-7 items-center mt-1">
-                          <p className="text-md text-[#c2c2c2] font-normal">
+                        <div className="mt-1 flex items-center gap-7">
+                          <p className="text-sm font-normal text-[#c2c2c2] 2xl:text-base">
                             {content?.date &&
                               new Date(content.date).getFullYear()}
                           </p>
 
                           {content?.duration && (
-                            <p className="text-base text-[#c2c2c2] font-normal">
+                            <p className="text-sm font-normal text-[#c2c2c2] 2xl:text-base">
                               {content?.duration &&
                                 formatDuration(content.duration)}
                             </p>
@@ -102,16 +102,16 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             <img
                               alt="TMDB"
                               src={TMDBIcon.src}
-                              className="w-6 h-6"
+                              className="h-6 w-6"
                             />
-                            <p className="text-sm text-[#c2c2c2] font-medium">
+                            <p className="text-sm font-normal  text-[#c2c2c2] 2xl:text-base">
                               {content?.rating.toFixed(1)}{" "}
                             </p>
                           </div>
                         </div>
 
-                        <div className="mt-3 mb-10">
-                          <p className="text-lg font-normal text-[#c2c2c2] max-w-[750px] line-clamp-3">
+                        <div className="mb-10 mt-3">
+                          <p className="line-clamp-3 max-w-[650px] font-normal text-[#c2c2c2] 2xl:text-lg">
                             {content.description.length > 0
                               ? content.description
                               : "No description available"}
@@ -121,22 +121,22 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                         <div className="flex gap-6">
                           <Link
                             href={handleGetWatchHref()}
-                            className="flex gap-3 items-center w-max rounded-2xl cursor-pointer transition-colors duration-500"
+                            className="flex w-max cursor-pointer items-center gap-3 rounded-2xl transition-colors duration-500"
                           >
                             <PlayIcon
-                              className="w-[40px] h-[40px] text-white fill-white bg-[#a35fe8] py-2.5 pl-2.5 pr-2 rounded-full"
+                              className="size-[36px] rounded-full bg-[#a35fe8] fill-white py-2.5 pl-2.5 pr-2 text-white 2xl:size-[40px]"
                               strokeWidth={0.8}
                             />
-                            <h1 className="text-2xl text-[#ebebeb]">
+                            <h1 className="text-xl text-[#ebebeb] 2xl:text-2xl">
                               {" "}
                               Watch Now
                             </h1>
                           </Link>
                           <Link
                             href={handleGetNavigateHref()}
-                            className="flex gap-3 items-center justify-center w-max rounded-lg cursor-pointer transition-colors duration-500 bg-[rgba(131,74,189,0.4)] py-1 px-4"
+                            className="flex w-max cursor-pointer items-center justify-center gap-3 rounded-lg bg-[rgba(131,74,189,0.4)] px-4 py-1 transition-colors duration-500"
                           >
-                            <h1 className="text-lg text-[#ebebeb] font-medium">
+                            <h1 className="text-base font-medium text-[#ebebeb] 2xl:text-lg">
                               More Info
                             </h1>
                           </Link>
@@ -151,14 +151,14 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                 {isAboveSmallTablet ? (
                   <div
                     className={cn(
-                      "absolute bottom-[15px] flex flex-col py-10 px-4",
-                      isAboveSemiMediumScreens && "px-10"
+                      "absolute bottom-[15px] flex flex-col px-4 py-10",
+                      isAboveSemiMediumScreens && "px-10",
                     )}
                   >
                     <Reveal delay={0.25}>
                       <>
                         <div>
-                          <p className="text-sm text-[#a7a7a7] font-medium">
+                          <p className="text-sm font-medium text-[#a7a7a7]">
                             {content?.ContentGenre.map(
                               (genre: any, index: number) => (
                                 <span key={`tablet-genre-${genre.genre.id}`}>
@@ -173,7 +173,7 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                                   {genre.genre.name.charAt(0).toUpperCase() +
                                     genre.genre.name.slice(1)}
                                 </span>
-                              )
+                              ),
                             )}
                           </p>
                           <div className="flex items-center gap-5">
@@ -182,14 +182,14 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             </p>
                           </div>
                         </div>
-                        <div className="flex gap-7 items-center mt-1">
-                          <p className="text-sm text-[#c2c2c2] font-normal">
+                        <div className="mt-1 flex items-center gap-7">
+                          <p className="text-sm font-normal text-[#c2c2c2]">
                             {content?.date &&
                               new Date(content.date).getFullYear()}
                           </p>
 
                           {content?.duration && (
-                            <p className="text-sm text-[#c2c2c2] font-normal">
+                            <p className="text-sm font-normal text-[#c2c2c2]">
                               {content?.duration &&
                                 formatDuration(content.duration)}
                             </p>
@@ -199,16 +199,16 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             <img
                               alt="TMDB"
                               src={TMDBIcon.src}
-                              className="w-4 h-4"
+                              className="h-4 w-4"
                             />
-                            <p className="text-sm text-[#c2c2c2] font-medium">
+                            <p className="text-sm font-medium text-[#c2c2c2]">
                               {content?.rating.toFixed(1)}{" "}
                             </p>
                           </div>
                         </div>
 
-                        <div className="mt-3 mb-10">
-                          <p className="text-md font-normal text-[#c2c2c2] max-w-[550px] line-clamp-2">
+                        <div className="mb-10 mt-3">
+                          <p className="text-md line-clamp-2 max-w-[550px] font-normal text-[#c2c2c2]">
                             {content.description.length > 0
                               ? content.description
                               : "No description available"}
@@ -218,10 +218,10 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                         <div className="flex gap-6">
                           <Link
                             href={handleGetWatchHref()}
-                            className="flex gap-3 items-center w-max rounded-2xl cursor-pointer transition-colors duration-500"
+                            className="flex w-max cursor-pointer items-center gap-3 rounded-2xl transition-colors duration-500"
                           >
                             <PlayIcon
-                              className="w-[35px] h-[35px] text-white fill-white bg-[#a35fe8] py-2 pl-2 pr-1.5 rounded-full"
+                              className="h-[35px] w-[35px] rounded-full bg-[#a35fe8] fill-white py-2 pl-2 pr-1.5 text-white"
                               strokeWidth={0.8}
                             />
                             <h1 className="text-lg text-[#ebebeb]">
@@ -231,9 +231,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                           </Link>
                           <Link
                             href={handleGetNavigateHref()}
-                            className="flex gap-3 items-center justify-center w-max rounded-lg cursor-pointer transition-colors duration-500 bg-[rgba(131,74,189,0.4)] py-0.5 px-3"
+                            className="flex w-max cursor-pointer items-center justify-center gap-3 rounded-lg bg-[rgba(131,74,189,0.4)] px-3 py-0.5 transition-colors duration-500"
                           >
-                            <h1 className="text-sm text-[#ebebeb] font-medium">
+                            <h1 className="text-sm font-medium text-[#ebebeb]">
                               More Info
                             </h1>
                           </Link>
@@ -243,11 +243,11 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                   </div>
                 ) : (
                   <>
-                    <div className="absolute bottom-0 bg-black-100 flex flex-col p-4">
+                    <div className="bg-black-100 absolute bottom-0 flex flex-col p-4">
                       <Reveal delay={0.25}>
                         <>
                           <div>
-                            <p className="text-xs text-[#bebebe] font-medium">
+                            <p className="text-xs font-medium text-[#bebebe]">
                               {content?.ContentGenre.map(
                                 (genre: any, index: number) => (
                                   <span key={`mobile-genre-${genre.genre.id}`}>
@@ -263,14 +263,14 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                                     {genre.genre.name.charAt(0).toUpperCase() +
                                       genre.genre.name.slice(1)}
                                   </span>
-                                )
+                                ),
                               )}
                             </p>
                             <div className="flex items-center gap-3">
                               <p
                                 className={`text-3xl text-white ${
                                   content?.title.length > 10 &&
-                                  "text-xl max-w-[305px] truncate"
+                                  "max-w-[305px] truncate text-xl"
                                 }`}
                               >
                                 {content?.title}
@@ -278,13 +278,13 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             </div>
                           </div>
                           <div className="flex gap-5">
-                            <p className="text-xs text-[#c2c2c2] font-normal">
+                            <p className="text-xs font-normal text-[#c2c2c2]">
                               {content?.date &&
                                 new Date(content.date).getFullYear()}
                             </p>
 
                             {content?.duration && (
-                              <p className="text-xs text-[#c2c2c2] font-normal">
+                              <p className="text-xs font-normal text-[#c2c2c2]">
                                 {content?.duration &&
                                   formatDuration(content.duration)}
                               </p>
@@ -294,20 +294,20 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                               <img
                                 alt="TMDB"
                                 src={TMDBIcon.src}
-                                className="w-4 h-4 object-cover"
+                                className="h-4 w-4 object-cover"
                               />
-                              <p className="text-xs text-[#d8d7d7] font-normal">
+                              <p className="text-xs font-normal text-[#d8d7d7]">
                                 {content?.rating.toFixed(1)}{" "}
                               </p>
                             </div>
                           </div>
-                          <div className="flex gap-4 items-center mt-4">
+                          <div className="mt-4 flex items-center gap-4">
                             <Link
                               href={handleGetWatchHref()}
-                              className="flex gap-2.5 items-center w-max h-max rounded-2xl cursor-pointer"
+                              className="flex h-max w-max cursor-pointer items-center gap-2.5 rounded-2xl"
                             >
                               <PlayIcon
-                                className="w-[24px] h-[24px] text-white fill-white bg-[#a35fe8] py-1.5 pl-1.5 pr-1 rounded-full"
+                                className="h-[24px] w-[24px] rounded-full bg-[#a35fe8] fill-white py-1.5 pl-1.5 pr-1 text-white"
                                 strokeWidth={0.8}
                               />
                               <h1 className="text-sm text-[#ebebeb]">
@@ -316,9 +316,9 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             </Link>
                             <Link
                               href={handleGetNavigateHref()}
-                              className="flex gap-3 items-center justify-center h-max w-max rounded-lg cursor-pointer bg-[rgba(131,74,189,0.4)] py-1.5 px-2.5"
+                              className="flex h-max w-max cursor-pointer items-center justify-center gap-3 rounded-lg bg-[rgba(131,74,189,0.4)] px-2.5 py-1.5"
                             >
-                              <h1 className="text-xs text-[#ebebeb] font-medium">
+                              <h1 className="text-xs font-medium text-[#ebebeb]">
                                 More Info
                               </h1>
                             </Link>

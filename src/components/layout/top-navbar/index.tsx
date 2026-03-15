@@ -28,9 +28,8 @@ export default function TopNavbar() {
   const [isTopOfPage, setIsTopOfPage] = useState<boolean>(true);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isSearchResultsModalOpen, setIsSearchResultsModalOpen] = useState<
-    boolean
-  >(false);
+  const [isSearchResultsModalOpen, setIsSearchResultsModalOpen] =
+    useState<boolean>(false);
   const searchContainerRef = useRef<HTMLInputElement>(null);
   const mobileSearchContainerRef = useRef<any>(null);
   const mobileSearchIconRef = useRef<any>(null);
@@ -38,14 +37,12 @@ export default function TopNavbar() {
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  const {
-    data: searchContentData,
-    isLoading: isSearchContentLoading,
-  } = useQuery({
-    queryKey: ["search", debouncedSearchQuery],
-    queryFn: () => handleSearch(debouncedSearchQuery),
-    enabled: debouncedSearchQuery.length > 0,
-  });
+  const { data: searchContentData, isLoading: isSearchContentLoading } =
+    useQuery({
+      queryKey: ["search", debouncedSearchQuery],
+      queryFn: () => handleSearch(debouncedSearchQuery),
+      enabled: debouncedSearchQuery.length > 0,
+    });
 
   // MANAGE SCROLLING
   useEffect(() => {
@@ -87,17 +84,14 @@ export default function TopNavbar() {
       const target = e.target as Node | null;
       if (!target) return;
 
-      const clickedInsideDesktop = !!searchContainerRef.current?.contains(
-        target
-      );
+      const clickedInsideDesktop =
+        !!searchContainerRef.current?.contains(target);
 
-      const clickedInsideMobileIcon = !!mobileSearchIconRef?.current?.contains(
-        target
-      );
+      const clickedInsideMobileIcon =
+        !!mobileSearchIconRef?.current?.contains(target);
 
-      const clickedInsideMobileDropDown = !!mobileSearchContainerRef.current?.contains(
-        target
-      );
+      const clickedInsideMobileDropDown =
+        !!mobileSearchContainerRef.current?.contains(target);
 
       if (
         !clickedInsideDesktop &&
@@ -188,12 +182,12 @@ export default function TopNavbar() {
   return (
     <nav
       className={cn(
-        "bg-[#0F0F0F] fixed top-0 z-30 w-full left-0 right-0 mx-auto transition-colors border-b duration-300 border-transparent",
-        !isTopOfPage && "shadow-lg border-white/5"
+        "fixed left-0 right-0 top-0 z-30 mx-auto w-full border-b border-transparent bg-[#0F0F0F] transition-colors duration-300",
+        !isTopOfPage && "border-white/5 shadow-lg",
       )}
     >
       <div
-        className={`max-w-[1920px] m-auto gap-x-8 py-4 relative ${flexBetween}
+        className={`relative m-auto max-w-[1920px] gap-x-8 py-4 ${flexBetween}
         ${isAboveMediumScreens ? "px-10" : "px-4"}`}
       >
         {/* LEFT SIDE */}
@@ -201,7 +195,7 @@ export default function TopNavbar() {
           <img
             alt="logo"
             src={Logo.src}
-            className="h-5 sm:h-6 w-auto cursor-pointer"
+            className="h-5 w-auto cursor-pointer sm:h-6"
           />
         </Link>
         {isAboveMediumScreens ? (
@@ -209,14 +203,14 @@ export default function TopNavbar() {
             {/* DESKTOP */}
             <div className={`${flexBetween} w-full items-center`}>
               {/* INNER LEFT SIDE */}
-              <div className={`${flexBetween} gap-x-8 text-sm mt-1`}>
+              <div className={`${flexBetween} mt-1 gap-x-8 text-sm`}>
                 <Item name="Home" route="/" />
                 <Item name="Movies" route="movie" />
                 <Item name="TV Shows" route="tv" />
                 <Item name="Anime" route="anime" />
               </div>
               {/* INNER RIGHT SIDE */}
-              <div className={`${flexBetween} gap-6 relative`}>
+              <div className={`${flexBetween} relative gap-6`}>
                 <Search
                   mode="desktop"
                   isSearching={isSearching}
@@ -239,8 +233,8 @@ export default function TopNavbar() {
                     <Link href="/library">
                       <ListVideoIcon
                         className={cn(
-                          "size-8 text-white cursor-pointer ml-[-6.5px] rounded-2xl p-1 transition duration-300 hover:bg-[rgba(255,255,255,0.08)]",
-                          location === "/library" && "text-[#a35fe8]"
+                          "ml-[-6.5px] size-8 cursor-pointer rounded-2xl p-1 text-white transition duration-300 hover:bg-[rgba(255,255,255,0.08)]",
+                          location === "/library" && "text-[#a35fe8]",
                         )}
                         strokeWidth={1.5}
                       />
@@ -248,7 +242,7 @@ export default function TopNavbar() {
 
                     <img
                       src={currentProfile.imgUrl}
-                      className="h-9 w-9 rounded-full object-cover cursor-pointer"
+                      className="h-9 w-9 cursor-pointer rounded-full object-cover"
                       ref={desktopMenuButtonRef}
                       onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
                     />
@@ -256,7 +250,7 @@ export default function TopNavbar() {
                 ) : (
                   <Link
                     href="/signin"
-                    className="text-white px-5 py-1.5 rounded-md w-max mx-auto transition duration-500 p-2 bg-[#6C0386] hover:bg-[#510266]"
+                    className="mx-auto w-max rounded-md bg-[#6C0386] p-2 px-5 py-1.5 text-white transition duration-500 hover:bg-[#510266]"
                   >
                     Sign In
                   </Link>
@@ -265,7 +259,7 @@ export default function TopNavbar() {
             </div>
           </>
         ) : (
-          <div className="flex gap-6 items-center">
+          <div className="flex items-center gap-6">
             {/* RIGHT SIDE MOBILE */}
             <Search
               mode="mobile"
@@ -288,21 +282,21 @@ export default function TopNavbar() {
                 <Link href="/library">
                   <ListVideoIcon
                     className={cn(
-                      "w-5 h-5 text-white cursor-pointer",
-                      location === "/library" && "text-[#a35fe8]"
+                      "h-5 w-5 cursor-pointer text-white",
+                      location === "/library" && "text-[#a35fe8]",
                     )}
                     strokeWidth={1}
                   />
                 </Link>
                 <img
                   src={currentProfile.imgUrl}
-                  className="rounded-full object-cover h-[26px] w-[26px] cursor-pointer"
+                  className="h-[26px] w-[26px] cursor-pointer rounded-full object-cover"
                   onClick={() => setIsMobileMenuOpen(true)}
                 />
               </>
             ) : (
               <UserCircleIcon
-                className="text-white h-[26px] w-auto stroke-current cursor-pointer"
+                className="h-[26px] w-auto cursor-pointer stroke-current text-white"
                 strokeWidth={0.8}
                 onClick={() => setIsMobileMenuOpen(true)}
               />

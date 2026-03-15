@@ -9,7 +9,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "dev": "next dev",
+    "dev": "next dev -host",
     "postinstall": "prisma generate",
     "lint": "next lint",
     "start": "next start"
@@ -40,7 +40,7 @@
     "jsonwebtoken": "^9.0.2",
     "lucide": "^0.439.0",
     "lucide-react": "^0.439.0",
-    "next": "^14.2.1",
+    "next": "14.2.35",
     "nodemailer": "^7.0.5",
     "nuqs": "^2.4.3",
     "puppeteer-core": "^10.1.0",

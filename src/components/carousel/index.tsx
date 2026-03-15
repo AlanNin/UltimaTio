@@ -45,11 +45,8 @@ const CustomDot: React.FC<DotProps> = ({ onClick, active }) => {
             "h-1.5 rounded-full transition-all",
             active
               ? "w-10 bg-[#a35fe8]"
-              : "w-4 bg-white/55 hover:w-6 hover:bg-white"
+              : "w-4 bg-white/55 hover:w-6 hover:bg-white",
           )}
-          // style={{
-          //   boxShadow: active ? "0 0 12px rgba(163,95,232,0.6)" : "none",
-          // }}
         />
       </button>
     </li>
@@ -57,11 +54,11 @@ const CustomDot: React.FC<DotProps> = ({ onClick, active }) => {
 };
 
 const HomeCarousel: React.FC<Props> = ({ content }) => {
-  const isAboveMediumScreens = useMediaQuery("(min-width: 1280px)");
+  const isAboveMediumScreens = useMediaQuery("(min-width: 1200px)");
   const [slideIndex, setSlideIndex] = useState<number>(1);
 
   return (
-    <section id="carousel" className="w-full h-full flex flex-col z-0">
+    <section id="carousel" className="z-0 flex h-full w-full flex-col">
       <Carousel
         responsive={responsive}
         draggable={true}
