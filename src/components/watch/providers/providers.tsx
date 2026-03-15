@@ -20,12 +20,12 @@ const Providers: React.FC<Props> = ({
 
   return (
     <div
-      className={`w-full flex items-center gap-4 py-4 ${
+      className={`flex w-full items-center gap-4 py-4 ${
         isAboveMediumScreens ? "gap-6" : "gap-4 px-2"
       }`}
     >
       <p
-        className={`bg-[rgba(0,0,0,0.5)] p-4 font-light text-xs text-center rounded-md ${
+        className={`rounded-md bg-[rgba(0,0,0,0.5)] p-4 text-center text-xs font-light ${
           isAboveMediumScreens ? "flex-[35%]" : "flex-[55%]"
         }`}
       >
@@ -43,7 +43,7 @@ const Providers: React.FC<Props> = ({
       </p>
 
       <div
-        className={`flex overflow-x-auto gap-3 pb-3 ${
+        className={`flex gap-3 overflow-x-auto pb-3 ${
           isAboveMediumScreens ? "basis-[65%]" : "basis-[45%]"
         }`}
       >

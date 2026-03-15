@@ -2,9 +2,11 @@
 import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import useMediaQuery from "~/hooks/use-media-query";
+import { Provider } from "../page";
 
 type Props = {
   src: string;
+  provider: Provider;
   handleCurrentTimeUpdate: (time: number) => void;
   handleDurationUpdate: (duration: number) => void;
 };
@@ -25,6 +27,7 @@ type PlayerPayload = { type: "PLAYER_EVENT"; data: PlayerEventData };
 
 const ExternalPlayer: React.FC<Props> = ({
   src,
+  provider,
   handleCurrentTimeUpdate,
   handleDurationUpdate,
 }) => {
@@ -35,6 +38,18 @@ const ExternalPlayer: React.FC<Props> = ({
   const lastDurationRef = useRef(0);
   const lastSentAtRef = useRef(0);
   const MIN_INTERVAL_MS = 500;
+
+  // Force autoplay by injecting the param into the src URL
+  const autoplaySrc = (() => {
+    try {
+      const url = new URL(src);
+      url.searchParams.set("autoplay", "1");
+      url.searchParams.set("auto_play", "1");
+      return url.toString();
+    } catch {
+      return src;
+    }
+  })();
 
   useEffect(() => {
     if (!currentProfile) return;
@@ -62,6 +77,52 @@ const ExternalPlayer: React.FC<Props> = ({
     };
 
     const onMessage = (event: MessageEvent) => {
+      // ── VidEasy: sends MEDIA_DATA with a nested JSON string payload ─────
+      if (provider === "VidEasy") {
+        if (typeof event.data !== "string") return;
+
+        let parsed: Record<string, any>;
+        try {
+          parsed = JSON.parse(event.data);
+        } catch {
+          return;
+        }
+
+        if (parsed.type !== "MEDIA_DATA") return;
+
+        let mediaStore: Record<string, any>;
+        try {
+          mediaStore = JSON.parse(parsed.data);
+        } catch {
+          return;
+        }
+
+        // Match entry by tmdbId found in the src URL (e.g. "movie-1265609" or "tv-95479")
+        const activeKey = Object.keys(mediaStore).find((key) => {
+          const id = key.split("-")[1];
+          return id !== undefined && src.includes(id);
+        });
+        if (!activeKey) return;
+        const active = mediaStore[activeKey];
+
+        const watched = Number(active?.progress?.watched) || 0;
+        const duration =
+          Number(active?.progress?.duration) || lastDurationRef.current;
+
+        console.log(
+          "[VidEasy] active:",
+          active?.title,
+          "| watched:",
+          watched,
+          "| duration:",
+          duration,
+        );
+
+        push(watched, duration, true);
+        return;
+      }
+
+      // ── All other providers (VidLink, etc.) ─────────────────────────────
       const allowed =
         event.origin === "https://vidlink.pro" ||
         (srcOrigin && event.origin === srcOrigin);
@@ -78,7 +139,7 @@ const ExternalPlayer: React.FC<Props> = ({
       push(
         Number(time) || 0,
         Number(duration) || lastDurationRef.current,
-        force
+        force,
       );
     };
 
@@ -99,7 +160,13 @@ const ExternalPlayer: React.FC<Props> = ({
       document.removeEventListener("visibilitychange", flush);
       window.removeEventListener("beforeunload", flush);
     };
-  }, [src, currentProfile, handleCurrentTimeUpdate, handleDurationUpdate]);
+  }, [
+    src,
+    provider,
+    currentProfile,
+    handleCurrentTimeUpdate,
+    handleDurationUpdate,
+  ]);
 
   return (
     <div
@@ -122,18 +189,18 @@ const ExternalPlayer: React.FC<Props> = ({
       >
         <iframe
           ref={iframeRef}
-          src={src}
+          src={autoplaySrc}
           width="100%"
           height="100%"
           frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           className={isAboveMediumScreens ? "rounded-md" : undefined}
           onLoad={() => {
             try {
               iframeRef.current?.contentWindow?.postMessage(
                 { type: "PLAYER_COMMAND", command: "play" },
-                "*"
+                "*",
               );
             } catch {}
           }}

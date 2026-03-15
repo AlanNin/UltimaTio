@@ -15,13 +15,16 @@ import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { saveProfileContentProgress } from "~/server/queries/contentProfile.queries";
 import { getQueryClient } from "~/hooks/get-query-client";
+import Providers from "~/components/watch/providers/providers";
+import { useQueryState } from "nuqs";
+import { env } from "~/env";
 
-export type Provider = "VidLink" | "VidSrcPro";
+export type Provider = "VidEasy" | "VidLink" | "VidSrcPro";
 
 export default function WatchScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
   const router = useRouter();
-  const providers = ["VidLink", "VidSrcPro"] as Provider[];
+  const providers = ["VidEasy", "VidLink", "VidSrcPro"] as Provider[];
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const category = searchParams.get("category");
@@ -32,6 +35,12 @@ export default function WatchScreen() {
   const contentDurationRef = useRef<number | null>();
   const { currentProfile } = useSelector((state: any) => state.profile);
   const queryClient = getQueryClient();
+  const showProviders =
+    env.NEXT_PUBLIC_SHOW_PROVIDERS === "true" ? true : false;
+
+  const [currentProvider, setCurrentProvider] = useQueryState("provider", {
+    defaultValue: providers[0] as string,
+  });
 
   const {
     data: contentData,
@@ -66,9 +75,30 @@ export default function WatchScreen() {
       category,
       seasonParam,
       episodeParam,
-      !!currentProfile
+      !!currentProfile,
     );
   }, [category, seasonParam, episodeParam, !!contentData?.profileContent]);
+
+  const beaconProgress = useCallback(() => {
+    if (!currentProfile) return;
+    const t = Number(currentTimeRef.current) || 0;
+    const d = Number(contentDurationRef.current) || 0;
+    if (t <= 0) return;
+
+    const payload = JSON.stringify({
+      tmdbid: Number(tmdbidParam) || 0,
+      category: String(category),
+      watched: t,
+      duration: d,
+      season: Number(seasonParam) || 0,
+      episode: Number(episodeParam) || 0,
+    });
+
+    navigator.sendBeacon(
+      "/api/save-progress",
+      new Blob([payload], { type: "application/json" }),
+    );
+  }, [currentProfile, tmdbidParam, category, seasonParam, episodeParam]);
 
   const flushProgress = useCallback(() => {
     if (!currentProfile) return;
@@ -82,7 +112,7 @@ export default function WatchScreen() {
       t,
       d,
       Number(seasonParam) || 0,
-      Number(episodeParam) || 0
+      Number(episodeParam) || 0,
     );
 
     refetchContent();
@@ -94,6 +124,7 @@ export default function WatchScreen() {
     });
   }, [
     currentProfile,
+    currentProvider,
     tmdbidParam,
     category,
     seasonParam,
@@ -102,9 +133,9 @@ export default function WatchScreen() {
   ]);
 
   useEffect(() => {
-    const onHide = () => flushProgress();
+    const onHide = () => beaconProgress();
     const onVisibility = () => {
-      if (document.visibilityState === "hidden") flushProgress();
+      if (document.visibilityState === "hidden") beaconProgress();
     };
 
     window.addEventListener("beforeunload", onHide);
@@ -116,7 +147,7 @@ export default function WatchScreen() {
       window.removeEventListener("pagehide", onHide);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [flushProgress]);
+  }, [beaconProgress]);
 
   useEffect(() => {
     return () => {
@@ -143,16 +174,17 @@ export default function WatchScreen() {
   return (
     <section id="home">
       {isContentLoading ? (
-        <div className={`flex w-full h-screen items-center justify-center`}>
+        <div className={`flex h-screen w-full items-center justify-center`}>
           <Loading type="bars" />
         </div>
       ) : (
         <div
-          className={`w-full h-full min-h-screen relative max-w-[854px] m-auto flex flex-col ${
+          className={`relative m-auto flex h-full min-h-screen w-full max-w-[854px] flex-col ${
             isAboveMediumScreens ? "pb-10" : "pb-16"
           }`}
         >
           <TopNav />
+
           <Player
             title={contentData.title}
             tmdbid={Number(tmdbidParam)}
@@ -160,32 +192,39 @@ export default function WatchScreen() {
             season={Number(seasonParam)}
             episode={Number(episodeParam)}
             year={String(new Date(contentData.date).getFullYear())}
-            currentProvider={providers[0]}
+            currentProvider={currentProvider}
             currentTimeRef={currentTimeRef}
             contentDurationRef={contentDurationRef}
             startAt={startAt}
           />
 
-          <div className="mt-4 w-full">
-            {(category === "tv" || category === "anime") && (
-              <div className="w-full flex flex-col gap-4">
-                <Episodes
-                  content={contentData}
-                  tmdbid={Number(tmdbidParam)!}
-                  category={category}
-                  currentSeason={Number(seasonParam)!}
-                  currentEpisode={Number(episodeParam)!}
-                  profileContent={contentData.profileContent}
-                />
-                <Seasons
-                  content={contentData}
-                  tmdbid={Number(tmdbidParam)!}
-                  category={category}
-                  currentSeason={Number(seasonParam)!}
-                />
-              </div>
-            )}
-          </div>
+          {showProviders && (
+            <Providers
+              currentProvider={currentProvider}
+              providers={providers}
+              saveProfileProgress={flushProgress}
+              setCurrentProvider={setCurrentProvider}
+            />
+          )}
+
+          {(category === "tv" || category === "anime") && (
+            <div className="mb-6 mt-2 flex w-full flex-col gap-4">
+              <Episodes
+                content={contentData}
+                tmdbid={Number(tmdbidParam)!}
+                category={category}
+                currentSeason={Number(seasonParam)!}
+                currentEpisode={Number(episodeParam)!}
+                profileContent={contentData.profileContent}
+              />
+              <Seasons
+                content={contentData}
+                tmdbid={Number(tmdbidParam)!}
+                category={category}
+                currentSeason={Number(seasonParam)!}
+              />
+            </div>
+          )}
           <Info
             content={contentData!}
             season={Number(seasonParam)}
@@ -202,7 +241,7 @@ function computeStartAt(
   category: string | null,
   seasonParam: string | null,
   episodeParam: string | null,
-  currentProfileExists: boolean
+  currentProfileExists: boolean,
 ) {
   const isTV = category === "tv" || category === "anime";
   const seasonNum = Number(seasonParam);
@@ -244,7 +283,7 @@ function computeStartAt(
   if (isTV) {
     const pc = contentData.profileContent.find(
       (p: any) =>
-        Number(p.season) === seasonNum && Number(p.episode) === episodeNum
+        Number(p.season) === seasonNum && Number(p.episode) === episodeNum,
     );
     if (pc) {
       start = Number(pc.watchProgress) || 0;
@@ -253,7 +292,7 @@ function computeStartAt(
   } else {
     const pc =
       contentData.profileContent.find(
-        (p: any) => p.season == null && p.episode == null
+        (p: any) => p.season == null && p.episode == null,
       ) || contentData.profileContent[0];
     if (pc) {
       start = Number(pc.watchProgress) || 0;

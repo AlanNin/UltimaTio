@@ -19,7 +19,7 @@ type LibraryList = {
 
 export default function LibraryScreen() {
   const [currentWatchList, setCurrentWatchList] = useState<string>(
-    WATCH_LISTS[0]!
+    WATCH_LISTS[0]!,
   );
 
   const { data: libraryData, isLoading: isLibraryLoading } = useQuery({
@@ -31,9 +31,9 @@ export default function LibraryScreen() {
   const currentLib: LibraryList | undefined = useMemo(
     () =>
       (libraryData as LibraryList[] | undefined)?.find(
-        (lib) => lib.name === currentWatchList
+        (lib) => lib.name === currentWatchList,
       ),
-    [libraryData, currentWatchList]
+    [libraryData, currentWatchList],
   );
 
   // ✅ Normalize `content` to an array
@@ -44,42 +44,42 @@ export default function LibraryScreen() {
   }, [currentLib]);
 
   return (
-    <main className="w-full h-full min-h-screen pt-[60px] pb-10 md-screen:pt-[69px] md-screen:pb-16 flex">
+    <main className="flex h-full min-h-screen w-full pb-10 pt-[60px] md-screen:pb-16 md-screen:pt-[69px]">
       {isLibraryLoading ? (
-        <div className="flex w-full h-screen items-center justify-center my-[-76px] md-screen:my-[-56px]">
+        <div className="my-[-76px] flex h-screen w-full items-center justify-center md-screen:my-[-56px]">
           <Loading type="bars" />
         </div>
       ) : (
-        <div className="max-w-[1920px] mx-auto w-full h-full px-4 mb-screen:px-8 flex flex-col gap-y-4">
-          <section className="flex gap-x-6 my-4 overflow-x-auto max-sm:pb-2">
+        <div className="mx-auto flex h-full w-full max-w-[1920px] flex-col gap-y-4 px-4 mb-screen:px-8">
+          <section className="my-4 flex gap-x-6 overflow-x-auto max-sm:pb-2">
             {WATCH_LISTS.map((watchList) => {
               const isActive = currentWatchList === watchList;
               return (
                 <button
                   key={watchList}
                   className={cn(
-                    "flex gap-x-2 items-center py-2 px-4 rounded-md transition-colors duration-300",
+                    "flex items-center gap-x-2 rounded-md px-4 py-2 transition-colors duration-300",
                     isActive
                       ? "bg-[rgba(124,38,212,1)]"
-                      : "hover:bg-[rgba(124,38,212,0.3)]"
+                      : "hover:bg-[rgba(124,38,212,0.3)]",
                   )}
                   onClick={() => setCurrentWatchList(watchList)}
                 >
-                  <span className="text-sm whitespace-nowrap">{watchList}</span>
+                  <span className="whitespace-nowrap text-sm">{watchList}</span>
                 </button>
               );
             })}
           </section>
 
           {currentContent.length === 0 ? (
-            <div className="mt-32 flex flex-col gap-y-6 items-center justify-center">
+            <div className="mt-32 flex flex-col items-center justify-center gap-y-6">
               <p className="font-normal italic tracking-wide">
                 This watch list is empty. Try adding some content!
               </p>
               <Clapperboard className="size-8" strokeWidth={1} />
             </div>
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-4 md:grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
               {currentContent.map((content, i) => (
                 <DefaultContentCard
                   key={

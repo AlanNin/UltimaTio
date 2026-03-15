@@ -7,7 +7,7 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
 
   const img = (
     p: string | null | undefined,
-    size: "original" | "w780" = "original"
+    size: "original" | "w780" = "original",
   ) => (p ? `https://media.themoviedb.org/t/p/${size}${p}` : null);
 
   const getMovieRuntimeSeconds = (movie: any) => {
@@ -28,10 +28,10 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
       typeof fromArray === "number"
         ? fromArray
         : typeof lastEp === "number"
-        ? lastEp
-        : typeof nextEp === "number"
-        ? nextEp
-        : null;
+          ? lastEp
+          : typeof nextEp === "number"
+            ? nextEp
+            : null;
     return typeof minutes === "number" ? minutes * 60 : null;
   };
 
@@ -58,7 +58,7 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
                   api_key: process.env.TMDB_APIKEY,
                   append_to_response: "credits",
                 },
-              }
+              },
             );
 
             const data = fullDataResponse.data;
@@ -123,7 +123,7 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
                   api_key: process.env.TMDB_APIKEY,
                   append_to_response: "credits",
                 },
-              }
+              },
             );
 
             const data = fullDataResponse.data;
@@ -190,7 +190,7 @@ async function searchTMDBFeed(url: string): Promise<any[]> {
           console.error("Error fetching full TMDB data:", content.id, error);
           return null;
         }
-      })
+      }),
     );
 
     return responseData.filter((data: any) => data !== null);
@@ -325,7 +325,7 @@ export async function handleSearch(query: string): Promise<any> {
           console.error("Error fetching full TMDB data:", content.id, error);
           return null;
         }
-      })
+      }),
     );
 
     // Filter out null entries

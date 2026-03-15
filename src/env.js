@@ -31,6 +31,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string(),
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string(),
     NEXT_PUBLIC_FIREBASE_APP_ID: z.string(),
+    NEXT_PUBLIC_SHOW_PROVIDERS: z.string(),
   },
 
   /**
@@ -55,6 +56,7 @@ export const env = createEnv({
     NODEMAILER_EMAIL_USER: process.env.NODEMAILER_EMAIL_USER,
     NODEMAILER_EMAIL_PASSWORD: process.env.NODEMAILER_EMAIL_PASSWORD,
     APP_ORIGIN: process.env.APP_ORIGIN,
+    NEXT_PUBLIC_SHOW_PROVIDERS: process.env.NEXT_PUBLIC_SHOW_PROVIDERS,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

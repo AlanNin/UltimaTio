@@ -19,11 +19,11 @@ const Seasons: React.FC<Props> = ({
   const isAboveMediumScreens = useMediaQuery("(min-width: 869px)");
   return (
     <div
-      className={`w-full flex flex-col gap-3 mb-8 ${
+      className={`flex w-full flex-col gap-3 ${
         !isAboveMediumScreens && "px-4"
       }`}
     >
-      <h1 className="font-light text-sm text-[#adadad]">More Seasons</h1>
+      <h1 className="text-sm font-light text-[#adadad]">More Seasons</h1>
       <div
         className={`flex gap-4 ${
           isAboveMediumScreens ? "flex-wrap" : "overflow-x-auto pb-4"

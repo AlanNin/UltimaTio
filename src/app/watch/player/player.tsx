@@ -40,10 +40,10 @@ const Player: React.FC<Props> = ({
 
   return (
     <div
-      className={`${
+      className={`mb-2 ${
         isAboveMediumScreens
-          ? "w-[854px] h-[480px] rounded-md"
-          : "w-full h-auto"
+          ? "h-[480px] w-[854px] rounded-md"
+          : "h-auto w-full"
       }`}
       style={{
         background:
@@ -57,8 +57,9 @@ const Player: React.FC<Props> = ({
           season,
           episode,
           currentProvider,
-          startAt
+          startAt,
         )}
+        provider={currentProvider}
         handleCurrentTimeUpdate={handleCurrentTimeUpdate}
         handleDurationUpdate={handleDurationUpdate}
       />
@@ -74,12 +75,15 @@ const determineSrc = (
   season: any,
   episode: any,
   provider: Provider,
-  startAt: number
+  startAt: number,
 ) => {
   let src = "";
 
   switch (category) {
     case "movie":
+      if (provider === "VidEasy") {
+        src = `https://player.videasy.net/movie/${tmdbid}?color=eefdec&overlay=true&progress=${startAt}`;
+      }
       if (provider === "VidLink") {
         src = `https://vidlink.pro/movie/${tmdbid}?startAt=${startAt}&primaryColor=a35fe8&secondaryColor=a35fe8&iconColor=eefdec&icons=default&player=jw&title=true&poster=true&autoplay=false&nextbutton=false`;
       }
@@ -88,6 +92,9 @@ const determineSrc = (
       }
       break;
     default:
+      if (provider === "VidEasy") {
+        src = `https://player.videasy.net/tv/${tmdbid}/${season}/${episode}?overlay=true&progress=${startAt}&color=eefdec&nextEpisode=false&episodeSelector=false`;
+      }
       if (provider === "VidLink") {
         src = `https://vidlink.pro/tv/${tmdbid}/${season}/${episode}?startAt=${startAt}&primaryColor=a35fe8&secondaryColor=a35fe8&iconColor=eefdec&icons=default&player=jw&title=true&poster=true&autoplay=false&nextbutton=false`;
       }
