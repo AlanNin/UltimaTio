@@ -9,16 +9,17 @@ export default function MovieScreen() {
     queryKey: ["movie-feed"],
     queryFn: () => getFeedMovie(),
     staleTime: 1000 * 60 * 15,
+    refetchOnWindowFocus: false,
   });
 
   return (
     <section id="home">
       {isFeedLoading ? (
-        <div className="flex w-full h-screen items-center justify-center my-[-44px] md-screen:my-[-56px]">
+        <div className="my-[-44px] flex h-screen w-full items-center justify-center md-screen:my-[-56px]">
           <Loading type="bars" />
         </div>
       ) : (
-        <div className="w-full h-full min-h-screen relative max-w-[1920px] m-auto pt-[60px] pb-10 md-screen:pt-[69px] md-screen:pb-16">
+        <div className="relative m-auto h-full min-h-screen w-full max-w-[1920px] pb-10 pt-[60px] md-screen:pb-16 md-screen:pt-[69px]">
           <div className="pt-6 md-screen:pt-8">
             {feedData.trendingMovies && feedData.trendingMovies.length > 0 && (
               <Section text="Trending" content={feedData.trendingMovies} />

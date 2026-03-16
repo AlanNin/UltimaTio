@@ -7,6 +7,8 @@ import SliderCard from "./item";
 import { useState } from "react";
 import { hideResumeWatching } from "~/server/queries/contentProfile.queries";
 import { useMutation } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { getQueryClient } from "~/hooks/get-query-client";
 
 type Props = {
   content: any;
@@ -20,9 +22,9 @@ const LeftArrow = ({ onClick }: { onClick?: () => void }) => {
       type="button"
       onClick={onClick}
       aria-label="Previous"
-      className={`absolute cursor-pointer left-0 bottom-0 top-0 ${
+      className={`absolute bottom-0 left-0 top-0 cursor-pointer ${
         isAboveTabletScreens ? "p-2.5" : "p-0.5"
-      } flex justify-center items-center bg-[rgba(219,219,219,0.08)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
+      } flex items-center justify-center bg-[rgba(219,219,219,0.08)] transition-colors duration-500 hover:bg-[rgba(65,64,64,0.35)]`}
     >
       <ChevronLeftIcon
         className={`text-white ${isAboveTabletScreens ? "h-6 w-6" : "h-5 w-5"}`}
@@ -39,9 +41,9 @@ const RightArrow = ({ onClick }: { onClick?: () => void }) => {
       type="button"
       onClick={onClick}
       aria-label="Next"
-      className={`absolute cursor-pointer right-0 bottom-0 top-0 ${
+      className={`absolute bottom-0 right-0 top-0 cursor-pointer ${
         isAboveTabletScreens ? "p-2.5" : "p-0.5"
-      } flex justify-center items-center bg-[rgba(219,219,219,0.08)] hover:bg-[rgba(65,64,64,0.35)] transition-colors duration-500`}
+      } flex items-center justify-center bg-[rgba(219,219,219,0.08)] transition-colors duration-500 hover:bg-[rgba(65,64,64,0.35)]`}
     >
       <ChevronRightIcon
         className={`text-white ${isAboveTabletScreens ? "h-6 w-6" : "h-5 w-5"}`}
@@ -51,22 +53,26 @@ const RightArrow = ({ onClick }: { onClick?: () => void }) => {
   );
 };
 
-const Slider: React.FC<Props> = ({ content: initialContent, watchHistory }) => {
-  const [content, setContent] = useState(initialContent);
+const Slider: React.FC<Props> = ({ content, watchHistory }) => {
+  const { currentProfile } = useSelector((state: any) => state.profile);
+  const queryClient = getQueryClient();
 
   const { mutate: hideResumeWatchingMutation } = useMutation({
     mutationFn: ({ id }: { id: string }) => hideResumeWatching(id),
     onSuccess: (data, variables) => {
       if (data.success === true) {
-        setContent((prevContent: any) =>
-          prevContent.filter((item: any) => item.id !== variables.id)
-        );
+        queryClient.invalidateQueries({
+          queryKey: [
+            "watch-history",
+            currentProfile ? currentProfile.id : undefined,
+          ],
+        });
       }
     },
   });
 
   const filteredContent = content.filter(
-    (item: any) => !item.posterUrl.includes("w780null")
+    (item: any) => !item.posterUrl.includes("w780null"),
   );
 
   const responsive = {
@@ -101,7 +107,7 @@ const Slider: React.FC<Props> = ({ content: initialContent, watchHistory }) => {
   };
 
   return (
-    <section id="carousel" className="w-full h-full flex flex-col z-0">
+    <section id="carousel" className="z-0 flex h-full w-full flex-col">
       <Carousel
         responsive={responsive}
         draggable={true}

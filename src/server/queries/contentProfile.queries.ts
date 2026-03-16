@@ -10,7 +10,7 @@ export async function saveProfileContentProgress(
   progress: number,
   duration: number,
   season?: number,
-  episode?: number
+  episode?: number,
 ): Promise<any | null> {
   try {
     const profile_id = await getCurrentProfile();
@@ -92,7 +92,7 @@ export async function getProfileContentProgress(
   tmdb_id: number,
   category: string,
   season?: number,
-  episode?: number
+  episode?: number,
 ): Promise<any | null> {
   try {
     const profile_id = await getCurrentProfile();
@@ -189,7 +189,7 @@ export async function getProfileHistory(): Promise<any[] | null> {
         try {
           const content = await fetchTMDBContent(
             item.content.tmdb_id.toString(),
-            item.content.category
+            item.content.category,
           );
           if (!content) {
             return null; //
@@ -217,11 +217,11 @@ export async function getProfileHistory(): Promise<any[] | null> {
           console.error(
             "Error fetching TMDB content:",
             item.content.tmdb_id,
-            error
+            error,
           );
           return null;
         }
-      })
+      }),
     );
 
     return history.filter((item) => item !== null);
@@ -232,24 +232,20 @@ export async function getProfileHistory(): Promise<any[] | null> {
 
 // HIDE RESUME WATCHING
 export async function hideResumeWatching(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; message: string }> {
   try {
     const profile_id = await getCurrentProfile();
     const user_id = await getUserFromAuth();
 
     const profile = await prisma.profile.findUnique({
-      where: {
-        id: profile_id,
-      },
+      where: { id: profile_id },
     });
 
     if (!profile) {
-      return {
-        success: false,
-        message: `Profile not found: ${profile_id}`,
-      };
+      return { success: false, message: `Profile not found: ${profile_id}` };
     }
+
     if (profile.user_id !== user_id) {
       return {
         success: false,
@@ -257,23 +253,33 @@ export async function hideResumeWatching(
       };
     }
 
-    const updateResumeState = await prisma.profileContent.update({
+    const record = await prisma.profileContent.findUnique({
+      where: { id },
+      select: { content_id: true },
+    });
+
+    if (!record) {
+      return { success: false, message: `Record not found: ${id}` };
+    }
+
+    const { count } = await prisma.profileContent.updateMany({
       where: {
-        id,
+        content_id: record.content_id,
+        profile_id,
       },
       data: {
         showResume: false,
       },
     });
 
-    if (!updateResumeState) {
+    if (count === 0) {
       return {
         success: false,
         message: `Failed to update resume state: ${id}`,
       };
-    } else {
-      return { success: true, message: "Resume watching hidden" };
     }
+
+    return { success: true, message: "Resume watching hidden" };
   } catch (error) {
     return {
       success: false,
@@ -350,7 +356,7 @@ export async function getProfileActivity(): Promise<any | null> {
 export async function handleLikeOrDislike(
   tmdb_id: number,
   category: string,
-  likeStatus: number
+  likeStatus: number,
 ): Promise<{ success: boolean; message: string; likeStatus?: number }> {
   try {
     const profile_id = await getCurrentProfile();
@@ -423,7 +429,7 @@ export async function handleLikeOrDislike(
 // Fetch TMDB CONTENT
 async function fetchTMDBContent(
   tmdb_id: string,
-  category: string
+  category: string,
 ): Promise<any | null> {
   const baseUrl = "https://api.themoviedb.org/3/";
   try {
@@ -453,7 +459,7 @@ async function fetchTMDBContent(
         : null,
       title: response.data.title || response.data.name,
       date: new Date(
-        response.data.release_date || response.data.first_air_date
+        response.data.release_date || response.data.first_air_date,
       ),
       rating: Math.round(response.data.vote_average * 10) / 10,
       description: response.data.overview,

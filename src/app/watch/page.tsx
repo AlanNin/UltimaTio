@@ -79,6 +79,8 @@ export default function WatchScreen() {
     );
   }, [category, seasonParam, episodeParam, !!contentData?.profileContent]);
 
+  // Beacon-safe save: used on beforeunload/pagehide so the browser
+  // does not cancel the request mid-flight during a reload.
   const beaconProgress = useCallback(() => {
     if (!currentProfile) return;
     const t = Number(currentTimeRef.current) || 0;
@@ -94,6 +96,7 @@ export default function WatchScreen() {
       episode: Number(episodeParam) || 0,
     });
 
+    // sendBeacon is guaranteed to complete even during page unload
     navigator.sendBeacon(
       "/api/save-progress",
       new Blob([payload], { type: "application/json" }),
@@ -117,7 +120,10 @@ export default function WatchScreen() {
 
     refetchContent();
     queryClient.invalidateQueries({
-      queryKey: ["watch-history", currentProfile?.id],
+      queryKey: [
+        "watch-history",
+        currentProfile ? currentProfile.id : undefined,
+      ],
     });
     queryClient.invalidateQueries({
       queryKey: ["content", tmdbidParam, currentProfile?.id],

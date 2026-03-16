@@ -17,6 +17,7 @@ export default function HomeScreen() {
     queryKey: ["home-feed"],
     queryFn: () => getHomeFeed(),
     staleTime: 1000 * 60 * 15,
+    refetchOnWindowFocus: false,
   });
 
   const {
@@ -34,17 +35,17 @@ export default function HomeScreen() {
     <section id="home">
       {isLoading ? (
         <div
-          className={`flex w-full h-screen items-center justify-center ${
+          className={`flex h-screen w-full items-center justify-center ${
             isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
           } `}
         >
           <Loading type="bars" />
         </div>
       ) : (
-        <div className="w-full h-full min-h-screen relative pt-[60px] pb-10 md-screen:pt-[69px] md-screen:pb-16">
+        <div className="relative h-full min-h-screen w-full pb-10 pt-[60px] md-screen:pb-16 md-screen:pt-[69px]">
           <HomeCarousel content={feedData.trending} />
           <div
-            className={`max-w-[1920px] m-auto ${
+            className={`m-auto max-w-[1920px] ${
               isAboveMediumScreens ? "pt-10" : "pt-6"
             }`}
           >
