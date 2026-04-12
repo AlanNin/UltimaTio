@@ -123,12 +123,13 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             href={handleGetWatchHref()}
                             className="flex w-max cursor-pointer items-center gap-3 rounded-2xl transition-colors duration-500"
                           >
-                            <PlayIcon
-                              className="size-[36px] rounded-full bg-[#a35fe8] fill-white py-2.5 pl-2.5 pr-2 text-white 2xl:size-[40px]"
-                              strokeWidth={0.8}
-                            />
+                            <div className="rounded-full bg-[#a35fe8] py-2 pl-2 pr-1.5">
+                              <PlayIcon
+                                className="size-4 shrink-0  fill-white  text-white 2xl:size-6"
+                                strokeWidth={0.8}
+                              />
+                            </div>
                             <h1 className="text-xl text-[#ebebeb] 2xl:text-2xl">
-                              {" "}
                               Watch Now
                             </h1>
                           </Link>
@@ -220,12 +221,14 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                             href={handleGetWatchHref()}
                             className="flex w-max cursor-pointer items-center gap-3 rounded-2xl transition-colors duration-500"
                           >
-                            <PlayIcon
-                              className="h-[35px] w-[35px] rounded-full bg-[#a35fe8] fill-white py-2 pl-2 pr-1.5 text-white"
-                              strokeWidth={0.8}
-                            />
+                            <div className="rounded-full bg-[#a35fe8] py-2 pl-2 pr-1.5">
+                              <PlayIcon
+                                className="size-4 shrink-0  fill-white  text-white"
+                                strokeWidth={0.8}
+                              />
+                            </div>
+
                             <h1 className="text-lg text-[#ebebeb]">
-                              {" "}
                               Watch Now
                             </h1>
                           </Link>
@@ -306,10 +309,12 @@ const CarouselCard: React.FC<Props> = ({ content, isCurrent }) => {
                               href={handleGetWatchHref()}
                               className="flex h-max w-max cursor-pointer items-center gap-2.5 rounded-2xl"
                             >
-                              <PlayIcon
-                                className="h-[24px] w-[24px] rounded-full bg-[#a35fe8] fill-white py-1.5 pl-1.5 pr-1 text-white"
-                                strokeWidth={0.8}
-                              />
+                              <div className="rounded-full bg-[#a35fe8] py-1.5 pl-1.5 pr-1">
+                                <PlayIcon
+                                  className="size-3 shrink-0  fill-white  text-white"
+                                  strokeWidth={0.8}
+                                />
+                              </div>
                               <h1 className="text-sm text-[#ebebeb]">
                                 Watch Now
                               </h1>
