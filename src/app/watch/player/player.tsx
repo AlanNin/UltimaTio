@@ -2,15 +2,17 @@
 import useMediaQuery from "~/hooks/use-media-query";
 import ExternalPlayer from "./external-player";
 import { Provider } from "../page";
+import { cn } from "~/utils/cn";
 
 type Props = {
-  title: any;
-  tmdbid: any;
-  category: any;
-  season: any;
-  episode: any;
-  year: any;
-  currentProvider: any;
+  title: string;
+  tmdbid: number;
+  anilistid: number;
+  category: "movie" | "tv" | "anime";
+  season: number;
+  episode: number;
+  year: string;
+  currentProvider: Provider;
   currentTimeRef: any;
   contentDurationRef: any;
   startAt: number;
@@ -18,6 +20,7 @@ type Props = {
 
 const Player: React.FC<Props> = ({
   tmdbid,
+  anilistid,
   category,
   season,
   episode,
@@ -40,11 +43,10 @@ const Player: React.FC<Props> = ({
 
   return (
     <div
-      className={`mb-2 ${
-        isAboveMediumScreens
-          ? "h-[480px] w-[854px] rounded-md"
-          : "h-auto w-full"
-      }`}
+      className={cn(
+        "mb-2 aspect-video h-auto w-full",
+        isAboveMediumScreens && "max-w-5xl rounded-md",
+      )}
       style={{
         background:
           "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
@@ -53,6 +55,7 @@ const Player: React.FC<Props> = ({
       <ExternalPlayer
         src={determineSrc(
           tmdbid,
+          anilistid,
           category,
           season,
           episode,
@@ -70,10 +73,11 @@ const Player: React.FC<Props> = ({
 export default Player;
 
 const determineSrc = (
-  tmdbid: any,
-  category: any,
-  season: any,
-  episode: any,
+  tmdbid: number,
+  anilistid: number,
+  category: "movie" | "tv" | "anime",
+  season: number,
+  episode: number,
   provider: Provider,
   startAt: number,
 ) => {
@@ -87,19 +91,24 @@ const determineSrc = (
       if (provider === "VidLink") {
         src = `https://vidlink.pro/movie/${tmdbid}?startAt=${startAt}&primaryColor=a35fe8&secondaryColor=a35fe8&iconColor=eefdec&icons=default&player=jw&title=true&poster=true&autoplay=false&nextbutton=false`;
       }
-      if (provider === "VidSrcPro") {
-        src = `https://vidsrc.xyz/embed/movie?tmdb=${tmdbid}&ds_lang=en`;
+      if (provider === "VidCore") {
+        src = `https://vidcore.net/movie/${tmdbid}?autoPlay=true&theme=a35fe8&startAt=${startAt}&sub=en&hideServer=true`;
       }
       break;
-    default:
+    case "tv":
       if (provider === "VidEasy") {
         src = `https://player.videasy.net/tv/${tmdbid}/${season}/${episode}?overlay=true&progress=${startAt}&color=eefdec&nextEpisode=false&episodeSelector=false`;
       }
       if (provider === "VidLink") {
         src = `https://vidlink.pro/tv/${tmdbid}/${season}/${episode}?startAt=${startAt}&primaryColor=a35fe8&secondaryColor=a35fe8&iconColor=eefdec&icons=default&player=jw&title=true&poster=true&autoplay=false&nextbutton=false`;
       }
-      if (provider === "VidSrcPro") {
-        src = `https://vidsrc.xyz/embed/tv?tmdb=${tmdbid}&season=${season}&episode=${episode}&ds_lang=en`;
+      if (provider === "VidCore") {
+        src = `https://vidcore.net/tv/${tmdbid}/${season}/${episode}?autoPlay=true&theme=a35fe8&startAt=${startAt}&sub=en&hideServer=true`;
+      }
+      break;
+    case "anime":
+      if (provider === "VidEasy") {
+        src = `https://player.videasy.net/anime/${anilistid}${episode && `/${episode}`}?overlay=true&progress=${startAt}&color=eefdec&nextEpisode=false&episodeSelector=false&dub=false`;
       }
       break;
   }

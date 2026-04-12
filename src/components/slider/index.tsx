@@ -59,7 +59,7 @@ const Slider: React.FC<Props> = ({ content, watchHistory }) => {
 
   const { mutate: hideResumeWatchingMutation } = useMutation({
     mutationFn: ({ id }: { id: string }) => hideResumeWatching(id),
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       if (data.success === true) {
         queryClient.invalidateQueries({
           queryKey: [

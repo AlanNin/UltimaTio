@@ -5,6 +5,7 @@ import useMediaQuery from "~/hooks/use-media-query";
 
 type Props = {
   tmdbid: number;
+  anilistid: number;
   category: string;
   currentSeason: number;
   episode: number;
@@ -15,6 +16,7 @@ type Props = {
 
 const EpisodeBox: React.FC<Props> = ({
   tmdbid,
+  anilistid,
   category,
   currentSeason,
   episode,
@@ -39,11 +41,21 @@ const EpisodeBox: React.FC<Props> = ({
 
   const isCurrentEpisodeWatched = watchedEpisodes.some(
     (pc: any) =>
-      parseInt(pc.episode) === episode && parseInt(pc.season) === currentSeason
+      parseInt(pc.episode) === episode && parseInt(pc.season) === currentSeason,
   );
 
   function handleGetHref() {
-    return `/watch?tmdbid=${tmdbid}&category=${category}&season=${currentSeason}&episode=${episode}`;
+    let href = "";
+
+    if (category === "tv") {
+      href = `/watch?tmdbid=${tmdbid}&category=${category}&season=${currentSeason}&episode=${episode}`;
+    }
+
+    if (category === "anime") {
+      href = `/watch?anilistid=${anilistid}&category=${category}&season=${currentSeason}&episode=${episode}`;
+    }
+
+    return href;
   }
 
   if (new Date(airDate) > new Date()) {
@@ -53,7 +65,7 @@ const EpisodeBox: React.FC<Props> = ({
   return (
     <Link
       href={handleGetHref()}
-      className={`cursor-pointer min-w-12 w-14 text-center font-light text-[14px] border border-[rgba(255,255,255,0.1)] transition-colors duration-200 ${
+      className={`w-14 min-w-12 cursor-pointer border border-[rgba(255,255,255,0.1)] text-center text-[14px] font-light transition-colors duration-200 ${
         episode === currentEpisode &&
         "bg-[rgba(71,12,130,0.6)] hover:bg-[rgba(71,12,130,0.6)]"
       }

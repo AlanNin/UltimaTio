@@ -6,26 +6,26 @@ import { useRouter } from "next/navigation";
 import { Loading } from "~/utils/loading/loading";
 import TopSection from "~/components/content/topSection";
 import CastSection from "~/components/content/castSection";
-import SeasonAndEpisodeSection from "~/components/content/season&EpisodeSection";
 import SimilarSection from "~/components/content/similarSection";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
+import EpisodeCard from "~/components/content/season&EpisodeSection/episodeCard";
 
 const Content = () => {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
   const isAboveMobileScreens = useMediaQuery("(min-width: 770px)");
-  const { tmdbid } = useParams();
+  const { anilistid } = useParams();
   const router = useRouter();
   const { currentProfile } = useSelector((state: any) => state.profile);
 
-  if (!tmdbid || isNaN(Number(tmdbid))) {
+  if (!anilistid || isNaN(Number(anilistid))) {
     router.replace("/anime");
     return;
   }
 
   const { data: contentData, isLoading: isContentLoading } = useQuery({
-    queryKey: ["content", tmdbid, currentProfile?.id],
-    queryFn: () => getContentAnime(parseInt(tmdbid as string, 10)),
+    queryKey: ["content", anilistid, currentProfile?.id],
+    queryFn: () => getContentAnime(parseInt(anilistid as string, 10)),
     staleTime: 1000 * 60 * 15,
   });
 
@@ -33,7 +33,7 @@ const Content = () => {
     <section id="content">
       {isContentLoading ? (
         <div
-          className={`flex w-full h-screen items-center justify-center ${
+          className={`flex h-screen w-full items-center justify-center ${
             isAboveMediumScreens ? "my-[-56px]" : "my-[-76px]"
           } `}
         >
@@ -41,19 +41,22 @@ const Content = () => {
         </div>
       ) : (
         <div
-          className={`w-full h-full min-h-screen relative max-w-[1920px] m-auto overflow-x-clip ${
-            isAboveMediumScreens ? "pt-[60px] pb-10" : "pt-[69px] pb-24"
+          className={`relative m-auto h-full min-h-screen w-full max-w-[1920px] overflow-x-clip ${
+            isAboveMediumScreens ? "pb-10 pt-[60px]" : "pb-24 pt-[69px]"
           }`}
         >
           <TopSection content={contentData} isLoading={isContentLoading} />
           <div className={`${isAboveMobileScreens ? "px-8" : "px-4"}`}>
             <CastSection cast={contentData.ContentActor} />
-            {contentData?.seasons && contentData?.seasons?.length > 0 && (
-              <SeasonAndEpisodeSection
-                content={contentData}
-                isLoading={isContentLoading}
-              />
-            )}
+            <div className="mt-2 grid items-stretch gap-4 pb-4 [grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]">
+              {contentData.episodes?.map((episode: any, index: number) => (
+                <EpisodeCard
+                  key={episode?.id ?? episode?.episodeNumber ?? index}
+                  episode={episode}
+                  content={contentData}
+                />
+              ))}
+            </div>
             {contentData.similarContent &&
               contentData.similarContent.length > 0 && (
                 <SimilarSection content={contentData.similarContent} />

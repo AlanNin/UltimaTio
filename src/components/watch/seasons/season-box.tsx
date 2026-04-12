@@ -27,25 +27,29 @@ const SeasonBox: React.FC<Props> = ({
     return `/watch?tmdbid=${tmdbid}&category=${category}&season=${season.season_number}&episode=${firstEpisodeSeason}`;
   }
 
-  if (new Date(airDate) > new Date() || season.air_date === null) {
+  if (
+    new Date(airDate) > new Date() ||
+    season.air_date === null ||
+    season.name?.toLowerCase().includes("special")
+  ) {
     return null;
   }
 
   return (
     <Link
       href={handleGetHref()}
-      className="relative overflow-clip cursor-pointer min-w-32 w-32 h-16 p-0 flex justify-center items-center text-center font-light text-[14px] border border-[rgba(255,255,255,0.1)]"
+      className="relative flex h-16 w-32 min-w-32 cursor-pointer items-center justify-center overflow-clip border border-[rgba(255,255,255,0.1)] p-0 text-center text-[14px] font-light"
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
     >
       <img
         src={posterUrl}
-        className={`bg-cover cursor-pointer absolute transition-all duration-500 ${
-          !isCurrentSeason && !isHover && "filter brightness-50 blur-sm"
+        className={`absolute cursor-pointer bg-cover transition-all duration-500 ${
+          !isCurrentSeason && !isHover && "blur-sm brightness-50 filter"
         }`}
       />
       <h1
-        className={`z-10 cursor-pointer text-xs font-semibold p-1 px-2 transition-colors duration-300 ${
+        className={`z-10 cursor-pointer p-1 px-2 text-xs font-semibold transition-colors duration-300 ${
           isHover && "bg-[rgba(71,12,130)]"
         } ${isCurrentSeason && "bg-[rgba(71,12,130)]"}`}
       >

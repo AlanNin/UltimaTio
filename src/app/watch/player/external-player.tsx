@@ -77,7 +77,6 @@ const ExternalPlayer: React.FC<Props> = ({
     };
 
     const onMessage = (event: MessageEvent) => {
-      // ── VidEasy: sends MEDIA_DATA with a nested JSON string payload ─────
       if (provider === "VidEasy") {
         if (typeof event.data !== "string") return;
 
@@ -97,7 +96,6 @@ const ExternalPlayer: React.FC<Props> = ({
           return;
         }
 
-        // Match entry by tmdbId found in the src URL (e.g. "movie-1265609" or "tv-95479")
         const activeKey = Object.keys(mediaStore).find((key) => {
           const id = key.split("-")[1];
           return id !== undefined && src.includes(id);
@@ -109,20 +107,10 @@ const ExternalPlayer: React.FC<Props> = ({
         const duration =
           Number(active?.progress?.duration) || lastDurationRef.current;
 
-        console.log(
-          "[VidEasy] active:",
-          active?.title,
-          "| watched:",
-          watched,
-          "| duration:",
-          duration,
-        );
-
         push(watched, duration, true);
         return;
       }
 
-      // ── All other providers (VidLink, etc.) ─────────────────────────────
       const allowed =
         event.origin === "https://vidlink.pro" ||
         (srcOrigin && event.origin === srcOrigin);

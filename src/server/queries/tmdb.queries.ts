@@ -1,339 +1,211 @@
 "use server";
 import axios from "axios";
+import { unstable_cache } from "next/cache";
+import pLimit from "p-limit";
 
-// SEARCH TMDB FEED (COMBINED)
-async function searchTMDBFeed(url: string): Promise<any[]> {
-  const baseUrl = "https://api.themoviedb.org/3/";
+const BASE_URL = "https://api.themoviedb.org/3/";
+const ANIME_GENRE_ID = 16;
+const ANIME_COUNTRY = "JP";
+const EXCLUDED_TV_GENRES = new Set([
+  "news",
+  "talk",
+  "documentary",
+  "soap",
+  "reality",
+]);
 
-  const img = (
-    p: string | null | undefined,
-    size: "original" | "w780" = "original",
-  ) => (p ? `https://media.themoviedb.org/t/p/${size}${p}` : null);
+const tmdb = axios.create({
+  baseURL: BASE_URL,
+  params: { api_key: process.env.TMDB_APIKEY, language: "en-US" },
+});
 
-  const getMovieRuntimeSeconds = (movie: any) => {
-    const r = movie?.runtime;
-    return typeof r === "number" ? r * 60 : null;
+const img = (
+  path: string | null | undefined,
+  size: "original" | "w780" = "original",
+) => (path ? `https://media.themoviedb.org/t/p/${size}${path}` : null);
+
+const movieRuntime = (data: any): number | null =>
+  typeof data?.runtime === "number" ? data.runtime * 60 : null;
+
+const tvRuntime = (data: any): number | null => {
+  const minutes =
+    data?.episode_run_time?.[0] ??
+    data?.last_episode_to_air?.runtime ??
+    data?.next_episode_to_air?.runtime ??
+    null;
+  return typeof minutes === "number" ? minutes * 60 : null;
+};
+
+const mapStudios = (companies: any[]) =>
+  (companies ?? []).map((s) => ({
+    studio: { id: s.id, name: s.name, originCountry: s.origin_country },
+  }));
+
+const mapGenres = (genres: any[]) =>
+  (genres ?? []).map((g) => ({
+    genre: {
+      id: g.id,
+      name: g.name,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  }));
+
+const mapCast = (cast: any[]) =>
+  (cast ?? []).slice(0, 15).map((a) => ({
+    name: a.name,
+    img: img(a.profile_path),
+  }));
+
+function mapMovie(item: any, detail: any): any | null {
+  const description = detail?.overview || item?.overview || "";
+  if (!description.trim()) return null;
+
+  return {
+    landscapeUrl: img(item.backdrop_path),
+    posterUrl: img(item.poster_path, "w780"),
+    title: detail.title,
+    tmdbid: item.id,
+    date: detail.release_date ? new Date(detail.release_date) : null,
+    duration: movieRuntime(detail),
+    rating: Math.round((item.vote_average ?? 0) * 10) / 10,
+    description,
+    ContentStudio: mapStudios(detail.production_companies),
+    ContentGenre: mapGenres(detail.genres),
+    ContentActor: mapCast(detail.credits?.cast),
+    category: "movie" as const,
   };
+}
 
-  const getTvRuntimeSeconds = (tv: any) => {
-    // episode_run_time is an array of minutes
-    const fromArray =
-      Array.isArray(tv?.episode_run_time) && tv.episode_run_time.length
-        ? tv.episode_run_time[0]
-        : null;
-    const lastEp = tv?.last_episode_to_air?.runtime ?? null;
-    const nextEp = tv?.next_episode_to_air?.runtime ?? null;
+function mapTV(item: any, detail: any): any | null {
+  const genres: any[] = detail.genres ?? [];
+  if (!genres.length) return null;
 
-    const minutes =
-      typeof fromArray === "number"
-        ? fromArray
-        : typeof lastEp === "number"
-          ? lastEp
-          : typeof nextEp === "number"
-            ? nextEp
-            : null;
-    return typeof minutes === "number" ? minutes * 60 : null;
+  const hasExcluded = genres.some((g) =>
+    EXCLUDED_TV_GENRES.has((g.name ?? "").toLowerCase()),
+  );
+  if (hasExcluded) return null;
+
+  const description = detail?.overview || item?.overview || "";
+  if (!description.trim()) return null;
+
+  const genreIds: number[] = item.genre_ids ?? genres.map((g: any) => g.id);
+
+  const isAnime =
+    Array.isArray(item.origin_country) &&
+    item.origin_country.includes(ANIME_COUNTRY) &&
+    genreIds.includes(ANIME_GENRE_ID);
+
+  return {
+    landscapeUrl: img(item.backdrop_path),
+    posterUrl: img(item.poster_path, "w780"),
+    title: detail.name,
+    tmdbid: item.id,
+    date: detail.first_air_date ? new Date(detail.first_air_date) : null,
+    duration: tvRuntime(detail),
+    rating: Math.round((item.vote_average ?? 0) * 10) / 10,
+    description,
+    ContentStudio: mapStudios(detail.production_companies),
+    ContentGenre: mapGenres(genres),
+    ContentActor: mapCast(detail.credits?.cast),
+    category: (isAnime ? "anime" : "tv") as "anime" | "tv",
   };
+}
 
+type MediaType = "movie" | "tv";
+
+function resolveType(item: any, fallback: MediaType): MediaType {
+  if (item.media_type === "movie" || item.title) return "movie";
+  if (item.media_type === "tv" || item.name) return "tv";
+  return fallback;
+}
+
+async function enrichOne(item: any, type: MediaType): Promise<any | null> {
   try {
-    const response = await axios.get(`${baseUrl}${url}`, {
-      params: {
-        api_key: process.env.TMDB_APIKEY,
-        language: "en-US",
-      },
+    const { data } = await tmdb.get(`${type}/${item.id}`, {
+      params: { append_to_response: "credits" },
     });
-
-    const responseData = await Promise.all(
-      response.data.results.map(async (content: any) => {
-        try {
-          let contentType;
-
-          if (url.includes("movie")) {
-            contentType = "movie";
-
-            const fullDataResponse = await axios.get(
-              `${baseUrl}movie/${content.id}`,
-              {
-                params: {
-                  api_key: process.env.TMDB_APIKEY,
-                  append_to_response: "credits",
-                },
-              },
-            );
-
-            const data = fullDataResponse.data;
-
-            // skip items with no overview
-            const description = data?.overview || content?.overview || "";
-            if (!description.trim()) return null;
-
-            const studios = (data.production_companies ?? []).map((s: any) => ({
-              id: s.id,
-              name: s.name,
-              originCountry: s.origin_country,
-            }));
-            const ContentStudio = studios.map((studio: any) => ({ studio }));
-
-            const ContentGenre = (data.genres ?? []).map((g: any) => ({
-              genre: {
-                id: g.id,
-                name: g.name,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              },
-            }));
-
-            const cast = (data.credits?.cast ?? []).slice(0, 15);
-            const ContentActor = cast.map((a: any) => ({
-              name: a.name,
-              img: img(a.profile_path, "original"),
-            }));
-
-            return {
-              landscapeUrl: img(content.backdrop_path, "original"),
-              posterUrl: img(content.poster_path, "w780"),
-              title: data.title,
-              tmdbid: content.id,
-              date: data.release_date ? new Date(data.release_date) : null,
-              duration: getMovieRuntimeSeconds(data), // can be null
-              rating: Math.round((content.vote_average || 0) * 10) / 10,
-              description,
-              ContentStudio,
-              ContentGenre,
-              ContentActor,
-              category: contentType,
-            };
-          }
-
-          if (url.includes("tv")) {
-            const AnimeGenreId = 16;
-            const AnimeCountry = "JP";
-            const isAnime =
-              Array.isArray(content.origin_country) &&
-              content.origin_country.includes(AnimeCountry) &&
-              Array.isArray(content.genre_ids) &&
-              content.genre_ids.includes(AnimeGenreId);
-
-            contentType = isAnime ? "anime" : "tv";
-
-            const fullDataResponse = await axios.get(
-              `${baseUrl}tv/${content.id}`,
-              {
-                params: {
-                  api_key: process.env.TMDB_APIKEY,
-                  append_to_response: "credits",
-                },
-              },
-            );
-
-            const data = fullDataResponse.data;
-
-            const genres = data.genres ?? [];
-            if (!genres.length) return null;
-
-            const hasNewsGenre = genres.some((g: any) => {
-              const n = (g.name || "").toLowerCase();
-              return (
-                n === "news" ||
-                n === "talk" ||
-                n === "documentary" ||
-                n === "soap" ||
-                n === "reality"
-              );
-            });
-            if (hasNewsGenre) return null;
-
-            const description = data?.overview || content?.overview || "";
-            if (!description.trim()) return null;
-
-            const studios = (data.production_companies ?? []).map((s: any) => ({
-              id: s.id,
-              name: s.name,
-              originCountry: s.origin_country,
-            }));
-            const ContentStudio = studios.map((studio: any) => ({ studio }));
-
-            const ContentGenre = genres.map((g: any) => ({
-              genre: {
-                id: g.id,
-                name: g.name,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              },
-            }));
-
-            const cast = (data.credits?.cast ?? []).slice(0, 15);
-            const ContentActor = cast.map((a: any) => ({
-              name: a.name,
-              img: img(a.profile_path, "original"),
-            }));
-
-            return {
-              landscapeUrl: img(content.backdrop_path, "original"),
-              posterUrl: img(content.poster_path, "w780"),
-              title: data.name,
-              tmdbid: content.id,
-              date: data.first_air_date ? new Date(data.first_air_date) : null,
-              // SAFE: no direct .runtime access on possibly null objects
-              duration: getTvRuntimeSeconds(data), // can be null
-              rating: Math.round((content.vote_average || 0) * 10) / 10,
-              description,
-              ContentStudio,
-              ContentGenre,
-              ContentActor,
-              category: contentType,
-            };
-          }
-
-          return null;
-        } catch (error) {
-          console.error("Error fetching full TMDB data:", content.id, error);
-          return null;
-        }
-      }),
-    );
-
-    return responseData.filter((data: any) => data !== null);
-  } catch (error) {
-    console.error("Error fetching TMDb search data:", error);
-    return [];
+    return type === "movie" ? mapMovie(item, data) : mapTV(item, data);
+  } catch {
+    return null;
   }
 }
 
-// SHUFFLE ARRAY
-function shuffleArray(array: any[]): any[] {
-  const interleavedArray: any[] = [];
-  const halfLength = Math.ceil(array.length / 2);
-
-  for (let i = 0; i < halfLength; i++) {
-    if (i < array.length) {
-      interleavedArray.push(array[i]);
-    }
-    if (i + halfLength < array.length) {
-      interleavedArray.push(array[i + halfLength]);
-    }
-  }
-
-  return interleavedArray;
+async function enrichAll(
+  items: any[],
+  fallbackType: MediaType,
+  limiter: ReturnType<typeof pLimit>,
+): Promise<any[]> {
+  const results = await Promise.all(
+    items.map((item) => {
+      if (item.media_type === "person") return Promise.resolve(null);
+      const type = resolveType(item, fallbackType);
+      return limiter(() => enrichOne(item, type));
+    }),
+  );
+  return results.filter(Boolean);
 }
 
-// GET HOME FEED (COMBINED)
-export async function getHomeFeed(): Promise<any | { error: string }> {
-  try {
-    const [
-      trendingMovies,
-      popularMovies,
-      topRatedMovies,
-      upcomingMovies,
-      trendingTV,
-      popularTV,
-      topRatedTV,
-    ] = await Promise.all([
-      searchTMDBFeed("trending/movie/week?language=en-US"),
-      searchTMDBFeed("movie/popular?language=en-US"),
-      searchTMDBFeed("movie/top_rated?language=en-US"),
-      searchTMDBFeed("movie/upcoming?language=en-US"),
-      searchTMDBFeed("trending/tv/week?language=en-US"),
-      searchTMDBFeed("tv/popular?language=en-US"),
-      searchTMDBFeed("tv/top_rated?language=en-US"),
-    ]);
-
-    const homeFeed = {
-      trending: shuffleArray([
-        ...trendingMovies.slice(0, 8),
-        ...trendingTV.slice(0, 8),
-      ]),
-      popular: shuffleArray([
-        ...popularMovies.slice(0, 8),
-        ...popularTV.slice(0, 8),
-      ]),
-      topRated: shuffleArray([
-        ...topRatedMovies.slice(0, 8),
-        ...topRatedTV.slice(0, 8),
-      ]),
-      upcoming: shuffleArray([...upcomingMovies]),
-    };
-
-    return homeFeed;
-  } catch (error) {
-    console.error("Error fetching home feed:", error);
-    return { error: "Error al obtener el feed de inicio" };
+function interleave<T>(arr: T[]): T[] {
+  const half = Math.ceil(arr.length / 2);
+  const result: T[] = [];
+  for (let i = 0; i < half; i++) {
+    const a = arr[i];
+    const b = arr[i + half];
+    if (a !== undefined) result.push(a);
+    if (b !== undefined) result.push(b);
   }
+  return result;
 }
 
-// HANDLE SEARCH
-export async function handleSearch(query: string): Promise<any> {
-  const AnimeGenreId = 16;
-  const AnimeCountry = "JP";
-  const baseUrl = "https://api.themoviedb.org/3/";
-  const apiKey = process.env.TMDB_APIKEY;
-  const language = "en-US";
+async function fetchHomeFeed() {
+  const [
+    trendingRaw,
+    popularMoviesRaw,
+    popularTVRaw,
+    topRatedMoviesRaw,
+    topRatedTVRaw,
+    upcomingRaw,
+  ] = await Promise.all([
+    tmdb.get("trending/all/week").then((r) => r.data.results as any[]),
+    tmdb.get("movie/popular").then((r) => r.data.results as any[]),
+    tmdb.get("tv/popular").then((r) => r.data.results as any[]),
+    tmdb.get("movie/top_rated").then((r) => r.data.results as any[]),
+    tmdb.get("tv/top_rated").then((r) => r.data.results as any[]),
+    tmdb.get("movie/upcoming").then((r) => r.data.results as any[]),
+  ]);
 
-  try {
-    // Search for multi content (movies, TV shows, etc.)
-    const searchResults: any[] = [];
+  const limiter = pLimit(15);
 
-    // Function to fetch search results from TMDb
-    const fetchSearchResults = async (page: number) => {
-      const response = await axios.get(`${baseUrl}search/multi`, {
-        params: {
-          api_key: apiKey,
-          query,
-          language,
-          page,
-        },
-      });
+  const trendingList = trendingRaw
+    .filter((i) => i.media_type !== "person")
+    .slice(0, 16);
 
-      return response.data.results;
-    };
+  const popularList = [
+    ...popularMoviesRaw.slice(0, 8),
+    ...popularTVRaw.slice(0, 8),
+  ];
+  const topRatedList = [
+    ...topRatedMoviesRaw.slice(0, 8),
+    ...topRatedTVRaw.slice(0, 8),
+  ];
+  const upcomingList = upcomingRaw.slice(0, 10);
 
-    // Fetch results from page 1
-    const resultsPage1 = await fetchSearchResults(1);
-    searchResults.push(...resultsPage1);
+  const [trending, popular, topRated, upcoming] = await Promise.all([
+    enrichAll(trendingList, "movie", limiter),
+    enrichAll(popularList, "movie", limiter),
+    enrichAll(topRatedList, "movie", limiter),
+    enrichAll(upcomingList, "movie", limiter),
+  ]);
 
-    // Fetch results from page 2
-    const resultsPage2 = await fetchSearchResults(2);
-    searchResults.push(...resultsPage2);
-
-    // Process search results
-    const responseData = await Promise.all(
-      searchResults.map(async (content: any) => {
-        try {
-          const isAnime =
-            content.origin_country &&
-            content.origin_country.includes(AnimeCountry) &&
-            content.genre_ids &&
-            content.genre_ids.includes(AnimeGenreId);
-
-          const category = isAnime ? "anime" : content.media_type;
-
-          return {
-            landscapeUrl: content.backdrop_path
-              ? "https://media.themoviedb.org/t/p/original" +
-                content.backdrop_path
-              : null,
-            posterUrl: content.poster_path
-              ? "https://media.themoviedb.org/t/p/w780" + content.poster_path
-              : null,
-            title: content.title || content.name,
-            tmdbid: content.id,
-            rating: Math.round(content.vote_average * 10) / 10,
-            description: content.overview,
-            category,
-          };
-        } catch (error) {
-          console.error("Error fetching full TMDB data:", content.id, error);
-          return null;
-        }
-      }),
-    );
-
-    // Filter out null entries
-    const filteredData = responseData.filter((data) => data !== null);
-
-    return filteredData;
-  } catch (error) {
-    console.error("Error fetching TMDb search data:", error);
-    return [];
-  }
+  return {
+    trending: interleave(trending),
+    popular: interleave(popular),
+    topRated: interleave(topRated),
+    upcoming,
+  };
 }
+
+export const getHomeFeed = unstable_cache(fetchHomeFeed, ["tmdb-home-feed"], {
+  revalidate: 60 * 60,
+});

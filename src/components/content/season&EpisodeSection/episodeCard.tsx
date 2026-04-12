@@ -1,35 +1,30 @@
 "use client";
 import React from "react";
-import NotFound from "~/assets/icons/no-image.png";
 import Link from "next/link";
+import { PlayIcon } from "lucide-react";
 
 type Props = {
-  selectedSeason: any;
+  selectedSeason?: any;
   episode: any;
   content: any;
 };
 
 const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
   const handleGetWatchHref = () => {
-    const seasonNumber = selectedSeason.season_number;
+    const isAnime = content.category === "anime";
+    const seasonNumber = selectedSeason?.season_number;
     const episodeNumber = episode.episodeNumber;
-
-    return `/watch?tmdbid=${content.tmdbid}&category=${content.category}&season=${seasonNumber}&episode=${episodeNumber}`;
+    const seasonParam = seasonNumber ? `&season=${seasonNumber}` : "";
+    if (isAnime) {
+      return `/watch?anilistid=${content.anilistid}&category=${content.category}${seasonParam}&episode=${episodeNumber}`;
+    } else {
+      return `/watch?tmdbid=${content.tmdbid}&category=${content.category}${seasonParam}&episode=${episodeNumber}`;
+    }
   };
 
   if (new Date(episode.airDate) > new Date()) {
     return null;
   }
-
-  const imageUrl =
-    !episode.episodePoster ||
-    episode.episodePoster.includes("questionmark") ||
-    episode.episodePoster.includes("bestv2null")
-      ? NotFound
-      : episode.episodePoster;
-
-  const toImgSrc = (val: string | { src: string }) =>
-    typeof val === "string" ? val : val?.src ?? "";
 
   const watchPercentage = episode?.watchProgress
     ? Math.floor((episode?.watchProgress / episode?.episodeDuration) * 100)
@@ -38,63 +33,21 @@ const EpisodeCard: React.FC<Props> = ({ episode, selectedSeason, content }) => {
   return (
     <Link
       href={handleGetWatchHref()}
-      className="relative flex flex-col cursor-pointer h-auto w-full rounded-md gap-3 transition-colors duration-300 bg-[rgba(181,181,181,0.1)] hover:bg-[rgba(181,181,181,0.2)] p-4"
+      className="relative flex h-auto w-full cursor-pointer items-center gap-x-3 overflow-hidden rounded-md bg-[rgba(181,181,181,0.1)] p-4 transition-colors duration-300 hover:bg-[rgba(181,181,181,0.2)]"
     >
-      <div className="flex gap-4">
-        <div className="relative w-[160px] aspect-video shrink-0">
-          <img
-            src={toImgSrc(imageUrl)}
-            alt="Episode Image"
-            className="absolute inset-0 w-full h-full object-cover rounded-md"
-            style={{
-              background:
-                "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
-              backgroundPosition: "center",
-            }}
-            loading="lazy"
-            decoding="async"
-            draggable={false}
-          />
-          {episode?.watchProgress > 0 && (
-            <div className="absolute bottom-2 right-2 left-2 h-1.5 rounded-md bg-[rgba(255,255,255,0.35)]">
-              <div
-                className="rounded-md bg-[#7c26d4] h-full"
-                style={{ width: watchPercentage + "%" }}
-              />
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col justify-center gap-1 min-w-0">
-          <h1 className="text-xs font-base mb-1 line-clamp-3 ">
-            {episode.episodeNumber}. {episode.title}
-          </h1>
-          <h1 className="text-xs font-base text-[#c2c2c2]">
-            Rated: {episode.rating.toFixed(1)}
-          </h1>
-          <h1 className="text-xs font-base text-[#c2c2c2]">
-            Duration: {formatDuration(episode.episodeDuration)}
-          </h1>
-        </div>
-      </div>
-      <label
-        className="text-sm font-light text-[#c2c2c2] line-clamp-2"
-        title={episode.overview ?? "No description available"}
-      >
-        {episode.overview ?? "No description available"}
-      </label>
+      {watchPercentage > 0 && (
+        <div
+          className="absolute inset-0 z-0 h-full bg-gradient-to-r from-[rgba(135,15,73,0.4)] to-[rgba(124,38,212,0.4)]"
+          style={{ width: watchPercentage + "%" }}
+        />
+      )}
+      <PlayIcon className="z-10 size-4 shrink-0 fill-white/50 text-white/50" />
+      <span className="z-10 truncate text-sm font-normal">
+        <span className="font-bold">Ep. {episode.episodeNumber}:</span>{" "}
+        {episode.title ?? "No title available"}
+      </span>
     </Link>
   );
 };
-
-function formatDuration(seconds: number) {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  } else {
-    return `${minutes}m`;
-  }
-}
 
 export default EpisodeCard;

@@ -3,6 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { env } from "~/env";
 import useMediaQuery from "~/hooks/use-media-query";
+import { cleanText } from "~/utils/cleanText";
 import { cn } from "~/utils/cn";
 
 type Props = {
@@ -29,11 +30,13 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
     ) ?? content.seasons?.[sNum - 1];
 
   const episodeObj =
-    seasonObj?.season?.episodes?.find(
-      (ep: any) => (ep.episode_number ?? ep.number) === eNum,
-    ) ?? seasonObj?.season?.episodes?.[eNum - 1];
+    content.category === "anime"
+      ? content.episodes?.[eNum - 1]
+      : (seasonObj?.season?.episodes?.find(
+          (ep: any) => (ep.episode_number ?? ep.number) === eNum,
+        ) ?? seasonObj?.season?.episodes?.[eNum - 1]);
 
-  const description =
+  const descriptionRaw =
     content.category === "movie"
       ? (content.description ?? "")
       : (episodeObj?.overview ??
@@ -41,20 +44,25 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
         content.description ??
         null);
 
+  const description = cleanText(descriptionRaw);
+
   const rating =
     content.category === "movie"
       ? (content.rating ?? null)
       : (episodeObj?.rating ?? seasonObj?.season?.rating ?? null);
 
   const handleGetContentHref = () => {
+    if (content.category === "anime") {
+      return `/${content.category}/${content.anilistid}`;
+    }
     return `/${content.category}/${content.tmdbid}`;
   };
 
   return (
     <div
       className={cn(
-        "flex w-full flex-wrap gap-6",
-        !isAboveMediumScreens && "justify-center px-4",
+        "flex w-full gap-6",
+        !isAboveMediumScreens && "flex-wrap justify-center px-4",
         !showingProviders ? "mt-8" : "mt-2",
       )}
     >
@@ -66,7 +74,7 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
         />
       </Link>
       <div
-        className={`flex max-w-[650px] flex-col gap-2 ${
+        className={`flex w-full flex-col gap-2 ${
           !isAboveMediumScreens && "text-center"
         }`}
       >
@@ -88,11 +96,13 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
           </p>
           {(category === "tv" || category === "anime") && (
             <>
-              <div className="flex items-center gap-1 bg-[rgba(173,173,173,0.2)] px-2 py-0.5">
-                <p className="text-xs font-light capitalize text-white">
-                  Season {season}
-                </p>
-              </div>
+              {category !== "anime" && (
+                <div className="flex items-center gap-1 bg-[rgba(173,173,173,0.2)] px-2 py-0.5">
+                  <p className="text-xs font-light capitalize text-white">
+                    Season {season}
+                  </p>
+                </div>
+              )}
               <div className="flex items-center gap-1 bg-[rgba(173,173,173,0.2)] px-2 py-0.5">
                 <p className="text-xs font-light capitalize text-white">
                   Episode {episode}
@@ -117,7 +127,11 @@ const Info: React.FC<Props> = ({ content, season, episode }) => {
         >
           <span className="text-xs font-light text-[#adadad]"> Rating: </span>
           <span className="text-xs font-light text-[#cfcfcf]">
-            {rating ? `${rating} on TMDB` : "No rating available"}
+            {rating
+              ? content.category === "anime"
+                ? `${rating} on AniList`
+                : `${rating} on TMDB`
+              : "No rating available"}
           </span>
         </div>
         <div

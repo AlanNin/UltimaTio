@@ -172,9 +172,10 @@ model LibraryContent {
 
 // LIBRARY MODEL
 model Content {
-  id       String @id @default(uuid())
-  tmdb_id  Int
-  category String
+  id         String @id @default(uuid())
+  tmdb_id    Int?
+  anilist_id Int?
+  category   String
 
   // CREATED AT & UPDATED AT
   created_at DateTime @default(now())

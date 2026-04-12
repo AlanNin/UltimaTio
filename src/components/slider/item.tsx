@@ -30,7 +30,7 @@ const SliderCard: React.FC<Props> = ({
     : null;
 
   const handleGetNavigateHref = () => {
-    return `/${content.category}/${content.tmdbid || content.content.tmdb_id}`;
+    return `/${content.category}/${content.tmdbid || content.content?.tmdb_id || content.anilistid}`;
   };
 
   const handleGetWatchHref = () => {
@@ -49,24 +49,30 @@ const SliderCard: React.FC<Props> = ({
 
   return (
     <div
-      className="flex w-full h-full pr-4"
+      className="flex h-full w-full pr-4"
       onMouseEnter={() => (isAboveSmallTablet ? setIsHovered(true) : null)}
       onMouseLeave={() => (isAboveSmallTablet ? setIsHovered(false) : null)}
     >
-      <div className="h-full w-max relative rounded-sm flex flex-col">
-        <div className="h-full w-full relative rounded-sm">
-          <Link href={handleGetNavigateHref()}>
+      <div className="relative flex h-full w-max flex-col rounded-sm">
+        <div className="relative h-full w-full rounded-sm">
+          <Link
+            href={handleGetNavigateHref()}
+            className="flex h-full flex-col gap-y-2.5"
+          >
             <img
               src={content?.posterUrl}
               alt="Content Image"
               loading="lazy"
-              className={`object-cover w-full h-full cursor-pointer rounded-md transition-all duration-500`}
+              className={`h-full w-full cursor-pointer rounded-md object-cover transition-all duration-500`}
               style={{
                 userSelect: "none",
                 background:
                   "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
               }}
             />
+            <span className="line-clamp-1 w-full text-sm font-medium">
+              {content?.title}
+            </span>
           </Link>
 
           {watchHistory && (
@@ -75,8 +81,8 @@ const SliderCard: React.FC<Props> = ({
                 <>
                   <XMarkIcon
                     className={cn(
-                      "absolute top-2.5 right-2.5 p-1 w-6 h-6 cursor-pointer  text-white bg-[rgba(0,0,0,0.6)] hover:bg-red-500/60 rounded-full transition-all duration-300",
-                      isHovered ? "opacity-100" : "opacity-0"
+                      "absolute right-2.5 top-2.5 h-6 w-6 cursor-pointer rounded-full bg-[rgba(0,0,0,0.6)] p-1 text-white transition-all duration-300 hover:bg-red-500/60",
+                      isHovered ? "opacity-100" : "opacity-0",
                     )}
                     strokeWidth={2}
                     onClick={() =>
@@ -89,11 +95,11 @@ const SliderCard: React.FC<Props> = ({
                       strokeWidth={0.8}
                       height={75}
                       className={cn(
-                        "absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 cursor-pointer m-0 rounded-full transition-all duration-300 border-2 fill-[rgba(240,240,240,0.8)] hover:bg-[rgba(124,38,212,0.8)] hover:border-[rgba(124,38,212,0.8)]",
+                        "absolute left-1/2 top-1/2 m-0 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border-2 fill-[rgba(240,240,240,0.8)] transition-all duration-300 hover:border-[rgba(124,38,212,0.8)] hover:bg-[rgba(124,38,212,0.8)]",
                         isAboveSmallTablet
                           ? "py-5 pl-5 pr-4"
                           : "py-2.5 pl-2.5 pr-1.5",
-                        isHovered ? "opacity-100" : "opacity-0"
+                        isHovered ? "opacity-100" : "opacity-0",
                       )}
                     />
                   </Link>
@@ -101,11 +107,11 @@ const SliderCard: React.FC<Props> = ({
               )}
               <Link
                 href={handleGetNavigateHref()}
-                className={`absolute bottom-2.5 left-0 right-0 h-1.5 w-full px-3 cursor-pointer`}
+                className={`absolute left-0 right-0 top-[85%] h-1.5 w-full cursor-pointer px-3`}
               >
                 <div className="h-full w-full rounded-md bg-[rgba(255,255,255,0.4)]">
                   <div
-                    className={`rounded-md bg-[#9231f5] h-full`}
+                    className={`h-full rounded-md bg-[#9231f5]`}
                     style={{ width: watchPercentage + "%" }}
                   />
                 </div>
@@ -113,36 +119,36 @@ const SliderCard: React.FC<Props> = ({
             </>
           )}
           {isMobileMenuOpen && !isAboveMediumScreens && (
-            <div className="w-full h-full absolute bottom-0 left-0 right-0 mx-auto bg-[rgba(18,18,18)] p-2 text-center flex flex-col items-center justify-center gap-2.5">
+            <div className="absolute bottom-0 left-0 right-0 mx-auto flex h-full w-full flex-col items-center justify-center gap-2.5 bg-[rgba(18,18,18)] p-2 text-center">
               <Link
                 href={handleGetWatchHref()}
-                className="w-full text-xs font-normal bg-[rgba(255,255,255,0.07)] py-1.5 rounded-md flex px-1 gap-2 items-center justify-center"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-[rgba(255,255,255,0.07)] px-1 py-1.5 text-xs font-normal"
               >
-                <PlayIcon strokeWidth={2} className="w-3 h-3" />
+                <PlayIcon strokeWidth={2} className="h-3 w-3" />
                 Resume
               </Link>
               <span
-                className="w-full text-xs font-normal bg-[rgba(255,255,255,0.07)] py-1.5 rounded-md flex px-1 gap-2 items-center justify-center"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-[rgba(255,255,255,0.07)] px-1 py-1.5 text-xs font-normal"
                 onClick={() => handleRemoveResumeWatching(content.id)}
               >
-                <BackspaceIcon strokeWidth={2} className="w-3 h-3" />
+                <BackspaceIcon strokeWidth={2} className="h-3 w-3" />
                 Remove
               </span>
               <Link
                 href={handleGetNavigateHref()}
-                className="w-full text-xs font-normal bg-[rgba(255,255,255,0.07)] py-1.5 rounded-md flex px-1 gap-2 items-center justify-center"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-[rgba(255,255,255,0.07)] px-1 py-1.5 text-xs font-normal"
               >
-                <Bars3BottomLeftIcon strokeWidth={2} className="w-3 h-3" />
+                <Bars3BottomLeftIcon strokeWidth={2} className="h-3 w-3" />
                 Details
               </Link>
             </div>
           )}
         </div>
         {!isAboveMediumScreens && watchHistory && (
-          <div className="relative h-max w-full bg-[rgba(255,255,255,0.05)] rounded-b-md p-1">
+          <div className="relative h-max w-full rounded-b-md bg-[rgba(255,255,255,0.05)] p-1">
             <EllipsisHorizontalIcon
               strokeWidth={1.8}
-              className="w-4 h-4 text-white ml-auto"
+              className="ml-auto h-4 w-4 text-white"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             />
           </div>

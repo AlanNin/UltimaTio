@@ -8,12 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { getProfileHistory } from "~/server/queries/contentProfile.queries";
 
+const EMPTY_FEED = { trending: [], popular: [], topRated: [], upcoming: [] };
+
 export default function HomeScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 900px)");
 
   const { currentProfile } = useSelector((state: any) => state.profile);
 
-  const { data: feedData, isLoading: isFeedLoading } = useQuery({
+  const { data: feedData = EMPTY_FEED, isLoading: isFeedLoading } = useQuery({
     queryKey: ["home-feed"],
     queryFn: () => getHomeFeed(),
     staleTime: 1000 * 60 * 15,

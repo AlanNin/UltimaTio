@@ -20,6 +20,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { cn } from "~/utils/cn";
 import { useSelector } from "react-redux";
+import NoImage from "~/assets/icons/no-image.png";
+import { cleanText } from "~/utils/cleanText";
 
 type Props = {
   content: any;
@@ -45,12 +47,17 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
       : 0;
 
   const handleGetWatchHref = (): string => {
-    const { tmdbid, category, profileContent } = content ?? {};
+    const { tmdbid, anilistid, category, profileContent } = content ?? {};
 
-    const params = new URLSearchParams({
-      tmdbid: String(tmdbid ?? ""),
-      category: String(category ?? ""),
-    });
+    const params = new URLSearchParams({});
+
+    if (category === "anime") {
+      params.set("anilistid", String(anilistid ?? ""));
+    } else {
+      params.set("tmdbid", String(tmdbid ?? ""));
+    }
+
+    params.set("category", String(category));
 
     if (category === "movie") {
       return `/watch?${params.toString()}`;
@@ -149,9 +156,17 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
     isRefetching: isRefetchingLibraries,
     refetch: refetchLibraries,
   } = useQuery({
-    queryKey: ["libraries-for-content", content.category, content.tmdbid],
+    queryKey: [
+      "libraries-for-content",
+      content.category,
+      content.category === "anime" ? content.anilistid : content.tmdbid,
+    ],
     queryFn: async () => {
-      const res = await getLibraryForContent(content.tmdbid, content.category);
+      const res = await getLibraryForContent(
+        content.category,
+        content.category !== "anime" ? content.tmdbid : undefined,
+        content.category === "anime" ? content.anilistid : undefined,
+      );
       return res as any[];
     },
     select: (resp) => mapToLibraries(resp),
@@ -162,29 +177,30 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
 
   const { mutate: addOrRemoveFromLibraryMutation } = useMutation({
     mutationFn: ({
-      tmdbId,
       category,
       libraryName,
+      tmdbId,
+      anilistId,
     }: {
-      tmdbId: number;
       category: string;
       libraryName: string;
-    }) => addOrRemoveContentFromLibrary(tmdbId, category, libraryName),
-
+      tmdbId?: number;
+      anilistId?: number;
+    }) =>
+      addOrRemoveContentFromLibrary(category, libraryName, tmdbId, anilistId),
     onSuccess: () => {
       refetchLibraries();
-      queryClient.invalidateQueries({
-        queryKey: ["library"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["library"] });
     },
   });
 
   const handleAddToLibrary = async (library_name: string) => {
     try {
       addOrRemoveFromLibraryMutation({
-        tmdbId: content.tmdbid,
         category: content.category,
         libraryName: library_name,
+        tmdbId: content.category !== "anime" ? content.tmdbid : undefined,
+        anilistId: content.category === "anime" ? content.anilistid : undefined,
       });
     } catch (error) {
       console.error("Error adding/removing content:", error);
@@ -203,6 +219,12 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
       document.body.style.overflow = "auto";
     };
   }, [openLibraryModal, isAboveMobileScreens]);
+
+  const description = cleanText(content.description);
+
+  const posterUrl = content.posterUrl.includes("null")
+    ? null
+    : content.posterUrl;
 
   if (isLoading) {
     return;
@@ -245,8 +267,8 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               }`}
             >
               <img
-                src={content!.posterUrl}
-                className={`h-[240px] w-[158px] rounded-sm bg-cover drop-shadow-lg`}
+                src={posterUrl || NoImage.src}
+                className={`h-[240px] w-[158px] rounded-sm bg-cover object-cover drop-shadow-lg`}
                 style={{
                   background:
                     "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
@@ -297,13 +319,11 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               <p className="mt-4 max-w-[550px] text-sm font-normal text-[#c2c2c2]">
                 {showMore ? (
                   <>
-                    {content &&
-                    content.description &&
-                    content.description.length > 0 ? (
+                    {content && description && description.length > 0 ? (
                       <>
-                        {content.description}
-                        {content.description.length >
-                          (isAboveMobileScreens ? 520 : 150) && (
+                        {cleanText(description)}
+                        {description.length >
+                          (isAboveMobileScreens ? 220 : 150) && (
                           <span
                             className="my-1 ml-2 cursor-pointer rounded-xl bg-[rgba(191,191,191,0.15)] px-2 py-0.5 text-xs font-light"
                             style={{ whiteSpace: "nowrap" }}
@@ -319,17 +339,16 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   </>
                 ) : (
                   <>
-                    {content?.description && content.description.length > 0 ? (
+                    {description && description.length > 0 ? (
                       <>
-                        {content.description.length >
-                        (isAboveMobileScreens ? 520 : 150)
-                          ? content.description.slice(
+                        {description.length > (isAboveMobileScreens ? 220 : 150)
+                          ? cleanText(description)?.slice(
                               0,
-                              isAboveMobileScreens ? 520 : 150,
+                              isAboveMobileScreens ? 220 : 150,
                             ) + "..."
-                          : content.description}
-                        {content.description.length >
-                          (isAboveMobileScreens ? 520 : 150) && (
+                          : description}
+                        {description.length >
+                          (isAboveMobileScreens ? 220 : 150) && (
                           <span
                             className="my-1 ml-2 cursor-pointer rounded-xl bg-[rgba(191,191,191,0.15)] px-2 py-0.5 text-xs font-light"
                             style={{ whiteSpace: "nowrap" }}
@@ -352,7 +371,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
             <div className="flex basis-full flex-wrap items-center justify-center gap-3">
               <Link
                 href={handleGetWatchHref()}
-                className="relative flex cursor-pointer items-center gap-2.5 overflow-hidden rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)]"
+                className="relative flex cursor-pointer items-center gap-2.5 overflow-hidden rounded-3xl bg-[rgba(181,181,181,0.2)] px-5 py-2.5 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)]"
               >
                 <PlayIcon
                   className="z-10 size-5 fill-white text-white"
@@ -374,7 +393,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                 />
               </Link>
               <div
-                className="flex cursor-pointer items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)]"
+                className="flex cursor-pointer items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-5 py-2.5 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)]"
                 onClick={() => setOpenLibraryModal(true)}
               >
                 <SquaresPlusIcon
@@ -384,7 +403,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                 <h1 className="text-sm text-[#ebebeb]"> Add to Library </h1>
               </div>
               <button
-                className="flex items-center gap-2.5 rounded-3xl bg-[rgba(131,74,189,0.3)] px-3.5 py-2 opacity-50 transition-colors duration-500"
+                className="flex items-center gap-2.5 rounded-3xl bg-[rgba(131,74,189,0.3)] px-5 py-2.5 opacity-50 transition-colors duration-500"
                 disabled
               >
                 <UserGroupIcon
@@ -394,7 +413,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                 <h1 className="text-sm text-[#ebebeb]"> Watch Party </h1>
               </button>
               {currentProfile && (
-                <div className="flex items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2">
+                <div className="flex items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-5 py-2.5">
                   <HandThumbUpIcon
                     className="size-5 cursor-pointer text-white"
                     strokeWidth={1.5}
@@ -476,7 +495,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
               <div className="flex flex-wrap items-center gap-4">
                 <Link
                   href={handleGetWatchHref()}
-                  className="relative flex cursor-pointer items-center gap-2.5 overflow-hidden rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)]"
+                  className="relative flex cursor-pointer items-center gap-2.5 overflow-hidden rounded-3xl bg-[rgba(181,181,181,0.2)] px-5 py-2.5 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)]"
                 >
                   <PlayIcon
                     className="z-10 h-[24px] w-[24px] fill-white text-white"
@@ -499,7 +518,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                 </Link>
                 <div className="relative">
                   <div
-                    className={` flex cursor-pointer items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)] ${
+                    className={` flex cursor-pointer items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-5 py-2.5 transition-colors duration-500 hover:bg-[rgba(181,181,181,0.4)] ${
                       openLibraryModal && "bg-[rgba(181,181,181,0.4)]"
                     }`}
                     onClick={() => setOpenLibraryModal(!openLibraryModal)}
@@ -525,7 +544,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   )}
                 </div>
                 <button
-                  className="flex items-center gap-2.5 rounded-3xl bg-[rgba(131,74,189,0.3)] px-3.5 py-2 opacity-50 transition-colors duration-500"
+                  className="flex items-center gap-2.5 rounded-3xl bg-[rgba(131,74,189,0.3)] px-5 py-2.5 opacity-50 transition-colors duration-500"
                   disabled
                 >
                   <UserGroupIcon
@@ -537,7 +556,7 @@ const TopSection: React.FC<Props> = ({ content, isLoading }) => {
                   </h1>
                 </button>
                 {currentProfile && (
-                  <div className="flex items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-3.5 py-2">
+                  <div className="flex items-center gap-2.5 rounded-3xl bg-[rgba(181,181,181,0.2)] px-5 py-2.5">
                     <HandThumbUpIcon
                       className={cn(
                         "transitions-colors size-6 cursor-pointer duration-300",

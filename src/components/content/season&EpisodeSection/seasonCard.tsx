@@ -17,21 +17,22 @@ const SeasonCard: React.FC<Props> = ({
   if (
     season.season.episode_count === 0 ||
     new Date(season.season.airDate) > new Date() ||
-    season.season.air_date === null
+    season.season.air_date === null ||
+    season.season.name?.toLowerCase().includes("special")
   ) {
     return null;
   }
 
   return (
     <div
-      className={`relative cursor-pointer h-max w-max py-1.5 px-3 rounded-md transition-colors duration-300 ${
+      className={`relative h-max w-max cursor-pointer rounded-md px-3 py-1.5 transition-colors duration-300 ${
         selectedSeason.name === season.season.name
           ? "bg-[rgba(181,181,181,0.3)]"
           : "hover:bg-[rgba(181,181,181,0.2)]"
       }`}
       onClick={() => handleChangeSeason(index)}
     >
-      <h1 className="whitespace-nowrap"> {season.season.name} </h1>
+      <h1 className="whitespace-nowrap font-medium"> {season.season.name} </h1>
     </div>
   );
 };

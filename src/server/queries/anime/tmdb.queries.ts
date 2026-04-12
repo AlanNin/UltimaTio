@@ -2,377 +2,435 @@
 import axios from "axios";
 import { getCurrentProfile } from "../authMiddleware";
 import prisma from "~/server/prisma-client";
+import pLimit from "p-limit";
 
-// GET FEED (ANIME)
-export async function getFeedAnime(): Promise<any | { error: string }> {
+const ANILIST_URL = "https://graphql.anilist.co";
+
+async function gql<T = any>(
+  query: string,
+  variables: Record<string, any> = {},
+): Promise<T> {
+  const response = await axios.post(ANILIST_URL, { query, variables });
+  return response.data.data;
+}
+
+const MEDIA_CARD_FIELDS = `
+  id
+  title { romaji english native }
+  coverImage { extraLarge large }
+  bannerImage
+  averageScore
+  description(asHtml: false)
+  genres
+  format
+  status
+  episodes
+  duration
+  startDate { year month day }
+  studios(isMain: true) { nodes { id name } }
+`;
+
+function mapCard(item: any) {
+  return {
+    landscapeUrl: item.bannerImage ?? null,
+    posterUrl: item.coverImage?.extraLarge ?? item.coverImage?.large ?? null,
+    title:
+      item.title?.english ?? item.title?.romaji ?? item.title?.native ?? null,
+    anilistid: item.id,
+    rating: item.averageScore ? Math.round(item.averageScore) / 10 : null,
+    description: item.description ?? null,
+    date: item.startDate?.year
+      ? new Date(
+          `${item.startDate.year}-${item.startDate.month ?? 1}-${item.startDate.day ?? 1}`,
+        )
+      : null,
+    duration: item.duration ? item.duration * 60 : null,
+    episodes: item.episodes ?? null,
+    genres: item.genres ?? [],
+    format: item.format ?? null,
+    status: item.status ?? null,
+    ContentStudio: (item.studios?.nodes ?? []).map((s: any) => ({
+      studio: { id: s.id, name: s.name },
+    })),
+    ContentGenre: (item.genres ?? []).map((name: string, idx: number) => ({
+      genre: {
+        id: idx,
+        name,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    })),
+    category: "anime" as const,
+  };
+}
+
+type FeedSort =
+  | "TRENDING_DESC"
+  | "POPULARITY_DESC"
+  | "SCORE_DESC"
+  | "START_DATE_DESC";
+
+async function fetchAnimeFeed(
+  sort: FeedSort,
+  status?: "RELEASING" | "FINISHED",
+  perPage = 30,
+): Promise<any[]> {
+  const withStatusQuery = `
+      query ($sort: [MediaSort], $status: MediaStatus, $perPage: Int) {
+        Page(page: 1, perPage: $perPage) {
+          media(type: ANIME, isAdult: false, sort: $sort, status: $status) {
+            ${MEDIA_CARD_FIELDS}
+          }
+        }
+      }
+    `;
+
+  const withoutStatusQuery = `
+      query ($sort: [MediaSort], $perPage: Int) {
+        Page(page: 1, perPage: $perPage) {
+          media(type: ANIME, isAdult: false, sort: $sort) {
+            ${MEDIA_CARD_FIELDS}
+          }
+        }
+      }
+    `;
+
   try {
-    const airingTodayAnime = await searchTMDBFeedAnime(
-      "tv/airing_today?language=en-US",
-    );
-
-    const onTheAirAnime = await searchTMDBFeedAnime(
-      "tv/on_the_air?language=en-US",
-    );
-
-    const popularAnime = await searchTMDBFeedAnime("tv/popular?language=en-US");
-
-    const topRatedAnime = await searchTMDBFeedAnime(
-      "tv/top_rated?language=en-US",
-    );
-
-    return { airingTodayAnime, onTheAirAnime, popularAnime, topRatedAnime };
+    const data = status
+      ? await gql(withStatusQuery, { sort: [sort], status, perPage })
+      : await gql(withoutStatusQuery, { sort: [sort], perPage });
+    return (data?.Page?.media ?? []).map(mapCard);
   } catch (error) {
-    console.error("Error fetching home feed:", error);
-    return { error: "Error al obtener el feed de inicio" };
+    console.error(`Error fetching AniList feed [${sort}]:`, error);
+    return [];
   }
 }
 
-// GET CONTENT (ANIME)
-export async function getContentAnime(
-  tmdbid: number,
-): Promise<any | { error: string }> {
+export async function getFeedAnime(): Promise<any | { error: string }> {
   try {
-    const fullDataResponse = await axios.get(
-      `https://api.themoviedb.org/3/tv/${tmdbid}`,
-      {
-        params: {
-          api_key: process.env.TMDB_APIKEY,
-          append_to_response: "credits",
-        },
-      },
-    );
+    const [airingTodayAnime, onTheAirAnime, popularAnime, topRatedAnime] =
+      await Promise.all([
+        fetchAnimeFeed("TRENDING_DESC", "RELEASING", 20),
+        fetchAnimeFeed("START_DATE_DESC", "RELEASING", 30),
+        fetchAnimeFeed("POPULARITY_DESC", undefined, 30),
+        fetchAnimeFeed("SCORE_DESC", undefined, 30),
+      ]);
 
-    const content = fullDataResponse.data;
+    return { airingTodayAnime, onTheAirAnime, popularAnime, topRatedAnime };
+  } catch (error) {
+    console.error("Error fetching anime feed:", error);
+    return { error: "Error al obtener el feed de anime" };
+  }
+}
+
+export async function getContentAnime(
+  anilistid: number,
+): Promise<any | { error: string }> {
+  const ANIME_FORMATS = new Set([
+    "TV",
+    "TV_SHORT",
+    "MOVIE",
+    "SPECIAL",
+    "OVA",
+    "ONA",
+    "MUSIC",
+  ]);
+
+  const query = `
+    query ($id: Int) {
+      Media(id: $id, type: ANIME) {
+        id
+        idMal
+        title { romaji english native }
+        coverImage { extraLarge large }
+        bannerImage
+        averageScore
+        description(asHtml: false)
+        genres
+        format
+        status
+        episodes
+        duration
+        startDate { year month day }
+
+        studios(isMain: true) { nodes { id name } }
+
+        characters(sort: ROLE, perPage: 15) {
+          edges {
+            role
+            node {
+              name { full }
+              image { large }
+            }
+          }
+        }
+
+        relations {
+          edges {
+            relationType
+            node {
+              id
+              type
+              title { romaji english }
+              coverImage { extraLarge large }
+              bannerImage
+              averageScore
+              format
+              status
+              episodes
+              genres
+              startDate { year month day }
+              studios(isMain: true) { nodes { id name } }
+            }
+          }
+        }
+
+        recommendations(page: 1, perPage: 12) {
+          nodes {
+            mediaRecommendation {
+              id
+              title { romaji english }
+              coverImage { extraLarge large }
+              bannerImage
+              averageScore
+              format
+              status
+              episodes
+              genres
+              startDate { year month day }
+              studios(isMain: true) { nodes { id name } }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  try {
+    const data = await gql(query, { id: anilistid });
+    const content = data?.Media;
+    if (!content) return { error: "Contenido no encontrado" };
 
     let profileContent = null;
     let likeStatus = null;
+
     try {
       const profile_id = await getCurrentProfile();
       if (profile_id !== null) {
         const contentDB = await prisma.content.findFirst({
-          where: {
-            tmdb_id: content.id,
-            category: "anime",
-          },
-          include: {
-            profile_likes: true,
-          },
+          where: { anilist_id: content.id, category: "anime" },
+          include: { profile_likes: true },
         });
+
         if (contentDB) {
           profileContent = await prisma.profileContent.findMany({
-            where: {
-              content_id: contentDB.id,
-              profile_id: profile_id,
-            },
-            orderBy: {
-              updated_at: "desc",
-            },
-            include: {
-              content: true,
-              profile: true,
-            },
+            where: { content_id: contentDB.id, profile_id },
+            orderBy: { updated_at: "desc" },
+            include: { content: true, profile: true },
           });
-          const profileLikes = await prisma.profileLike.findFirst({
-            where: {
-              profile_id,
-              content_id: contentDB.id,
-            },
+
+          const profileLike = await prisma.profileLike.findFirst({
+            where: { profile_id, content_id: contentDB.id },
           });
-          if (profileLikes) {
-            likeStatus = profileLikes.likeStatus;
-          }
+
+          if (profileLike) likeStatus = profileLike.likeStatus;
         }
       }
-    } catch (error) {
+    } catch {
       profileContent = null;
     }
 
-    const studios = content.production_companies.map((studio: any) => ({
-      id: studio.id,
-      name: studio.name,
-      originCountry: studio.origin_country,
+    const ContentStudio = (content.studios?.nodes ?? []).map((s: any) => ({
+      studio: { id: s.id, name: s.name },
     }));
 
-    const ContentStudio = studios.map((studio: any) => ({
-      studio,
-    }));
-
-    const ContentGenre = content.genres.map((genre: any) => ({
-      genre: {
-        id: genre.id,
-        name: genre.name,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    }));
-
-    const cast = content.credits.cast.slice(0, 15);
-
-    const contentActors = cast.map((actor: any) => ({
-      name: actor.name,
-      imgUrl: actor.profile_path
-        ? "https://media.themoviedb.org/t/p/original" + actor.profile_path
-        : null,
-    }));
-
-    const actors = contentActors.map((actor: any) => ({
-      name: actor.name,
-      imgUrl: actor.imgUrl,
-    }));
-    const seasons = await Promise.all(
-      content.seasons.map(async (season: any) => {
-        const seasonDetailsResponse = await axios.get(
-          `https://api.themoviedb.org/3/tv/${tmdbid}/season/${season.season_number}`,
-          {
-            params: {
-              api_key: process.env.TMDB_APIKEY,
-            },
-          },
-        );
-
-        const seasonDetails = seasonDetailsResponse.data;
-
-        const episodes = await Promise.all(
-          seasonDetails.episodes.map(async (episode: any) => {
-            let episodeWatchProgress = 0;
-            let episodeDuration = episode.runtime * 60;
-
-            // Check if there's profileContent available and find matching episode
-            if (profileContent) {
-              const matchedEpisode = profileContent.find(
-                (pc: any) =>
-                  pc.episode === episode.episode_number &&
-                  pc.season === season.season_number,
-              );
-              if (matchedEpisode) {
-                episodeWatchProgress = matchedEpisode.watchProgress.toNumber();
-                episodeDuration = matchedEpisode.duration
-                  ? matchedEpisode.duration.toNumber()
-                  : episodeDuration;
-              }
-            }
-
-            return {
-              episodeNumber: episode.episode_number,
-              episodePoster: episode.still_path
-                ? `https://media.themoviedb.org/t/p/w300_and_h450_bestv2${episode.still_path}`
-                : null,
-              rating: Math.round(episode.vote_average * 10) / 10,
-              title: episode.name,
-              airDate: new Date(episode.air_date),
-              episodeDuration: episodeDuration,
-              watchProgress: episodeWatchProgress,
-              overview: episode.overview,
-            };
-          }),
-        );
-
-        return {
-          season: {
-            ...season,
-            episodes,
-          },
-        };
+    const ContentGenre = (content.genres ?? []).map(
+      (name: string, idx: number) => ({
+        genre: {
+          id: idx,
+          name,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
       }),
     );
 
-    const sortedSeasons = seasons.sort((a, b) => {
-      if (a.season.season_number === 0) return 1;
-      if (b.season.season_number === 0) return -1;
-      return a.season.season_number - b.season.season_number;
-    });
+    const ContentActor = (content.characters?.edges ?? []).map((e: any) => ({
+      name: e.node?.name?.full ?? null,
+      imgUrl: e.node?.image?.large ?? null,
+    }));
 
-    const similarContent = await getSimilarContentAnime(content.id);
+    const durationSeconds = content.duration ? content.duration * 60 : 0;
+    const totalEpisodes = content.episodes ?? 0;
+    let episodes: any[] = [];
 
-    const duration =
-      (Array.isArray(content.episode_run_time) &&
-      content.episode_run_time.length > 0
-        ? content.episode_run_time[0] * 60
-        : null) ||
-      (content.last_episode_to_air?.runtime
-        ? content.last_episode_to_air.runtime * 60
-        : null) ||
-      (content.next_episode_to_air?.runtime
-        ? content.next_episode_to_air.runtime * 60
-        : null) ||
-      0;
+    if (content.idMal) {
+      try {
+        // Step 1 — fetch episode list pages (basic metadata: title, aired, score, filler)
+        const pageCount = Math.ceil(totalEpisodes / 100) || 1;
+        const pages = await Promise.all(
+          Array.from({ length: pageCount }, (_, i) =>
+            axios
+              .get(`https://api.jikan.moe/v4/anime/${content.idMal}/episodes`, {
+                params: { page: i + 1 },
+              })
+              .then((r) => r.data.data as any[])
+              .catch(() => [] as any[]),
+          ),
+        );
+        const listEpisodes: any[] = pages.flat();
 
-    return {
-      landscapeUrl:
-        "https://media.themoviedb.org/t/p/original" + content.backdrop_path,
-      posterUrl: "https://media.themoviedb.org/t/p/w780" + content.poster_path,
-      title: fullDataResponse.data.name,
-      tmdbid: content.id,
-      date: new Date(content.first_air_date),
-      duration,
-      rating: Math.round(content.vote_average * 10) / 10,
-      description: content.overview,
-      ContentStudio,
-      ContentGenre,
-      ContentActor: actors,
-      seasons: sortedSeasons,
-      similarContent,
-      category: "anime",
-      profileContent: profileContent || null,
-      likeStatus: likeStatus || 0,
-    };
-  } catch (error) {
-    console.error("Error fetching content:", error);
-    return { error: "Error al obtener el contenido" };
-  }
-}
+        // Step 2 — fetch individual episode detail for poster + synopsis
+        // Jikan rate limit: 3 req/s, 60 req/min — use p-limit(3) to stay safe
+        const limit = pLimit(3);
 
-// GET SIMILAR CONTENT (TV)
-async function getSimilarContentAnime(
-  tmdbid: number,
-): Promise<any | { error: string }> {
-  try {
-    const original_language = "ja";
+        const detailedEpisodes = await Promise.all(
+          listEpisodes.map((ep) =>
+            limit(() =>
+              axios
+                .get(
+                  `https://api.jikan.moe/v4/anime/${content.idMal}/episodes/${ep.mal_id}`,
+                )
+                .then((r) => r.data.data)
+                .catch(() => null),
+            ),
+          ),
+        );
 
-    const response = await axios.get(
-      `https://api.themoviedb.org/3/tv/${tmdbid}/similar`,
-      {
-        params: {
-          api_key: process.env.TMDB_APIKEY,
-        },
-      },
-    );
+        episodes = listEpisodes.map((ep: any, idx: number) => {
+          const detail = detailedEpisodes[idx];
+          const episodeNumber = ep.mal_id;
+          let watchProgress = 0;
+          let episodeDuration = durationSeconds;
 
-    const similarContent = response.data.results
-      .filter((content: any) => {
-        return content.original_language === original_language;
-      })
-      .map((content: any) => ({
-        ...content,
-        category: "anime",
-      }));
-
-    return similarContent;
-  } catch (error) {
-    console.error("Error fetching home feed:", error);
-    return { error: "Error al obtener el feed de inicio" };
-  }
-}
-
-// SEARCH TMDB FEED
-async function searchTMDBFeedAnime(url: string): Promise<any[] | null> {
-  const baseUrl = "https://api.themoviedb.org/3/";
-
-  // Exclude Anime
-  const excludedGenreId = 16;
-  const excludedCountry = "JP";
-
-  let totalPages = 8;
-
-  try {
-    const responses = await Promise.all(
-      Array.from({ length: totalPages }, (_, page) =>
-        axios.get(`${baseUrl}${url}`, {
-          params: {
-            api_key: process.env.TMDB_APIKEY,
-            language: "en-US",
-            page: page + 1,
-          },
-        }),
-      ),
-    );
-
-    const combinedResults = responses.flatMap(
-      (response) => response.data.results,
-    );
-
-    const responseData = await Promise.all(
-      combinedResults.map(async (content: any) => {
-        try {
-          const fullDataResponse = await axios.get(
-            `${baseUrl}tv/${content.id}`,
-            {
-              params: {
-                api_key: process.env.TMDB_APIKEY,
-                append_to_response: "credits",
-              },
-            },
-          );
-
-          const isAnime =
-            fullDataResponse.data.origin_country.includes(excludedCountry) &&
-            fullDataResponse.data.genres.some(
-              (genre: any) => genre.id === excludedGenreId,
+          if (profileContent) {
+            const match = profileContent.find(
+              (pc: any) => pc.episode === episodeNumber && pc.season === 1,
             );
-
-          if (!isAnime) {
-            return null;
+            if (match) {
+              watchProgress = match.watchProgress.toNumber();
+              episodeDuration = match.duration
+                ? match.duration.toNumber()
+                : durationSeconds;
+            }
           }
 
-          const studios = fullDataResponse.data.production_companies.map(
-            (studio: any) => ({
-              id: studio.id,
-              name: studio.name,
-              originCountry: studio.origin_country,
-            }),
-          );
-
-          const ContentStudio = studios.map((studio: any) => ({
-            studio,
-          }));
-
-          const ContentGenre = fullDataResponse.data.genres.map(
-            (genre: any) => ({
-              genre: {
-                id: genre.id,
-                name: genre.name,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              },
-            }),
-          );
-
-          const cast = fullDataResponse.data.credits.cast.slice(0, 15);
-
-          const contentActors = cast.map((actor: any) => ({
-            name: actor.name,
-            img: actor.profile_path
-              ? "https://media.themoviedb.org/t/p/original" + actor.profile_path
-              : null,
-          }));
-
-          const actors = contentActors.map((actor: any) => ({
-            name: actor.name,
-            img: actor.img,
-          }));
-
           return {
-            landscapeUrl:
-              "https://media.themoviedb.org/t/p/original" +
-              content.backdrop_path,
-            posterUrl:
-              "https://media.themoviedb.org/t/p/w780" + content.poster_path,
-            title: fullDataResponse.data.name,
-            tmdbid: content.id,
-            date: new Date(fullDataResponse.data.first_air_date),
-            duration: fullDataResponse.data.runtime * 60,
-            rating: Math.round(content.vote_average * 10) / 10,
-            description: content.overview,
-            ContentStudio,
-            ContentGenre,
-            ContentActor: actors,
-            category: "anime",
+            episodeNumber,
+            episodePoster:
+              detail?.images?.jpg?.image_url ??
+              detail?.images?.webp?.image_url ??
+              null,
+            rating: ep.score ? Math.round(ep.score * 10) / 10 : null,
+            title: ep.title ?? ep.title_romanji ?? `Episode ${episodeNumber}`,
+            airDate: ep.aired ? new Date(ep.aired) : null,
+            episodeDuration,
+            watchProgress,
+            overview: detail?.synopsis ?? null,
+            filler: ep.filler ?? false,
+            recap: ep.recap ?? false,
           };
-        } catch (error) {
-          console.error(
-            "Error fetching full TMDB data for anime:",
-            content.id,
-            error,
-          );
-          return null;
-        }
-      }),
+        });
+      } catch {
+        episodes = Array.from({ length: totalEpisodes }, (_, i) => ({
+          episodeNumber: i + 1,
+          episodePoster: null,
+          rating: null,
+          title: `Episode ${i + 1}`,
+          airDate: null,
+          episodeDuration: durationSeconds,
+          watchProgress: 0,
+          overview: null,
+          filler: false,
+          recap: false,
+        }));
+      }
+    }
+
+    const SEASON_TYPES = new Set(["SEQUEL", "PREQUEL", "PARENT", "SIDE_STORY"]);
+    const relationsEdges: any[] = content.relations?.edges ?? [];
+
+    const seasons = relationsEdges
+      .filter(
+        (e) =>
+          SEASON_TYPES.has(e.relationType) && ANIME_FORMATS.has(e.node.format),
+      )
+      .map((e) => ({
+        season: {
+          anilistid: e.node.id,
+          title:
+            e.node.title?.english ?? e.node.title?.romaji ?? "Unknown Season",
+          coverImage:
+            e.node.coverImage?.extraLarge ?? e.node.coverImage?.large ?? null,
+          format: e.node.format ?? null,
+          status: e.node.status ?? null,
+          episodes: e.node.episodes ?? null,
+          year: e.node.startDate?.year ?? null,
+          relationType: e.relationType,
+        },
+      }));
+
+    const seenIds = new Set<number>();
+
+    const relatedCards = relationsEdges
+      .filter(
+        (e) =>
+          !SEASON_TYPES.has(e.relationType) &&
+          e.node &&
+          ANIME_FORMATS.has(e.node.format),
+      )
+      .map((e) => mapCard(e.node));
+
+    const recommendedCards = (content.recommendations?.nodes ?? [])
+      .map((n: any) =>
+        n.mediaRecommendation && ANIME_FORMATS.has(n.mediaRecommendation.format)
+          ? mapCard(n.mediaRecommendation)
+          : null,
+      )
+      .filter(Boolean);
+
+    const similarContent = [...relatedCards, ...recommendedCards].filter(
+      (item) => {
+        if (!item || seenIds.has(item.anilistid)) return false;
+        seenIds.add(item.anilistid);
+        return true;
+      },
     );
 
-    const filteredData = responseData.filter((data: any) => data !== null);
-    return filteredData;
+    return {
+      landscapeUrl: content.bannerImage ?? null,
+      posterUrl:
+        content.coverImage?.extraLarge ?? content.coverImage?.large ?? null,
+      title:
+        content.title?.english ??
+        content.title?.romaji ??
+        content.title?.native,
+      anilistid: content.id,
+      date: content.startDate?.year
+        ? new Date(
+            `${content.startDate.year}-${content.startDate.month ?? 1}-${content.startDate.day ?? 1}`,
+          )
+        : null,
+      duration: durationSeconds,
+      rating: content.averageScore
+        ? Math.round(content.averageScore) / 10
+        : null,
+      description: content.description ?? null,
+      format: content.format ?? null,
+      status: content.status ?? null,
+      totalEpisodes,
+      ContentStudio,
+      ContentGenre,
+      ContentActor,
+      episodes,
+      seasons,
+      similarContent,
+      category: "anime" as const,
+      profileContent: profileContent ?? null,
+      likeStatus: likeStatus ?? 0,
+    };
   } catch (error) {
-    console.error("Error fetching TMDb search data:", error);
-    return null;
+    console.error("Error fetching anime content:", error);
+    return { error: "Error al obtener el contenido" };
   }
 }

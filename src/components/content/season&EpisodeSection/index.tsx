@@ -15,7 +15,7 @@ const SeasonAndEpisodeSection: React.FC<Props> = ({ content, isLoading }) => {
 
   const [selectedSeasonNumber, setSelectedSeasonNumber] = useQueryState(
     "season",
-    parseAsInteger.withDefault(1)
+    parseAsInteger.withDefault(1),
   );
 
   const selectedSeasonObj = useMemo(() => {
@@ -43,10 +43,10 @@ const SeasonAndEpisodeSection: React.FC<Props> = ({ content, isLoading }) => {
   if (isLoading) return null;
 
   return (
-    <div className="flex flex-col w-full h-max mt-6 gap-2">
+    <div className="mt-6 flex h-max w-full flex-col gap-2">
       <div
         ref={scrollRef}
-        className="w-max max-w-full flex overflow-x-auto gap-5 pb-4 overscroll-x-contain"
+        className="flex w-max max-w-full gap-5 overflow-x-auto overscroll-x-contain pb-4"
       >
         {seasons.map((season: any, index: number) => (
           <SeasonCard
@@ -59,7 +59,7 @@ const SeasonAndEpisodeSection: React.FC<Props> = ({ content, isLoading }) => {
         ))}
       </div>
 
-      <div className="grid gap-6 [grid-template-columns:repeat(auto-fill,minmax(320px,1fr))] pb-4 items-stretch">
+      <div className="grid items-stretch gap-4 pb-4 [grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]">
         {episodesList.map((episode: any, index: number) => (
           <EpisodeCard
             key={episode?.id ?? episode?.episodeNumber ?? index}

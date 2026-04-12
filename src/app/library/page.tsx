@@ -36,7 +36,6 @@ export default function LibraryScreen() {
     [libraryData, currentWatchList],
   );
 
-  // ✅ Normalize `content` to an array
   const currentContent: Content[] = useMemo(() => {
     const raw = currentLib?.content;
     if (!raw) return [];

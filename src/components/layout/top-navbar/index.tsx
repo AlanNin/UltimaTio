@@ -13,8 +13,8 @@ import { cn } from "~/utils/cn";
 import { ListVideoIcon } from "lucide-react";
 import Search from "./search/search";
 import useDebounce from "~/hooks/use-debounce";
-import { handleSearch } from "~/server/queries/tmdb.queries";
 import { useQuery } from "@tanstack/react-query";
+import { search } from "~/server/queries/search.queries";
 
 export default function TopNavbar() {
   const flexBetween = "flex items-center justify-between";
@@ -37,10 +37,10 @@ export default function TopNavbar() {
   const mobileSearchInputRef = useRef<HTMLInputElement>(null);
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
-  const { data: searchContentData, isLoading: isSearchContentLoading } =
+  const { data: searchContentData = [], isLoading: isSearchContentLoading } =
     useQuery({
       queryKey: ["search", debouncedSearchQuery],
-      queryFn: () => handleSearch(debouncedSearchQuery),
+      queryFn: () => search(debouncedSearchQuery),
       enabled: debouncedSearchQuery.length > 0,
     });
 

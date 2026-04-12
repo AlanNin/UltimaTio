@@ -19,16 +19,17 @@ import Providers from "~/components/watch/providers/providers";
 import { useQueryState } from "nuqs";
 import { env } from "~/env";
 
-export type Provider = "VidEasy" | "VidLink" | "VidSrcPro";
+export type Provider = "VidEasy" | "VidLink" | "VidCore";
 
 export default function WatchScreen() {
   const isAboveMediumScreens = useMediaQuery("(min-width: 854px)");
   const router = useRouter();
-  const providers = ["VidEasy", "VidLink", "VidSrcPro"] as Provider[];
+
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const category = searchParams.get("category");
   const tmdbidParam = searchParams.get("tmdbid");
+  const anilistidParam = searchParams.get("anilistid");
   const seasonParam = searchParams.get("season");
   const episodeParam = searchParams.get("episode");
   const currentTimeRef = useRef<number | null>();
@@ -37,6 +38,11 @@ export default function WatchScreen() {
   const queryClient = getQueryClient();
   const showProviders =
     env.NEXT_PUBLIC_SHOW_PROVIDERS === "true" ? true : false;
+
+  const providers =
+    category === "anime"
+      ? (["VidEasy"] as Provider[])
+      : (["VidEasy", "VidLink", "VidCore"] as Provider[]);
 
   const [currentProvider, setCurrentProvider] = useQueryState("provider", {
     defaultValue: providers[0] as string,
@@ -61,7 +67,7 @@ export default function WatchScreen() {
       } else if (category === "tv") {
         return getContentTV(Number(tmdbidParam)!);
       } else if (category === "anime") {
-        return getContentAnime(Number(tmdbidParam)!);
+        return getContentAnime(Number(anilistidParam)!);
       }
       return null;
     },
@@ -167,15 +173,15 @@ export default function WatchScreen() {
     };
   }, [flushProgress]);
 
-  if (!tmdbidParam) {
-    router.replace("/");
-    return;
-  }
+  // if (!tmdbidParam || !anilistidParam) {
+  //   router.replace("/");
+  //   return;
+  // }
 
-  if (isError) {
-    router.replace("/");
-    return;
-  }
+  // if (isError) {
+  //   router.replace("/");
+  //   return;
+  // }
 
   return (
     <section id="home">
@@ -185,7 +191,7 @@ export default function WatchScreen() {
         </div>
       ) : (
         <div
-          className={`relative m-auto flex h-full min-h-screen w-full max-w-[854px] flex-col ${
+          className={`relative mx-auto flex h-full min-h-screen w-full max-w-5xl flex-col ${
             isAboveMediumScreens ? "pb-10" : "pb-16"
           }`}
         >
@@ -194,11 +200,12 @@ export default function WatchScreen() {
           <Player
             title={contentData.title}
             tmdbid={Number(tmdbidParam)}
-            category={category}
+            anilistid={Number(anilistidParam)}
+            category={category as "movie" | "tv" | "anime"}
             season={Number(seasonParam)}
             episode={Number(episodeParam)}
             year={String(new Date(contentData.date).getFullYear())}
-            currentProvider={currentProvider}
+            currentProvider={currentProvider as Provider}
             currentTimeRef={currentTimeRef}
             contentDurationRef={contentDurationRef}
             startAt={startAt}
@@ -218,17 +225,20 @@ export default function WatchScreen() {
               <Episodes
                 content={contentData}
                 tmdbid={Number(tmdbidParam)!}
+                anilistid={Number(anilistidParam)!}
                 category={category}
                 currentSeason={Number(seasonParam)!}
                 currentEpisode={Number(episodeParam)!}
                 profileContent={contentData.profileContent}
               />
-              <Seasons
-                content={contentData}
-                tmdbid={Number(tmdbidParam)!}
-                category={category}
-                currentSeason={Number(seasonParam)!}
-              />
+              {category === "tv" && (
+                <Seasons
+                  content={contentData}
+                  tmdbid={Number(tmdbidParam)!}
+                  category={category}
+                  currentSeason={Number(seasonParam)!}
+                />
+              )}
             </div>
           )}
           <Info
