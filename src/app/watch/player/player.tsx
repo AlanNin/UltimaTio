@@ -86,7 +86,7 @@ const determineSrc = (
   switch (category) {
     case "movie":
       if (provider === "VidEasy") {
-        src = `https://player.videasy.ws/movie/${tmdbid}?color=eefdec&overlay=true&progress=${startAt}`;
+        src = `https://player.videasy.ws/embed/movie/${tmdbid}?color=eefdec&overlay=true&progress=${startAt}`;
       }
       if (provider === "VidLink") {
         src = `https://vidlink.pro/movie/${tmdbid}?startAt=${startAt}&primaryColor=a35fe8&secondaryColor=a35fe8&iconColor=eefdec&icons=default&player=jw&title=true&poster=true&autoplay=false&nextbutton=false`;
@@ -97,7 +97,7 @@ const determineSrc = (
       break;
     case "tv":
       if (provider === "VidEasy") {
-        src = `https://player.videasy.ws/tv/${tmdbid}/${season}/${episode}?overlay=true&progress=${startAt}&color=eefdec&nextEpisode=false&episodeSelector=false`;
+        src = `https://player.videasy.ws/embed/tv/${tmdbid}/${season}/${episode}?overlay=true&progress=${startAt}&color=eefdec&nextEpisode=false&episodeSelector=false`;
       }
       if (provider === "VidLink") {
         src = `https://vidlink.pro/tv/${tmdbid}/${season}/${episode}?startAt=${startAt}&primaryColor=a35fe8&secondaryColor=a35fe8&iconColor=eefdec&icons=default&player=jw&title=true&poster=true&autoplay=false&nextbutton=false`;
@@ -108,7 +108,7 @@ const determineSrc = (
       break;
     case "anime":
       if (provider === "VidEasy") {
-        src = `https://player.videasy.ws/anime/${anilistid}${episode && `/${episode}`}?overlay=true&progress=${startAt}&color=eefdec&nextEpisode=false&episodeSelector=false&dub=false`;
+        src = `https://player.videasy.ws/embed/anime/${anilistid}${episode && `/${episode}`}?overlay=true&progress=${startAt}&color=eefdec&nextEpisode=false&episodeSelector=false&dub=false`;
       }
       break;
   }
