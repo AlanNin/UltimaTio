@@ -42,7 +42,7 @@ const Content = () => {
       ) : (
         <div
           className={`relative m-auto h-full min-h-screen w-full max-w-[1920px] overflow-x-clip ${
-            isAboveMediumScreens ? "pb-10 pt-[60px]" : "pb-24 pt-[69px]"
+            isAboveMediumScreens ? "pb-10 pt-[60px]" : "pb-24 pt-[58px]"
           }`}
         >
           <TopSection content={contentData} isLoading={isContentLoading} />

@@ -70,7 +70,7 @@ const SliderCard: React.FC<Props> = ({
                   "linear-gradient(180deg, rgb(143, 143, 143, 0.1), rgb(176, 176, 176, 0.1))",
               }}
             />
-            <span className="line-clamp-1 w-full text-sm font-medium">
+            <span className="line-clamp-1 w-full text-xs font-medium sm:text-sm">
               {content?.title}
             </span>
           </Link>
@@ -107,7 +107,10 @@ const SliderCard: React.FC<Props> = ({
               )}
               <Link
                 href={handleGetNavigateHref()}
-                className={`absolute left-0 right-0 top-[85%] h-1.5 w-full cursor-pointer px-3`}
+                className={cn(
+                  "absolute left-0 right-0 top-[85%] h-1.5 w-full cursor-pointer px-3",
+                  isAboveMediumScreens ? "top-[85%]" : "top-[70%]",
+                )}
               >
                 <div className="h-full w-full rounded-md bg-[rgba(255,255,255,0.4)]">
                   <div
@@ -119,33 +122,36 @@ const SliderCard: React.FC<Props> = ({
             </>
           )}
           {isMobileMenuOpen && !isAboveMediumScreens && (
-            <div className="absolute bottom-0 left-0 right-0 mx-auto flex h-full w-full flex-col items-center justify-center gap-2.5 bg-[rgba(18,18,18)] p-2 text-center">
+            <div className="absolute bottom-0 left-0 right-0 mx-auto flex h-full w-full flex-col items-center justify-center gap-2.5 bg-[rgba(18,18,18)] p-1.5 text-center">
               <Link
                 href={handleGetWatchHref()}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-[rgba(255,255,255,0.07)] px-1 py-1.5 text-xs font-normal"
+                className="flex w-full items-center justify-center gap-1.5 rounded-md bg-[rgba(255,255,255,0.07)] px-2 py-1.5 text-xs font-normal"
               >
-                <PlayIcon strokeWidth={2} className="h-3 w-3" />
+                <PlayIcon strokeWidth={2} className="size-3 shrink-0" />
                 Resume
               </Link>
               <span
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-[rgba(255,255,255,0.07)] px-1 py-1.5 text-xs font-normal"
+                className="flex w-full items-center justify-center gap-1.5 rounded-md bg-[rgba(255,255,255,0.07)] px-2 py-1.5 text-xs font-normal"
                 onClick={() => handleRemoveResumeWatching(content.id)}
               >
-                <BackspaceIcon strokeWidth={2} className="h-3 w-3" />
+                <BackspaceIcon strokeWidth={2} className="size-3 shrink-0" />
                 Remove
               </span>
               <Link
                 href={handleGetNavigateHref()}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-[rgba(255,255,255,0.07)] px-1 py-1.5 text-xs font-normal"
+                className="flex w-full items-center justify-center gap-1.5 rounded-md bg-[rgba(255,255,255,0.07)] px-2 py-1.5 text-xs font-normal"
               >
-                <Bars3BottomLeftIcon strokeWidth={2} className="h-3 w-3" />
+                <Bars3BottomLeftIcon
+                  strokeWidth={2}
+                  className="size-3 shrink-0"
+                />
                 Details
               </Link>
             </div>
           )}
         </div>
         {!isAboveMediumScreens && watchHistory && (
-          <div className="relative h-max w-full rounded-b-md bg-[rgba(255,255,255,0.05)] p-1">
+          <div className="relative mt-2.5 h-max w-full rounded-b-md bg-[rgba(255,255,255,0.05)] p-1">
             <EllipsisHorizontalIcon
               strokeWidth={1.8}
               className="ml-auto h-4 w-4 text-white"

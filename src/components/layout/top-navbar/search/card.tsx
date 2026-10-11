@@ -20,17 +20,24 @@ export default function SearchCard({
       : content.posterUrl;
 
   const toImgSrc = (val: string | { src: string }) =>
-    typeof val === "string" ? val : val?.src ?? "";
+    typeof val === "string" ? val : (val?.src ?? "");
+
+  const id =
+    content.category === "anime"
+      ? content.anilistid
+      : content.tmdbid
+        ? content.tmdbid
+        : content.id;
 
   const handleGetNavigateHref = () => {
-    return `/${content.category}/${content.tmdbid}`;
+    return `/${content.category}/${id}`;
   };
 
   return (
     <Link
       className={cn(
-        "flex gap-4 items-center rounded-md p-2 hover:bg-[rgba(255,255,255,0.08)] cursor-pointer",
-        isMobile && "p-0"
+        "flex cursor-pointer items-center gap-4 rounded-md p-2 hover:bg-[rgba(255,255,255,0.08)]",
+        isMobile && "p-0",
       )}
       href={handleGetNavigateHref()}
       onClick={onClick}
@@ -39,22 +46,22 @@ export default function SearchCard({
         src={toImgSrc(imageUrl)}
         alt="Poster"
         className={cn(
-          "w-16 h-auto object-cover rounded-sm aspect-[2/3]",
-          isMobile && "w-20"
+          "aspect-[2/3] h-auto w-16 rounded-sm object-cover",
+          isMobile && "w-20",
         )}
       />
       <div className="flex flex-col gap-1">
         <h1 className="text-sm font-normal text-white">{content.title}</h1>
-        <span className="text-xs font-light text-white/75 capitalize">
+        <span className="text-xs font-light capitalize text-white/75">
           {content.category === "tv" ? "TV" : content.category}
         </span>
-        <div className="flex gap-x-2 items-center">
+        <div className="flex items-center gap-x-2">
           <img
             alt="TMDB"
             src={TMDBIcon.src}
-            className="w-7 h-auto object-contain"
+            className="h-auto w-7 object-contain"
           />
-          <span className="text-xs font-light text-white/75 capitalize">
+          <span className="text-xs font-light capitalize text-white/75">
             {content.rating ? content.rating.toFixed(1) : "Not Available"}
           </span>
         </div>
